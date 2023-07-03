@@ -1,0 +1,123 @@
+{
+  "kind": "collectionType",
+  "collectionName": "task_assigneds",
+  "info": {
+    "singularName": "task-assigned",
+    "pluralName": "task-assigneds",
+    "displayName": "TaskAssigned",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "provider": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "client": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "completed",
+        "cancelled",
+        "pending_completed",
+        "request",
+        "offer",
+        "acepted"
+      ],
+      "default": "request",
+      "required": true
+    },
+    "datetime": {
+      "type": "datetime",
+      "required": true
+    },
+    "time": {
+      "type": "time",
+      "required": true
+    },
+    "transportation": {
+      "type": "enumeration",
+      "enum": [
+        "not_necessary",
+        "motorcycle",
+        "car",
+        "truck"
+      ],
+      "default": "not_necessary"
+    },
+    "taskLength": {
+      "type": "enumeration",
+      "enum": [
+        "small",
+        "medium",
+        "large"
+      ],
+      "default": "small"
+    },
+    "location": {
+      "type": "component",
+      "repeatable": false,
+      "component": "location.location"
+    },
+    "description": {
+      "type": "text"
+    },
+    "paymentIntentId": {
+      "type": "string",
+      "private": true
+    },
+    "conversation": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::conversation.conversation"
+    },
+    "skill": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::skill.skill"
+    },
+    "timeFlexible": {
+      "type": "boolean",
+      "default": false
+    },
+    "descriptionProvis": {
+      "type": "string"
+    },
+    "brutePrice": {
+      "type": "string"
+    },
+    "netoPrice": {
+      "type": "string"
+    },
+    "addDetails": {
+      "type": "boolean",
+      "default": false
+    },
+    "addFinalPrice": {
+      "type": "boolean",
+      "default": false
+    },
+    "totalPrice": {
+      "type": "string"
+    },
+    "createType": {
+      "type": "enumeration",
+      "enum": [
+        "client",
+        "provider"
+      ],
+      "default": "client"
+    },
+    "idCreador": {
+      "type": "integer"
+    }
+  }
+}
