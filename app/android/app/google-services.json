@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "854687064809",
+    "project_id": "provitask-d12f2",
+    "storage_bucket": "provitask-d12f2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854687064809:android:e3d578152c523c52418678",
+        "android_client_info": {
+          "package_name": "com.provitask.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "854687064809-nkm5oco7f7s3gcqhd02b26coju5r54os.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6OiOBHZdAwbEYhewVTtWgLqGjEw81fb4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "854687064809-nkm5oco7f7s3gcqhd02b26coju5r54os.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
