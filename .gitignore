@@ -127,3 +127,5 @@ dist
 .pnp.*
 
 #app
+app/android/java_pid14932.hprof
+app/android/java_pid16204.hprof
