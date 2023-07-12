@@ -7,10 +7,12 @@
   "develop": "strapi develop",
   "start": "strapi start",
   "build": "strapi build",
-  "strapi": "strapi"
+  "strapi": "strapi",
+  "docu": "strapi install documentation"
  },
  "dependencies": {
   "@googlemaps/google-maps-services-js": "^3.3.28",
+  "@strapi/plugin-documentation": "^4.11.5",
   "@strapi/plugin-graphql": "4.11.5",
   "@strapi/plugin-i18n": "4.11.5",
   "@strapi/plugin-users-permissions": "4.11.5",
