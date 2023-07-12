@@ -11,12 +11,12 @@
  },
  "dependencies": {
   "@googlemaps/google-maps-services-js": "^3.3.28",
-  "@strapi/plugin-graphql": "4.9.0",
-  "@strapi/plugin-i18n": "4.9.0",
-  "@strapi/plugin-users-permissions": "4.9.0",
-  "@strapi/provider-email-nodemailer": "^4.9.0",
+  "@strapi/plugin-graphql": "4.11.5",
+  "@strapi/plugin-i18n": "4.11.5",
+  "@strapi/plugin-users-permissions": "4.11.5",
+  "@strapi/provider-email-nodemailer": "^4.11.5",
   "@strapi/provider-email-sendgrid": "^4.3.6",
-  "@strapi/strapi": "4.9.0",
+  "@strapi/strapi": "4.11.5",
   "geolib": "^3.3.3",
   "moment": "^2.29.4",
   "mysql": "2.18.1",
@@ -30,7 +30,7 @@
   "uuid": "d7049597-aafc-443a-aa2c-2e8dee18bbec"
  },
  "engines": {
-  "node": ">=12.x.x <=16.x.x",
+  "node": ">=12.x.x <=20.x.x",
   "npm": ">=6.0.0"
  },
  "license": "MIT"
