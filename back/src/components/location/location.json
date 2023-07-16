@@ -10,13 +10,13 @@
       "type": "float",
       "max": 90,
       "min": -90,
-      "required": true,
+      "required": false,
       "default": 90
     },
     "longitud": {
       "type": "float",
       "default": 180,
-      "required": true,
+      "required": false,
       "max": 180,
       "min": -180
     },

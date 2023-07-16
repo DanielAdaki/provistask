@@ -8,7 +8,7 @@
   "attributes": {
     "number": {
       "type": "string",
-      "required": true
+      "required": false
     },
     "expiration": {
       "type": "datetime"
