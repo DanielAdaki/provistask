@@ -20,6 +20,12 @@ class Preferences {
   // Local Token Client
   String? get token => _prefs.getString('token');
 
+  Map<String, dynamic>? get name {
+    final user = _prefs.getString('user');
+    if (user == null) return null;
+    return jsonDecode(user)['name'];
+  }
+
   set token(String? value) => _prefs.setString('token', value!);
 
   // Notification Token Client

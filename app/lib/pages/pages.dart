@@ -40,3 +40,5 @@ export 'package:provitask_app/pages/register_task/form/paso_4.dart';
 
 export 'package:provitask_app/pages/chat/chat_conversation/propuestas/crear_task_provider.dart';
 export 'package:provitask_app/pages/chat/chat_conversation/propuestas/crear_task_client.dart';
+
+export 'package:provitask_app/pages/home/home_page_provider.dart';

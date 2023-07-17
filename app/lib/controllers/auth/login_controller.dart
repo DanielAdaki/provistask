@@ -92,7 +92,12 @@ class LoginController extends GetxController {
 
     await Future.delayed(const Duration(seconds: 2));
     isLoading.value = false;
-    Get.offAllNamed("/home");
+
+    if (!user["data"]["isProvider"]) {
+      Get.offAllNamed("/home");
+    } else {
+      Get.offAllNamed("/home-proveedor");
+    }
   }
 
   loginForgottPassword() {}

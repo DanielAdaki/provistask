@@ -73,7 +73,7 @@ class _MyAppState extends State<MyApp> {
             scrollbarTheme: ScrollbarThemeData(
                 thumbVisibility: MaterialStateProperty.all(true),
                 thickness: MaterialStateProperty.all(10),
-                thumbColor: MaterialStateProperty.all(Colors.red),
+                thumbColor: MaterialStateProperty.all(const Color(0xFF170591)),
                 radius: const Radius.circular(10),
                 minThumbLength: 100)),
         defaultTransition: Transition.fade,
@@ -141,6 +141,19 @@ class _MyAppState extends State<MyApp> {
           GetPage(name: '/locations', page: () => LocationsPage()),
           GetPage(name: '/freelancers', page: () => FreelancersPage()),
           GetPage(name: '/chat_home', page: () => ChatHomePage()),
+          GetPage(
+            name: '/home-proveedor',
+            page: () => HomePageProvider(),
+            /*children: [
+                GetPage(
+                    name: '/crearPropusta/', page: () => CrearPropuestaChat()),
+                GetPage(
+                    name: '/crearTareaProvider/',
+                    page: () => CrearTaskProvider()),
+                GetPage(
+                    name: '/crearTareaClient/', page: () => CrearTaskClient())
+          ]*/
+          ),
           GetPage(
               name: '/chat/:id',
               page: () => ChatConversationPage(),

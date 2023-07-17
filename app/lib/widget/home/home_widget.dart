@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -435,17 +437,22 @@ class HomeWidgets {
         ));
   }
 
-  Widget titleGenerate(String title) {
+  Widget titleGenerate(String title,
+      [String? alignment, int? color, bool? italic]) {
     return Container(
-      alignment: Alignment.topLeft,
+      alignment: alignment == null
+          ? Alignment.topLeft
+          : alignment == "center"
+              ? Alignment.center
+              : Alignment.topLeft,
       padding: const EdgeInsets.only(left: 20, top: 10),
       child: Text(
         title,
         style: TextStyle(
             fontSize: 25,
             fontWeight: FontWeight.bold,
-            fontStyle: FontStyle.italic,
-            color: Colors.amber[800]),
+            fontStyle: italic == null ? FontStyle.italic : FontStyle.normal,
+            color: color == null ? Colors.amber[800] : Colors.indigo[900]),
       ),
     );
   }

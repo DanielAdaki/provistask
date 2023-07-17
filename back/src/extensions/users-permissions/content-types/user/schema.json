@@ -129,14 +129,10 @@
       ]
     },
     "open_disponibility": {
-      "type": "time",
-      "required": false,
-      "default": "08:00"
+      "type": "time"
     },
     "close_disponibility": {
-      "type": "time",
-      "default": "18:00",
-      "required": false
+      "type": "time"
     },
     "type_provider": {
       "type": "enumeration",

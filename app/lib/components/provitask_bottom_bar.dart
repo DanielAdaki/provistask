@@ -80,12 +80,12 @@ class ProvitaskBottomBar extends GetView<ProvitaskBottomBarController> {
                 children: [
                   InkWell(
                     onTap: () {
-                      Get.toNamed('/profile_provider');
+                      Get.toNamed('/home-proveedor');
                     },
-                    child: Icon(
-                      Icons.person,
-                      size: Get.height * 0.035,
-                      color: Get.currentRoute.contains('/profile_provider')
+                    child: Image.asset(
+                      'assets/images/BOTTOM BAR/home.png',
+                      height: Get.height * 0.035,
+                      color: Get.currentRoute.contains('/home-proveedor')
                           ? Colors.amber[800]
                           : Colors.grey,
                     ),

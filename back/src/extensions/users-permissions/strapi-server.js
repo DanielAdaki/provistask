@@ -372,9 +372,9 @@ module.exports = (plugin) => {
 
 
 
-
+console.log('hour',hour);
 let proID = [];
-if (hour != "I'm Flexible" && hour != "") {
+if (hour != "I'm Flexible" && hour != "" && hour != undefined && hour != null ) {
 
 let hourParts = hour.split(':');
 let hours = parseInt(hourParts[0]);
@@ -442,18 +442,22 @@ LIMIT ?
 `, [lng, lat, 6000,  open_disponibility , close_disponibility ,datetime , lng, lat,10]);
 
 } else {
+	console.log(open_disponibility	, close_disponibility);
 	proID = await strapi.db.connection.raw(`
 	SELECT id
 	FROM up_users
 	WHERE is_provider = true
-	AND ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) < ?
-	AND TIME_FORMAT(up_users.open_disponibility, '%H:%i:%s') >= ?
-AND TIME_FORMAT(up_users.close_disponibility, '%H:%i:%s') <= ?
+		AND ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) < ?
+		AND (TIME_FORMAT(up_users.open_disponibility, '%H:%i:%s') >= ? OR up_users.open_disponibility IS NULL)
+		AND (TIME_FORMAT(up_users.close_disponibility, '%H:%i:%s') <= ? OR up_users.close_disponibility IS NULL)
 	ORDER BY ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?))
 	LIMIT ?
-`, [lng, lat, 6000,open_disponibility , close_disponibility , lng, lat,10]);
+`, [lng, lat, 6000, open_disponibility, close_disponibility, lng, lat, 10]);
+
 
 }
+
+console.log('proID', proID);
 
 
 proID = proID[0].map(pro => pro.id);
@@ -465,11 +469,6 @@ proID = proID[0].map(pro => pro.id);
 					$and:[{
 						id: {
 							$in:proID,
-						},
-					},
-					{
-						id:{
-							$ne:ctx.state.user.id
 						},
 					},
 					{
