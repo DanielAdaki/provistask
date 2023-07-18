@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:provitask_app/common/socket.dart';
 import 'package:provitask_app/components/controllers/provitask_bottom_bar_controller.dart';
 import 'package:provitask_app/controllers/home/home_provider_controller.dart';
+import 'package:provitask_app/controllers/home/pending_page_provider_controller.dart';
 import 'package:provitask_app/pages/freelancers/UI/freelancers_controller.dart';
 import 'package:provitask_app/pages/chat/chat_conversation/UI/chat_conversation_controller.dart';
 import 'package:provitask_app/pages/chat/chat_home/UI/chat_home_controller.dart';
@@ -47,6 +48,7 @@ class SplashBinding implements Bindings {
 
     Get.lazyPut<ChatHomeController>(() => ChatHomeController());
     Get.lazyPut<HomeProviderController>(() => HomeProviderController());
+    Get.lazyPut<PendingPageController>(() => PendingPageController());
     Get.lazyPut<SocketController>(() => SocketController(), fenix: true);
     //Get.put(LocationController(), permanent: true);
     Get.put(LocationController());

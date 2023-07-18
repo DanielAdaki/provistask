@@ -142,18 +142,18 @@ class _MyAppState extends State<MyApp> {
           GetPage(name: '/freelancers', page: () => FreelancersPage()),
           GetPage(name: '/chat_home', page: () => ChatHomePage()),
           GetPage(
-            name: '/home-proveedor',
-            page: () => HomePageProvider(),
-            /*children: [
+              name: '/home-proveedor',
+              page: () => HomePageProvider(),
+              children: [
                 GetPage(
-                    name: '/crearPropusta/', page: () => CrearPropuestaChat()),
-                GetPage(
+                    name: '/tareas-pendientes',
+                    page: () => PendingPageProvider()),
+                /*GetPage(
                     name: '/crearTareaProvider/',
                     page: () => CrearTaskProvider()),
                 GetPage(
-                    name: '/crearTareaClient/', page: () => CrearTaskClient())
-          ]*/
-          ),
+                    name: '/crearTareaClient/', page: () => CrearTaskClient())*/
+              ]),
           GetPage(
               name: '/chat/:id',
               page: () => ChatConversationPage(),

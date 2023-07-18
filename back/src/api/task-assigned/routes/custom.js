@@ -16,6 +16,11 @@ module.exports = {
 		},
 		{
 			method: "GET",
+			path: "/task-assigneds/pending-task",
+			handler: "task-assigned.taskPending",
+		},
+		{
+			method: "GET",
 			path: "/task-assigneds/by-conversation/:id",
 			handler: "task-assigned.taskByConversation",
 			

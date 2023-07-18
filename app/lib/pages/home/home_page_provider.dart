@@ -7,6 +7,7 @@ import 'package:provitask_app/controllers/home/home_provider_controller.dart';
 
 import 'package:provitask_app/components/main_app_bar.dart';
 import 'package:provitask_app/components/main_drawer.dart';
+import 'package:provitask_app/widget/home/provider/home_provider_widget.dart';
 
 class HomePageProvider extends GetView<HomeProviderController> {
   final _widgets = HomeWidgetsProvider();
@@ -61,7 +62,7 @@ class HomePageProvider extends GetView<HomeProviderController> {
                   ),
                   _widgets.franjaInformativaFlecha(
                       "Same day task",
-                      "/calendar-task",
+                      "/home-proveedor/tareas-pendientes",
                       0xFF838383,
                       0xFFFFFFFF,
                       15,
@@ -321,108 +322,3 @@ class HomePageProvider extends GetView<HomeProviderController> {
 }
 
 // class de widgets
-
-class HomeWidgetsProvider {
-  Widget franjaInformativa(String texto,
-      [int colorText = 0xFFFFFFFF,
-      int colorFondo = 0xFFD67B21,
-      double border = 10,
-      double fontSize = 14,
-      double height = 30,
-      bool bold = false,
-      String alignment = "center"]) {
-    return Container(
-      alignment: Alignment.centerLeft,
-      padding: const EdgeInsets.only(left: 20),
-      width: Get.width * 0.9,
-      height: height,
-      decoration: BoxDecoration(
-        color: Color(colorFondo),
-        borderRadius: BorderRadius.circular(border),
-      ),
-      child: Text(
-        texto,
-        textAlign: TextAlign.start,
-        style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-            color: Color(colorText)),
-      ),
-    );
-  }
-
-  Widget titleGenerate(String title,
-      [String? alignment, int? color, bool? italic]) {
-    return Container(
-      alignment: alignment == null
-          ? Alignment.topLeft
-          : alignment == "center"
-              ? Alignment.center
-              : Alignment.topLeft,
-      padding: const EdgeInsets.only(left: 20, top: 10),
-      child: Text(
-        title,
-        style: TextStyle(
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-            fontStyle: italic == null ? FontStyle.italic : FontStyle.normal,
-            color: color == null ? Colors.amber[800] : Colors.indigo[900]),
-      ),
-    );
-  }
-
-  // widget de franja con una flecha a final a la derecha que mande a otra pagina
-
-  Widget franjaInformativaFlecha(
-    String texto,
-    String ruta, [
-    int colorText = 0xFF838383,
-    int colorFondo = 0xFFFFFFFF,
-    double border = 10,
-    double fontSize = 18,
-    double height = 30,
-    bool bold = false,
-    String alignment = "center",
-    double iconSize = 20,
-    int iconColor = 0xFFD67B21,
-  ]) {
-    return Container(
-      width: Get.width * 0.9,
-      height: height,
-      decoration: BoxDecoration(
-        color: Color(colorFondo),
-        borderRadius: BorderRadius.circular(border),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            padding: const EdgeInsets.only(left: 20),
-            child: Text(
-              texto,
-              textAlign: alignment == "center"
-                  ? TextAlign.center
-                  : alignment == "right"
-                      ? TextAlign.right
-                      : TextAlign.left,
-              style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-                  color: Color(colorText)),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.only(right: 20),
-            child: IconButton(
-              icon: Icon(Icons.arrow_forward_ios,
-                  size: iconSize, color: Color(iconColor)),
-              onPressed: () {
-                Get.toNamed(ruta);
-              },
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}

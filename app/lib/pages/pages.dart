@@ -42,3 +42,4 @@ export 'package:provitask_app/pages/chat/chat_conversation/propuestas/crear_task
 export 'package:provitask_app/pages/chat/chat_conversation/propuestas/crear_task_client.dart';
 
 export 'package:provitask_app/pages/home/home_page_provider.dart';
+export 'package:provitask_app/pages/home/pages/pending_request_page.dart';

@@ -382,6 +382,96 @@ console.log(items.data);
 
 		},
 
+		async taskPending(ctx) {
+
+			console.log("taskPending");
+
+			const user = ctx.state.user;
+
+			if (!user) {
+
+				return ctx.unauthorized("No tienes permiso", { error: 'No autorizado' });
+
+			}
+
+			console.log(user);
+
+			//verifico sea proveedor
+
+			if(!user.isProvider){
+
+				return ctx.unauthorized("No tienes permiso", { error: 'No autorizado' });
+
+			}
+
+
+			// busco todas las tareas pendientes del proveedor
+
+			let items = await strapi.db.query("api::task-assigned.task-assigned").findMany({
+
+				where: { provider: user.id, status: "acepted" },
+
+				select: ['id', 'datetime', 'description','brutePrice','totalPrice'],
+				populate: ['client','skill','client.avatar_image','skill.image']
+
+			});
+
+			console.log(items);
+
+
+
+			let elementos = [];
+
+			for (let i = 0; i < items.length; i++) {
+
+				let tarea = items[i];
+
+				/*
+				  String monto;
+  DateTime fecha;
+  Map<String, String> categoria;
+  Map<String, String> cliente;
+  String nombre;
+  String? description;
+				*/
+
+				tarea.datetime = moment(tarea.datetime).format('YYYY-MM-DD HH:mm:ss');
+
+				if(!tarea.client ){
+					continue;
+
+				}else if(tarea.client.id == user.id){
+					continue;
+				}
+
+				elementos.push({
+					id: tarea.id,
+					datetime: tarea.datetime,
+					description: tarea.description,
+					monto : tarea.totalPrice ? tarea.totalPrice : tarea.brutePrice,
+					categoria: { 
+						id: tarea.skill.id,
+						name: tarea.skill.name,
+						image: tarea.skill.image ? tarea.skill.image.url : null,
+					},
+					cliente: {
+						id: tarea.client.id,
+						name : tarea.client.name + " " + tarea.client.lastname,
+						avatar_image: tarea.client.avatar_image ? tarea.client.avatar_image.url : null,
+					},
+					nombre: 	tarea.skill.name
+				});
+
+
+			}
+
+			console.log(elementos);
+
+			return ctx.send(elementos);
+
+
+		},
+
 		async taskCompleted( ctx ) {
 
 			console.log("taskCompleted");

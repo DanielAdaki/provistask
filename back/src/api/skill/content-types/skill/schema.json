@@ -33,12 +33,6 @@
       ],
       "type": "media",
       "multiple": false
-    },
-    "user": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "plugin::users-permissions.user",
-      "inversedBy": "skills"
     }
   }
 }

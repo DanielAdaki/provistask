@@ -159,8 +159,7 @@
     "skills": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "api::skill.skill",
-      "mappedBy": "user"
+      "target": "api::skill.skill"
     },
     "stripe_customer_id": {
       "type": "string",
