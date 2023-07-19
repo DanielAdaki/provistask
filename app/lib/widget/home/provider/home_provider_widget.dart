@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 import 'package:provitask_app/models/pending_request/pending_request.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class HomeWidgetsProvider {
   Widget franjaInformativa(String texto,
@@ -111,17 +114,29 @@ class HomeWidgetsProvider {
   Widget pendingRequestWidget(PendingRequest request,
       [Color backgroundColor = Colors.white,
       Color textColor = const Color(0xFF170591),
-      double fontSize = 12]) {
+      double fontSize = 13]) {
     return Container(
-      width: Get.width * 0.1,
+      width: Get.width * 0.4,
+      height: Get.height * 0.2,
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
         color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(10),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
                 request.nombre,
@@ -135,57 +150,68 @@ class HomeWidgetsProvider {
           ),
           const SizedBox(height: 10),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                children: [
-                  Icon(
-                    Icons.attach_money,
-                    color: textColor,
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    request.monto,
-                    style: TextStyle(
+              Expanded(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.attach_money,
                       color: textColor,
-                      fontSize: fontSize,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 5),
+                    Text(
+                      request.monto,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(width: 10),
-              Column(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    color: textColor,
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    formatDate(request.fecha),
-                    style: TextStyle(
+              Expanded(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
                       color: textColor,
-                      fontSize: fontSize,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 5),
+                    Text(
+                      formatDate(request.fecha),
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(width: 10),
-              Column(
-                children: [
-                  Icon(
-                    Icons.category,
-                    color: textColor,
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    request.categoria['name'] ?? '',
-                    style: TextStyle(
+              Expanded(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.category,
                       color: textColor,
-                      fontSize: fontSize,
                     ),
-                    overflow: TextOverflow.clip,
-                  ),
-                ],
+                    const SizedBox(height: 5),
+                    Text(
+                      request.categoria['name'] ?? '',
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               )
             ],
           ),
@@ -195,8 +221,8 @@ class HomeWidgetsProvider {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               CircleAvatar(
-                backgroundImage: request.cliente['avatar'] != null
-                    ? NetworkImage(request.cliente['avatar'])
+                backgroundImage: request.cliente['avatar_image'] != null
+                    ? NetworkImage(request.cliente['avatar_image'])
                     : const AssetImage('assets/images/avatar.png')
                         as ImageProvider,
               ),
@@ -206,6 +232,7 @@ class HomeWidgetsProvider {
                 style: TextStyle(
                   color: textColor,
                   fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
@@ -214,8 +241,307 @@ class HomeWidgetsProvider {
       ),
     );
   }
+
+  Widget infoCard(mensualEarning, rateReliability, todayEarning) {
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                        height: 100,
+                        color: Colors.white,
+                        padding: const EdgeInsets.only(left: 20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              '\$${mensualEarning.value}',
+                              style: GoogleFonts.raleway(
+                                  fontSize: 18,
+                                  color: const Color(0xFFD06605),
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              "Monthly earning",
+                              style: GoogleFonts.raleway(
+                                  fontSize: 14, color: const Color(0xFF838383)),
+                            ),
+                          ],
+                        )),
+                  ),
+                  Expanded(
+                    child: Container(
+                        height: 100,
+                        color: Colors.white,
+                        padding: const EdgeInsets.only(right: 20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            RichText(
+                              text: TextSpan(
+                                text: 'Today you \n made ',
+                                style: GoogleFonts.raleway(
+                                  fontSize: 12,
+                                  color: Colors.black,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: '\$${todayEarning.value}',
+                                    style: GoogleFonts.raleway(
+                                      fontSize: 12,
+                                      color: const Color(0xFFD06605),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                        height: 100,
+                        color: Colors.white,
+                        padding: const EdgeInsets.only(left: 20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              '\$${rateReliability.value}',
+                              style: GoogleFonts.raleway(
+                                  fontSize: 18,
+                                  color: const Color(0xFFD06605),
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              "Reliability Rate",
+                              style: GoogleFonts.raleway(
+                                  fontSize: 14, color: const Color(0xFF838383)),
+                            ),
+                          ],
+                        )),
+                  ),
+                  Expanded(
+                    child: Container(
+                        height: 100,
+                        color: Colors.white,
+                        padding: const EdgeInsets.only(right: 20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            // llamo la imagen de los assets que se llama ayuda.png que está dentro de la carpeta imges
+
+                            Image.asset(
+                              'assets/images/ayuda.png',
+                              width: 45,
+                              height: 45,
+                            ),
+                          ],
+                        )),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 String formatDate(DateTime date) {
-  return "${date.day}/${date.month}/${date.year}";
+  return "${date.day}-${date.month}";
+}
+
+class MonthSliderController extends GetxController {
+  final PageController pageController;
+  final PageController dayPageController;
+  final selectedMonth = DateTime.now().month.obs;
+  final selectedDay = DateTime.now().day.obs;
+
+  MonthSliderController()
+      : pageController = PageController(
+          viewportFraction: 0.4,
+          initialPage: DateTime.now().month - 1,
+        ),
+        dayPageController = PageController(
+          viewportFraction: 0.2,
+          initialPage: (DateTime.now().day - 1) + DateTime.now().day ~/ 2,
+        );
+
+  void onPageChanged(int index) {
+    selectedMonth.value = (index + 1);
+  }
+
+  void onDayPageChanged(int index) {
+    selectedDay.value = index + 1;
+  }
+
+  void jumpToCurrentMonth() {
+    pageController.jumpToPage(DateTime.now().month - 1);
+    dayPageController
+        .jumpToPage((DateTime.now().day - 1) + DateTime.now().day ~/ 2);
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    //jumpToCurrentMonth();
+  }
+}
+
+class MonthSlider extends StatelessWidget {
+  final MonthSliderController controller = Get.put(MonthSliderController());
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          height: 30,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  controller.pageController.previousPage(
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+              ),
+              Expanded(
+                child: PageView.builder(
+                  controller: controller.pageController,
+                  itemCount: 12,
+                  onPageChanged: controller.onPageChanged,
+                  itemBuilder: (context, index) {
+                    final month = index + 1;
+                    final monthName = DateFormat.MMMM().format(
+                      DateTime(DateTime.now().year, month),
+                    );
+
+                    return Center(
+                      child: Obx(
+                        () => Text(
+                          monthName,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: month == controller.selectedMonth.value
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: month == controller.selectedMonth.value
+                                ? Colors.blue
+                                : Colors.black,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.arrow_forward),
+                onPressed: () {
+                  controller.pageController.nextPage(
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        Container(
+          height: 30,
+          child: Obx(
+            () => PageView.builder(
+              controller: controller.dayPageController,
+              itemCount: DateTime(
+                DateTime.now().year,
+                controller.selectedMonth.value + 1,
+                0,
+              ).day,
+              onPageChanged: controller.onDayPageChanged,
+              itemBuilder: (context, index) {
+                final day = index + 1;
+                final isSelected = (day == controller.selectedDay.value &&
+                    controller.selectedMonth.value == DateTime.now().month);
+
+                return Center(
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.blue : Colors.transparent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        day.toString(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

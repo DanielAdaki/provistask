@@ -74,7 +74,9 @@ class PendingPageController extends GetxController {
 
     Logger().i(data);
 
-    // recorro el array de datos y los convierto en objetos de tipo PendingRequest
+    // vacio la lista de pendingRequest
+
+    pendingRequest.clear();
 
     data.forEach((element) {
       pendingRequest.add(PendingRequest(

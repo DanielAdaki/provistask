@@ -5,7 +5,7 @@
 	*/
 const moment = require('moment');
 const { createCoreController } = require('@strapi/strapi').factories;
-const { STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY, STRIPE_URL, STRIPE_ID_CLIENT, STRIPE_WEBHOOK_SECRET, REMOTE_URL } = process.env;
+const { STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY, STRIPE_URL, STRIPE_ID_CLIENT, STRIPE_WEBHOOK_SECRET, URL } = process.env;
 const stripe = require('stripe')(STRIPE_SECRET_KEY);
 // modifico createCoreController
 
@@ -457,7 +457,7 @@ console.log(items.data);
 					cliente: {
 						id: tarea.client.id,
 						name : tarea.client.name + " " + tarea.client.lastname,
-						avatar_image: tarea.client.avatar_image ? tarea.client.avatar_image.url : null,
+						avatar_image: tarea.client.avatar_image ? URL + tarea.client.avatar_image.url : null,
 					},
 					nombre: 	tarea.skill.name
 				});
