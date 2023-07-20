@@ -23,6 +23,7 @@
   "moment": "^2.29.4",
   "mysql": "2.18.1",
   "socket.io": "^4.6.1",
+  "strapi-plugin-duplicate-button": "^1.1.11",
   "stripe": "^12.3.0"
  },
  "author": {

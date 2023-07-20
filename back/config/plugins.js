@@ -19,7 +19,8 @@ module.exports = ({ env }) => ({
   'add-custom-fields': {
     enabled: false,
     resolve: './src/plugins/add-custom-fields'
-  }
+  },
+  'duplicate-button': true
 
   
   // ...

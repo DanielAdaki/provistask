@@ -48,7 +48,8 @@ class SplashBinding implements Bindings {
 
     Get.lazyPut<ChatHomeController>(() => ChatHomeController());
     Get.lazyPut<HomeProviderController>(() => HomeProviderController());
-    Get.lazyPut<PendingPageController>(() => PendingPageController());
+    Get.lazyPut<PendingPageController>(() => PendingPageController(),
+        fenix: true);
     Get.lazyPut<SocketController>(() => SocketController(), fenix: true);
     //Get.put(LocationController(), permanent: true);
     Get.put(LocationController());

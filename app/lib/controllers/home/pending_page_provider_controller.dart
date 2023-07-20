@@ -32,8 +32,6 @@ class PendingPageController extends GetxController {
 
   final todayEarning = '12.50'.obs;
 
-  // saco de los widgets el widget categoryCard
-
   _getCurrentLocation() {
     Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.best,
@@ -78,6 +76,8 @@ class PendingPageController extends GetxController {
 
     pendingRequest.clear();
 
+    // ordeno por fecha y hora
+
     data.forEach((element) {
       pendingRequest.add(PendingRequest(
         id: element["id"],
@@ -89,6 +89,10 @@ class PendingPageController extends GetxController {
         description: element["description"] ?? "",
       ));
     });
+
+    // ordeno por fecha y hora, ordennado hora de menor a mayor
+
+    pendingRequest.sort((a, b) => a.fecha.compareTo(b.fecha));
 
     //imprimo tipo de dato de data
   }

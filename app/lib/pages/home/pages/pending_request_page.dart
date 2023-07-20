@@ -12,14 +12,13 @@ import 'package:provitask_app/widget/home/provider/home_provider_widget.dart';
 class PendingPageProvider extends GetView<PendingPageController> {
   final _widgets = HomeWidgetsProvider();
 
-  final calendar = MonthSlider();
-
   //saco listCategory de la clase HomeController
 
   PendingPageProvider({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final calendar = MonthSlider(pendingRequests: controller.pendingRequest);
     return Obx(() => Scaffold(
           appBar: const HomeMainAppBar(),
           drawer: const HomeDrawer(),

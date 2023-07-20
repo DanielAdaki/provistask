@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
+import 'package:provitask_app/controllers/home/pending_page_provider_controller.dart';
 import 'package:provitask_app/models/pending_request/pending_request.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class HomeWidgetsProvider {
   Widget franjaInformativa(String texto,
@@ -393,8 +393,14 @@ class HomeWidgetsProvider {
   }
 }
 
-String formatDate(DateTime date) {
-  return "${date.day}-${date.month}";
+String formatDate(DateTime date, [String type = 'day']) {
+  if (type == 'day') {
+    return "${date.day}-${date.month}";
+  } else if (type == 'hour') {
+    return "${date.hour}:${date.minute}";
+  } else {
+    return "${date.day}-${date.month}-${date.year}";
+  }
 }
 
 class MonthSliderController extends GetxController {
@@ -403,6 +409,14 @@ class MonthSliderController extends GetxController {
   final selectedMonth = DateTime.now().month.obs;
   final selectedDay = DateTime.now().day.obs;
 
+  // Lista observable para las tareas pendientes filtradas por mes y día
+  final filteredPendingRequests = <PendingRequest>[].obs;
+
+  final _controller = Get.put(PendingPageController());
+
+  // Lista de tareas pendientes
+  List<PendingRequest> get pendingRequests => _controller.pendingRequest;
+
   MonthSliderController()
       : pageController = PageController(
           viewportFraction: 0.4,
@@ -410,47 +424,73 @@ class MonthSliderController extends GetxController {
         ),
         dayPageController = PageController(
           viewportFraction: 0.2,
-          initialPage: (DateTime.now().day - 1) + DateTime.now().day ~/ 2,
+          initialPage: (DateTime.now().day - 1),
         );
 
   void onPageChanged(int index) {
     selectedMonth.value = (index + 1);
+    filterPendingRequests(); // Filtrar las tareas al cambiar de mes
   }
 
   void onDayPageChanged(int index) {
     selectedDay.value = index + 1;
+
+    filterPendingRequests(); // Filtrar las tareas al cambiar de día
   }
 
   void jumpToCurrentMonth() {
     pageController.jumpToPage(DateTime.now().month - 1);
-    dayPageController
-        .jumpToPage((DateTime.now().day - 1) + DateTime.now().day ~/ 2);
+    dayPageController.jumpToPage((DateTime.now().day - 1));
   }
 
   @override
   void onInit() {
     super.onInit();
-    //jumpToCurrentMonth();
+    // Inicializar las solicitudes filtradas al cargar el controlador
+    filterPendingRequests();
+    //  jumpToCurrentMonth();
+  }
+
+  void filterPendingRequests() {
+    filteredPendingRequests.value = pendingRequests.where((request) {
+      final requestDate = DateTime.parse(request.fecha.toString());
+      if (requestDate.day == selectedDay.value &&
+          requestDate.month == selectedMonth.value &&
+          requestDate.year == DateTime.now().year) {
+        return true;
+      } else {
+        return false;
+      }
+    }).toList();
+    // ordeno task por hora de menor a mayor
+    filteredPendingRequests.sort((a, b) {
+      final aDate = DateTime.parse(a.fecha.toString());
+      final bDate = DateTime.parse(b.fecha.toString());
+      return aDate.hour.compareTo(bDate.hour);
+    });
   }
 }
 
 class MonthSlider extends StatelessWidget {
   final MonthSliderController controller = Get.put(MonthSliderController());
+  final List<PendingRequest> pendingRequests;
+
+  MonthSlider({Key? key, required this.pendingRequests}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
+        SizedBox(
           height: 30,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               IconButton(
-                icon: Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back),
                 onPressed: () {
                   controller.pageController.previousPage(
-                    duration: Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
                   );
                 },
@@ -486,10 +526,10 @@ class MonthSlider extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.arrow_forward),
+                icon: const Icon(Icons.arrow_forward),
                 onPressed: () {
                   controller.pageController.nextPage(
-                    duration: Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
                   );
                 },
@@ -497,10 +537,10 @@ class MonthSlider extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
-        Container(
+        SizedBox(
           height: 30,
           child: Obx(
             () => PageView.builder(
@@ -510,11 +550,14 @@ class MonthSlider extends StatelessWidget {
                 controller.selectedMonth.value + 1,
                 0,
               ).day,
-              onPageChanged: controller.onDayPageChanged,
+              onPageChanged: (index) {
+                controller.onDayPageChanged(index);
+                controller
+                    .filterPendingRequests(); // Filtrar tareas al cambiar de día
+              },
               itemBuilder: (context, index) {
                 final day = index + 1;
-                final isSelected = (day == controller.selectedDay.value &&
-                    controller.selectedMonth.value == DateTime.now().month);
+                final isSelected = (day == controller.selectedDay.value);
 
                 return Center(
                   child: Container(
@@ -541,7 +584,189 @@ class MonthSlider extends StatelessWidget {
             ),
           ),
         ),
+        // Lista de tareas pendientes por día
+        Container(
+          height: Get.height * 0.4,
+          width: Get.width * 0.9,
+          alignment: Alignment.center,
+          margin: const EdgeInsets.only(top: 40),
+          child: Obx(
+            () {
+              return ListView.builder(
+                itemCount: controller.filteredPendingRequests.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  // ordeno task por hora de menor a mayor
+
+                  final task = controller.filteredPendingRequests[index];
+
+                  return pendingRequestWidget2(
+                    task,
+                    Colors.white,
+                    Colors.black,
+                    13,
+                  );
+                },
+              );
+            },
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget pendingRequestWidget2(PendingRequest request,
+      [Color backgroundColor = Colors.white,
+      Color textColor = const Color(0xFF170591),
+      double fontSize = 13]) {
+    return Container(
+      width: Get.width * 0.9,
+      height: Get.height * 0.3,
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  backgroundImage: request.cliente['avatar_image'] != null
+                      ? NetworkImage(request.cliente['avatar_image'])
+                      : const AssetImage('assets/images/avatar.png')
+                          as ImageProvider,
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  request.cliente['name'],
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                // hora de la tarea tirada a la derecha de la pantalla
+                const Spacer(),
+                Text(
+                  formatDate(request.fecha, 'hour'),
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    request.description ?? '',
+                    maxLines: 6,
+                    overflow: TextOverflow.visible,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: Get.width * 0.1,
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.attach_money,
+                          color: textColor,
+                          size: fontSize,
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          request.monto,
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Container(
+                    width: Get.width * 0.1,
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          color: textColor,
+                          size: fontSize,
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          formatDate(request.fecha),
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Container(
+                    width: Get.width * 0.2,
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.category,
+                          color: textColor,
+                          size: fontSize,
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          request.categoria['name'] ?? '',
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

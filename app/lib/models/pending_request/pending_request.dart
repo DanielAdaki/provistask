@@ -13,7 +13,7 @@ class PendingRequest {
     required this.categoria,
     required this.cliente,
     required this.nombre,
-    this.description,
+    this.description = "This task has no description",
   });
   // Getters
   int get getId => id;
