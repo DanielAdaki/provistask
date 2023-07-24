@@ -315,9 +315,9 @@ module.exports = (plugin) => {
 		try {
 
 
-			let { lat, lng, distance, start, limit, price, date, time, provider_type, sortBy, hour,day } = ctx.query;
+			let { lat, lng, distance, start, limit, price, date, time, provider_type, sortBy, hour, day } = ctx.query;
 
-			if (!lat || !lng || !distance) {
+			if (!lat || !lng) {
 
 				return ctx.badRequest('Missing parameters');
 
@@ -372,55 +372,57 @@ module.exports = (plugin) => {
 
 
 
-console.log('hour',hour);
-let proID = [];
-if (hour != "I'm Flexible" && hour != "" && hour != undefined && hour != null ) {
+			
+			let proID = [];
+			if (hour != "I'm Flexible" && hour != "" && hour != undefined && hour != null) {
+console.log('entro a la condicion');
+				let hourParts = hour.split(':'); 
+				let hours = parseInt(hourParts[0]);
+				let minutes = parseInt(hourParts[1].substr(0, 2));
+				let isPM = hourParts[1].substr(2) === 'pm';
 
-let hourParts = hour.split(':');
-let hours = parseInt(hourParts[0]);
-let minutes = parseInt(hourParts[1].substr(0, 2));
-let isPM = hourParts[1].substr(2) === 'pm';
-	
-	if (isPM && hours !== 12) {
-			hours += 12;
-	} else if (!isPM && hours === 12) {
-			hours = 0;
-	}
+				if (isPM && hours !== 12) {
+					hours += 12;
+				} else if (!isPM && hours === 12) {
+					hours = 0;
+				}
 
-
-	let datex = new Date();
-	datex.setHours(hours);
-	datex.setMinutes(minutes);
+				
 
 
-	
-const searchTime = datex.getHours() + ':' + ('0' + datex.getMinutes()).slice(-2);
-
-// transformo day de 13-05-2023 a 2023-05-13
-
-const dayParts = day.split('-');
-
-day = dayParts[2] + '-' + dayParts[1] + '-' + dayParts[0];
+				let datex = new Date();
+				datex.setHours(hours);
+				datex.setMinutes(minutes);
 
 
 
-//uno day y searchTime day tuene forma de 2021-08-12 y searchTime tiene forma de 12:00
+				const searchTime = datex.getHours() + ':' + ('0' + datex.getMinutes()).slice(-2);
 
-let datetime = day + ' ' + searchTime + ':00';
+				// transformo day de 13-05-2023 a 2023-05-13
 
-console.log('datetime', datetime);
+				const dayParts = day.split('-');
 
-
-
-// uno searchTime con date 
+				day = dayParts[2] + '-' + dayParts[1] + '-' + dayParts[0];
 
 
 
+				//uno day y searchTime day tuene forma de 2021-08-12 y searchTime tiene forma de 12:00
+
+				let datetime = day + ' ' + searchTime + ':00';
+
+				console.log('datetime', datetime);
+
+
+
+				// uno searchTime con date 
 
 
 
 
-proID = await strapi.db.connection.raw(`
+
+
+
+				proID = await strapi.db.connection.raw(`
 SELECT up_users.id
 FROM up_users
 LEFT JOIN task_assigneds_provider_links ON up_users.id = task_assigneds_provider_links.user_id
@@ -439,11 +441,11 @@ AND up_users.id NOT IN (
 GROUP BY up_users.id
 ORDER BY ST_Distance_Sphere(POINT(up_users.lng, up_users.lat), POINT(?, ?))
 LIMIT ?
-`, [lng, lat, 6000,  open_disponibility , close_disponibility ,datetime , lng, lat,10]);
+`, [lng, lat, 6000, open_disponibility, close_disponibility, datetime, lng, lat, 10]);
 
-} else {
-	console.log(open_disponibility	, close_disponibility);
-	proID = await strapi.db.connection.raw(`
+			} else {
+				console.log(open_disponibility, close_disponibility);
+				proID = await strapi.db.connection.raw(`
 	SELECT id
 	FROM up_users
 	WHERE is_provider = true
@@ -455,33 +457,33 @@ LIMIT ?
 `, [lng, lat, 6000, open_disponibility, close_disponibility, lng, lat, 10]);
 
 
-}
+			}
 
-console.log('proID', proID);
+			console.log('proID', proID);
 
 
-proID = proID[0].map(pro => pro.id);
+			proID = proID[0].map(pro => pro.id);
 
 			// busco a todos los usuarios que correspondan a los ids que me devolvio la consulta anterior usando super.Find para tener paginacion y ordenamiento
 
 			const proveedores = await strapi.entityService.findMany('plugin::users-permissions.user', {
 				filters: {
-					$and:[{
+					$and: [{
 						id: {
-							$in:proID,
+							$in: proID,
 						},
 					},
 					{
-						
-						isProvider:{
-							$eq:true
+
+						isProvider: {
+							$eq: true
 						},
 					},
 					{
 						...(provider_type && { type_provider: provider_type }),
 					},
 					{
-						
+
 						...(price && { type_price: price }),
 					}
 
@@ -489,7 +491,7 @@ proID = proID[0].map(pro => pro.id);
 
 
 
-					
+
 
 					]
 
@@ -514,7 +516,7 @@ proID = proID[0].map(pro => pro.id);
 
 			for (const proveedor of proveedores) {
 				try {
-			
+
 					let distance = await geolib.getDistance(
 						{ latitude: lat, longitude: lng },
 						{ latitude: proveedor.lat, longitude: proveedor.lng }
@@ -530,10 +532,10 @@ proID = proID[0].map(pro => pro.id);
 					proveedor.distanceLineal = distance;
 
 					// Calcular distancia usando Google Maps
-					const distanceGoogle = await calcularDistancia(lat, lng, proveedor.lat, proveedor.lng);
+			//		const distanceGoogle = await calcularDistancia(lat, lng, proveedor.lat, proveedor.lng);
 
 					// Agregar distancia Google Maps al objeto proveedor
-					proveedor.distanceGoogle = distanceGoogle;
+				//	proveedor.distanceGoogle = distanceGoogle;
 
 					//elimino datos no necesarios como lo son createdAt ,	updateAt , provider ,password ,"resetPasswordToken ,confirmationToken , 
 
@@ -543,7 +545,7 @@ proID = proID[0].map(pro => pro.id);
 					delete proveedor.password;
 					delete proveedor.resetPasswordToken;
 					delete proveedor.confirmationToken;
-					delete proveedor.location.id;
+				//	delete proveedor.location ?  delete proveedor.location.id : null;
 
 					proveedor.avatar_image = proveedor.avatar_image ? proveedor.avatar_image.url : null;
 
@@ -616,7 +618,7 @@ proID = proID[0].map(pro => pro.id);
 
 			let { lat, lng } = ctx.query;
 
-		// imprimo el tipo de dato de lat y lng para ver si son string o number
+			// imprimo el tipo de dato de lat y lng para ver si son string o number
 
 
 
@@ -968,19 +970,19 @@ proID = proID[0].map(pro => pro.id);
 
 			const { id } = ctx.params;
 
-			const {isNew} = ctx.query; 
+			const { isNew } = ctx.query;
 
 
 			// busco la conversacion entre el usuario y el proveedor , recordando que en una conversacion los usuarios se	guardan en el campo users que es un array de ids de usuarios
 			let conversation = [];
 
-			if(!isNew){
+			if (!isNew) {
 				conversation = await strapi.db.query('api::conversation.conversation').findMany({
 
 					where: {
-	
+
 						$and: [
-	
+
 							{
 								users: {
 									id: {
@@ -988,56 +990,56 @@ proID = proID[0].map(pro => pro.id);
 									}
 								}
 							},
-	
+
 							{
 								users: {
-	
+
 									id: {
 										$eq: id
 									}
 								}
 							}
-	
+
 						]
 					}
-	
+
 				});
-	
-	
-	
-	
+
+
+
+
 				if (conversation.length == 0) {
-	
-	
+
+
 					// creo una conversacion con los usuarios
-	
-	
+
+
 					conversation = await strapi.entityService.create('api::conversation.conversation', {
-	
+
 						data: {
 							name: "Conversacion between " + user.id + " and " + id,
 							users: [user.id, id]
-	
+
 						}
-	
+
 					})
-	
-	
-	
+
+
+
 				} else {
-	
+
 					conversation = conversation[0];
 				}
-	
-	
-	
-	
-	
 
-			}else{
+
+
+
+
+
+			} else {
 
 				conversation = await strapi.entityService.create('api::conversation.conversation', {
-	
+
 					data: {
 						name: "Conversacion between " + user.id + " and " + id,
 						users: [user.id, id]
@@ -1046,7 +1048,7 @@ proID = proID[0].map(pro => pro.id);
 
 				})
 
-				
+
 			}
 
 
@@ -1501,12 +1503,6 @@ proID = proID[0].map(pro => pro.id);
 
 	plugin.routes['content-api'].routes.push(
 
-		{
-			"method": "GET",
-			"path": "/proveedores/",
-			"handler": "user.buscarProveedores"
-
-		},
 		{
 			"method": "GET",
 			"path": "/proveedores/",

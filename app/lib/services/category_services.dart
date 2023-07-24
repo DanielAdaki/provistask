@@ -39,36 +39,54 @@ class CategoryServices {
 
     return respuesta;
   }
+
+  Future<Map> getItem(int id) async {
+    Map respuesta;
+
+    try {
+      final response = await dio.get("/api/categories/$id");
+
+      // reviso el status de la respuesta si es distinto a 200 lanzo error
+
+      if (response.statusCode != 200) {
+        throw response.data;
+      }
+      var aux = response.data;
+
+      respuesta = {"status": 200, "data": aux};
+    } catch (e) {
+      respuesta = {"status": 500, "error": e};
+    }
+
+    return respuesta;
+  }
+
+  Future<Map> getItemHomeSlider() async {
+    Map respuesta;
+
+    try {
+      final response = await dio.get("/slider-homes?populate=*");
+
+      // reviso el status de la respuesta si es distinto a 200 lanzo error
+
+      if (response.statusCode != 200) {
+        throw response.data;
+      }
+
+      var aux = response.data;
+
+      respuesta = {"status": 200, "data": aux};
+    } catch (e) {
+      respuesta = {"status": 500, "error": e};
+    }
+
+    return respuesta;
+  }
 }
 
 // defino getItem como una funcion asincrona que retorna un Map
 
-Future<Map> getItem(int id) async {
-  Map respuesta;
-
-  try {
-    final response = await dio.get("/api/categories/$id");
-
-    // reviso el status de la respuesta si es distinto a 200 lanzo error
-
-    if (response.statusCode != 200) {
-      throw response.data;
-    }
-
-    logger.d(response.data);
-
-    // mando al modelo
-
-    var aux = response.data;
-
-    respuesta = {"status": 200, "data": aux};
-  } catch (e) {
-    respuesta = {"status": 500, "error": e};
-  }
-
-  return respuesta;
-}
 
 // importo conexion_common.dart
 
-CategoryServices auth = CategoryServices();
+//CategoryServices auth = CategoryServices();

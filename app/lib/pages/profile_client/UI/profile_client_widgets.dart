@@ -3,7 +3,6 @@ import 'package:flutter_switch/flutter_switch.dart';
 
 import 'package:get/get.dart';
 
-import 'package:provitask_app/graphql/mutations/send_mail.dart';
 import 'package:provitask_app/common/conexion_common.dart';
 import 'package:provitask_app/models/data/client_information.dart';
 import 'package:provitask_app/pages/payments_methods/UI/payments_metods_controller.dart';
@@ -1262,72 +1261,71 @@ class ProfileClientWidgets {
       );
 
   void _showMessageInformation() async {
-    if (await SendMail.forgotPassword()) {
-      showDialog(
-        context: Get.context!,
-        builder: (BuildContext context) => AlertDialog(
-          contentPadding: const EdgeInsets.all(0),
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20.0))),
-          actions: [
-            InkWell(
-              onTap: () {
-                Get.back();
-                _showChagePassword();
-              },
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
-                decoration: BoxDecoration(
-                    color: const Color(0xffD06605),
-                    borderRadius: BorderRadius.circular(90)),
-                child: const Text(
-                  'Confirm',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w500,
-                  ),
+    //if (await SendMail.forgotPassword()) {
+    showDialog(
+      context: Get.context!,
+      builder: (BuildContext context) => AlertDialog(
+        contentPadding: const EdgeInsets.all(0),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20.0))),
+        actions: [
+          InkWell(
+            onTap: () {
+              Get.back();
+              _showChagePassword();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 20),
+              decoration: BoxDecoration(
+                  color: const Color(0xffD06605),
+                  borderRadius: BorderRadius.circular(90)),
+              child: const Text(
+                'Confirm',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-          ],
-          actionsAlignment: MainAxisAlignment.center,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: Get.width,
-                padding: const EdgeInsets.only(left: 10, top: 10, bottom: 5),
-                decoration: BoxDecoration(
-                  color: Colors.indigo[100],
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: const Text(
-                  'Information',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 26,
-                  ),
+          ),
+        ],
+        actionsAlignment: MainAxisAlignment.center,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: Get.width,
+              padding: const EdgeInsets.only(left: 10, top: 10, bottom: 5),
+              decoration: BoxDecoration(
+                color: Colors.indigo[100],
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
               ),
-              Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text(
-                    'We have sent a confirmation code to your email',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20, color: Colors.grey[600]),
-                  ))
-            ],
-          ),
+              child: const Text(
+                'Information',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                ),
+              ),
+            ),
+            Container(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                child: Text(
+                  'We have sent a confirmation code to your email',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20, color: Colors.grey[600]),
+                ))
+          ],
         ),
-      );
-    }
+      ),
+    );
+    // }
   }
 
   Widget registerFrom() {

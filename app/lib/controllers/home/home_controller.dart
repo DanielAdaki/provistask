@@ -8,13 +8,14 @@ import 'package:get/get.dart';
 
 import 'package:provitask_app/services/category_services.dart';
 import 'package:provitask_app/services/task_services.dart';
+import 'package:provitask_app/models/home/category_home_slider.dart';
 
 final logger = Logger();
-final _category = CategoryServices();
-
-final _task = TaskServices();
 
 class HomeController extends GetxController {
+  final _category = CategoryServices();
+
+  final _task = TaskServices();
   Position? _currentPosition;
   final locationAddress = Rx<String>('');
 
@@ -32,14 +33,19 @@ class HomeController extends GetxController {
 
   final searchController = Rx<TextEditingController>(TextEditingController());
 
+  final categoryHomeSlider = <CategoryHomeSlider>[].obs;
+
   @override
   void onInit() async {
     super.onInit();
+    Logger().i("HomeController");
     _getCurrentLocation();
+
     await Future.wait<void>([
       _findCategory(),
       _findTask(),
       _getPopularTask(),
+      _getCategoryHomeSlider(),
     ]);
 
     // await listaCategorias();
@@ -167,6 +173,33 @@ class HomeController extends GetxController {
       Placemark place = placemarks[0];
 
       locationAddress.value = place.locality!;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  _getCategoryHomeSlider() async {
+    try {
+      final response = await _category.getItemHomeSlider();
+
+      if (response["status"] != 200) {
+        return;
+      }
+
+      final data = response["data"]["data"];
+
+      categoryHomeSlider.clear();
+
+      data.forEach((element) {
+        categoryHomeSlider.add(CategoryHomeSlider(
+          id: element["id"].toString(),
+          text: element["attributes"]["titulo"],
+          image: element["attributes"]["media"] != null
+              ? element["attributes"]["media"]["data"]["attributes"]["url"]
+              : null,
+          slug: element["attributes"]["skill"]["data"]["attributes"]["slug"],
+        ));
+      });
     } catch (e) {
       print(e);
     }

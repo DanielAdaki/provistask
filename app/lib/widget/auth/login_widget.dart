@@ -4,7 +4,7 @@ import 'package:provitask_app/controllers/auth/login_controller.dart';
 //import 'package:provitask_app/pages/register_client/UI/register_client_controller.dart';
 
 class LoginWidgets {
-  final _controller = Get.put<LoginController>(LoginController());
+  final _controller = Get.find<LoginController>();
 
   Widget loginHeader() {
     return Container(
@@ -61,7 +61,7 @@ class LoginWidgets {
 
   Widget loginEmailField() {
     _controller.emailController.value =
-        TextEditingController(text: "daniel@adaki.net");
+        TextEditingController(text: "anchorquery@gmail.com");
     return Container(
       padding: EdgeInsets.symmetric(horizontal: Get.width * 0.12),
       child: TextFormField(

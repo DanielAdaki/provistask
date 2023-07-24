@@ -150,7 +150,7 @@ class FreelancesServices {
       var aux = response.data;
 
       respuesta = {"status": 200, "data": aux};
-    } on DioException catch (e) {
+    } catch (e) {
       Logger().i(e);
       respuesta = {"status": 500, "error": e};
     }

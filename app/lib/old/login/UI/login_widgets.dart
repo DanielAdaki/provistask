@@ -61,7 +61,7 @@ class LoginWidgets {
 
   Widget loginEmailField() {
     _controller.emailController.value =
-        TextEditingController(text: "daniel@adaki.net");
+        TextEditingController(text: "anchorquery@gmail.com");
     return Container(
       padding: EdgeInsets.symmetric(horizontal: Get.width * 0.12),
       child: TextFormField(

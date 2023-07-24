@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provitask_app/pages/login/login_page.dart';
+import 'package:provitask_app/pages/auth/login_page.dart';
 import 'package:provitask_app/pages/welcome/UI/welcome_controller.dart';
 
 class WelcomeWidgets {

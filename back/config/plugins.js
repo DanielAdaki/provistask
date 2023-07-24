@@ -16,11 +16,18 @@ module.exports = ({ env }) => ({
       }
     },
   },
-  'add-custom-fields': {
-    enabled: false,
-    resolve: './src/plugins/add-custom-fields'
+  'duplicate-button': true,
+  slugify: {
+    enabled: true,
+    config: {
+      contentTypes: {
+        skills: {
+          field: 'slug',
+          references: 'name',
+        },
+      },
+    },
   },
-  'duplicate-button': true
 
   
   // ...

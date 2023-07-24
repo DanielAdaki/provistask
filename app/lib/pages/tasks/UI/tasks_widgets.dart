@@ -5,36 +5,47 @@ import 'package:intl/intl.dart';
 import 'package:provitask_app/common/conexion_common.dart';
 
 import 'package:provitask_app/pages/tasks/UI/tasks_controller.dart';
+import 'package:provitask_app/services/preferences.dart';
+
+final prefs = Preferences();
 
 class TasksWidgets {
+  // llamo la spreferencias de usaurio
+
+  //user
+
+  final user = prefs.user;
+
   final _controller = Get.put<TasksController>(TasksController());
 
   Widget tasksFloatingButton() {
     return Material(
         type: MaterialType.transparency,
-        child: Ink(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey[400]!, width: 3.5),
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-          child: InkWell(
-            //This keeps the splash effect within the circle
-            borderRadius: BorderRadius.circular(
-                1000.0), //Something large to ensure a circle
-            onTap: () {
-              Get.toNamed('/register_task');
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Icon(
-                Icons.add,
-                size: 45.0,
-                color: Colors.grey[400],
-              ),
-            ),
-          ),
-        ));
+        child: prefs.user?["isProvider"] == true
+            ? Container()
+            : Ink(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[400]!, width: 3.5),
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: InkWell(
+                  //This keeps the splash effect within the circle
+                  borderRadius: BorderRadius.circular(
+                      1000.0), //Something large to ensure a circle
+                  onTap: () {
+                    Get.toNamed('/register_task');
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Icon(
+                      Icons.add,
+                      size: 45.0,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                ),
+              ));
   }
 
   Widget tasksTitleTop() {

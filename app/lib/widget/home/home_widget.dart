@@ -1,9 +1,8 @@
-import 'dart:ffi';
-
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 
 import 'package:provitask_app/controllers/home/home_controller.dart';
 
@@ -150,55 +149,13 @@ class HomeWidgets {
     );
   }
 
-  Widget homePublicityCarrousel() {
+  Widget homePublicityCarrousel(items) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       height: Get.height * 0.25,
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
       child: CarouselSlider(
-        items: [
-          Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(color: Colors.black, width: 2),
-                  image: const DecorationImage(
-                    image: AssetImage('assets/images/placeholder.jpg'),
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topCenter,
-                  ),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(25),
-                    color: const Color(0xFF001A8C).withOpacity(0.5),
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(25),
-                  color: Colors.transparent,
-                ),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Hola',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 35,
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic,
-                        )),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+        items: generateWidgets(items),
         options: CarouselOptions(
           disableCenter: true,
           aspectRatio: 2.0,
@@ -477,5 +434,61 @@ class HomeWidgets {
         ),
       ),
     );
+  }
+
+  generateWidgets(items) {
+    List<Widget> widgets = [];
+
+    for (var item in items.value) {
+      widgets.add(
+        GestureDetector(
+          onTap: null,
+          child: Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: Colors.black, width: 2),
+                  image: DecorationImage(
+                    image: NetworkImage(ConexionCommon.hostBase + item.image),
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                  ),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25),
+                    color: const Color(0xFF001A8C).withOpacity(0.5),
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  color: Colors.transparent,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.text,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FontStyle.italic,
+                        )),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return widgets;
   }
 }

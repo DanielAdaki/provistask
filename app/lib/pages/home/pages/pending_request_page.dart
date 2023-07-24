@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provitask_app/components/provitask_bottom_bar.dart';
 
-import 'package:provitask_app/controllers/home/pending_page_provider_controller.dart';
+import 'package:provitask_app/controllers/home/home_provider_controller.dart';
 
 import 'package:provitask_app/components/main_app_bar.dart';
 import 'package:provitask_app/components/main_drawer.dart';
 import 'package:provitask_app/models/pending_request/pending_request.dart';
 import 'package:provitask_app/widget/home/provider/home_provider_widget.dart';
 
-class PendingPageProvider extends GetView<PendingPageController> {
+class PendingPageProvider extends GetView<HomeProviderController> {
   final _widgets = HomeWidgetsProvider();
 
   //saco listCategory de la clase HomeController
@@ -18,7 +18,6 @@ class PendingPageProvider extends GetView<PendingPageController> {
 
   @override
   Widget build(BuildContext context) {
-    final calendar = MonthSlider(pendingRequests: controller.pendingRequest);
     return Obx(() => Scaffold(
           appBar: const HomeMainAppBar(),
           drawer: const HomeDrawer(),
@@ -93,7 +92,8 @@ class PendingPageProvider extends GetView<PendingPageController> {
                         const SizedBox(
                           height: 30,
                         ),
-                        calendar,
+
+                        _widgets.monthSlider(),
 
                         const SizedBox(
                           height: 60,

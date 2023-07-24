@@ -4,8 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
-import 'package:provitask_app/graphql/mutations/create_provider.dart';
-import 'package:provitask_app/graphql/mutations/upload_file.dart';
+
 import 'package:flutter_stripe/flutter_stripe.dart';
 // importo el servicio de provider
 
@@ -190,18 +189,6 @@ class RegisterProviderController extends GetxController {
     }
   }
 
-  Future<bool> registerProvider() async {
-    bool reg = await CreateProvider.run(
-        skillsList,
-        socialSecNumber.value.text,
-        address.value.text,
-        city.value.text,
-        state.value.text,
-        birthDate.value.text,
-        idPhoto.value);
-    return reg;
-  }
-
   Future<File?> selectPhoto() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -214,15 +201,6 @@ class RegisterProviderController extends GetxController {
       return arch;
     } else {
       return null;
-    }
-  }
-
-  Future<bool> uploadPhoto() async {
-    idPhoto.value = (await UploadFileMutation.run(photoProvider.value))!;
-    if (idPhoto.value >= 0) {
-      return true;
-    } else {
-      return false;
     }
   }
 

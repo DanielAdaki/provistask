@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:place_picker/place_picker.dart';
 import 'package:provitask_app/controllers/location/location_controller.dart';
 import 'package:provitask_app/pages/register_task/UI/register_task_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -352,13 +353,27 @@ class RegisterTaskWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: () {
-                    // abro el dialog en el widget MapDialog
-
-                    Get.dialog(
-                      mapDialog(),
-                      barrierDismissible: false,
+                  onPressed: () async {
+                    final LatLng? initialLocation =
+                        _controllerLocation.initialCameraPosition;
+                    LocationResult result =
+                        await Navigator.of(Get.context!).push(
+                      MaterialPageRoute(
+                        builder: (context) => PlacePicker(
+                          "AIzaSyBbluXRjZ7O3n3A6n5Wi01ePbDm9pXMCH4",
+                          defaultLocation: initialLocation,
+                        ),
+                      ),
                     );
+
+                    _controllerLocation.updateSelectedLocation(result.latLng!);
+
+                    _controllerLocation.getAddressFromLatLng();
+                    await _controller.findProviders();
+                    /* Get.dialog(
+                      madDialogGooglePLace(),
+                      barrierDismissible: false,
+                    );*/
                   },
                   // si no hay seleccionada una direccion, el icono es un add  si no es un edit
 

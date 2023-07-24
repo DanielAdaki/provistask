@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "provider_skills",
+  "info": {
+    "singularName": "provider-skill",
+    "pluralName": "provider-skills",
+    "displayName": "provider-skill"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "cost": {
+      "type": "string"
+    },
+    "media": {
+      "allowedTypes": [
+        "images"
+      ],
+      "type": "media",
+      "multiple": true
+    },
+    "provider": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "provider_skill"
+    },
+    "categorias_skill": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::skill.skill"
+    }
+  }
+}

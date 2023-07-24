@@ -13,7 +13,6 @@
  "dependencies": {
   "@googlemaps/google-maps-services-js": "^3.3.28",
   "@strapi/plugin-documentation": "^4.11.5",
-  "@strapi/plugin-graphql": "4.11.5",
   "@strapi/plugin-i18n": "4.11.5",
   "@strapi/plugin-users-permissions": "4.11.5",
   "@strapi/provider-email-nodemailer": "^4.11.5",
@@ -24,6 +23,7 @@
   "mysql": "2.18.1",
   "socket.io": "^4.6.1",
   "strapi-plugin-duplicate-button": "^1.1.11",
+  "strapi-plugin-slugify": "^2.3.3",
   "stripe": "^12.3.0"
  },
  "author": {

@@ -185,6 +185,12 @@
     "truck": {
       "type": "boolean",
       "default": false
+    },
+    "provider_skill": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::provider-skill.provider-skill",
+      "mappedBy": "provider"
     }
   }
 }

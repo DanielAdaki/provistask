@@ -101,22 +101,24 @@ class TaskServices extends GetxController {
     try {
       // saco los filtros date, time, price, provider_type
 
-      var date = filters["date"];
-      var time = filters["time"];
-      var price = filters["price"];
-      var providerType = filters["provider_type"];
-      var sortBy = filters["sortBy"];
-      var hour = filters["hour"];
+      final date = filters["date"];
+      final time = filters["time"];
+      final price = filters["price"];
+      final providerType = filters["provider_type"];
+      final sortBy = filters["sortBy"];
+      final hour = filters["hour"];
 
-      var day = filters["day"];
+      final skill = filters["skill"];
+
+      final day = filters["day"];
 
       // hago la peticion
 
       print(
-          "/users-permissions/proveedores/?lat=$lat&lng=$lng&distance=$distance&date=$date&time=$time&price=$price&provider_type=$providerType&sortBy=$sortBy&hour=$hour&day=$day");
+          "/users-permissions/proveedores/?lat=$lat&lng=$lng&distance=$distance&date=$date&time=$time&price=$price&provider_type=$providerType&sortBy=$sortBy&hour=$hour&day=$day&skill=$skill");
 
       final response = await dio.get(
-          "/users-permissions/proveedores/?lat=$lat&lng=$lng&distance=$distance&date=$date&time=$time&price=$price&provider_type=$providerType&sortBy=$sortBy&hour=$hour&day=$day");
+          "/users-permissions/proveedores/?lat=$lat&lng=$lng&distance=$distance&date=$date&time=$time&price=$price&provider_type=$providerType&sortBy=$sortBy&hour=$hour&day=$day&skill=$skill");
 
       // reviso el status de la respuesta si es distinto a 200 lanzo error
 

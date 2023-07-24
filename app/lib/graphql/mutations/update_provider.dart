@@ -1,4 +1,0 @@
-const String uploadProviderMutation = r'''
-
-
-''';

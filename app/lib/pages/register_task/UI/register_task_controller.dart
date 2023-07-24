@@ -10,13 +10,16 @@ import 'package:provitask_app/services/provider_services.dart';
 import 'package:provitask_app/services/payment_services.dart';
 
 class RegisterTaskController extends GetxController {
-  // llamo controlador de location para obtener la ubicacion
-
-  // una key con nombre currentState
+  @override
+  void onInit() async {
+    super.onInit();
+    await getSkills();
+    Logger().d(listSkills);
+  }
 
   final currentState = GlobalKey<FormState>();
 
-  final _locationController = Get.put(LocationController());
+  final _locationController = Get.find<LocationController>();
   final _services = ProviderRegisterServices();
   final _paymentServices = PaymentServices();
   final _task = TaskServices();
@@ -30,7 +33,7 @@ class RegisterTaskController extends GetxController {
 
   final isLoading = false.obs;
 
-  final selectedSkill = "Bookshelf Assembly".obs;
+  final selectedSkill = "1".obs;
   final listProviders = RxList([]);
   final lengthTask = RxString('');
 
@@ -42,6 +45,7 @@ class RegisterTaskController extends GetxController {
     "sortBy": "Distance".obs,
     "hour": "".obs,
     "day": "".obs,
+    "skill": "1".obs,
   }.obs;
 
   final idProvider = RxInt(0);
@@ -252,54 +256,21 @@ class RegisterTaskController extends GetxController {
         );
       }
     }
-
-    /* else if (formStepTwo.value == 0.5 && formStepOne.value == 1) {
-      // ya seleccionó el proveedor  lo paso al siguiente formulario
-      if (idProvider.value != 0) {
-        formStepTwo.value = 1;
-
-        formController.value = 3;
-
-        await findProvider();
-        Get.toNamed('/register_task/step3');
-      } else {
-        Get.snackbar(
-          'Error!',
-          'Please select a provider',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
-    } else if (formStepThree.value == 0.5 &&
-        formStepTwo.value == 1 &&
-        formStepOne.value == 1) {
-      // si selectedDay y selectedHour no son nulos y no estan vacios , paso al siguiente formulario
-      if (selectedHour.value.isNotEmpty && selectedHour.value != 'null') {
-        formStepThree.value = 1;
-
-        formController.value = 4;
-      } else {
-        Get.snackbar(
-          'Error!',
-          'Please select a date and a hour',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
-    }*/
   }
 
   void prepareSkills(skills) {
     // recorro skills y añado a  stSkills.value  solo los nombres que estan en skills["attibutes"]["name"]
 
-    // tipo de datos de skills es List<dynamic>
+    listSkills.clear();
 
     for (var i = 0; i < skills.length; i++) {
       if (skills[i]["attributes"]["name"] != null) {
-        listSkills.add(skills[i]["attributes"]["name"].toString());
-        print(skills[i]["attributes"]["name"].toString());
+        final object = {
+          "id": skills[i]["id"],
+          "name": skills[i]["attributes"]["name"].toString(),
+          "slug": skills[i]["attributes"]["slug"].toString(),
+        };
+        listSkills.add(object);
       }
     }
   }
@@ -325,6 +296,7 @@ class RegisterTaskController extends GetxController {
 
   findProviders() async {
     // isLoading.value = true;
+    Logger().d(filters);
     final response = await _task.getProviders(
         _locationController.selectedLocation?.latitude,
         _locationController.selectedLocation?.longitude,
@@ -338,10 +310,10 @@ class RegisterTaskController extends GetxController {
 
       // muestro el mensaje de error en un snackbar en la parte inferior de la pantalla y fondo en rojo
       isLoading.value = false;
-
+      Logger().e(response["error"]);
       Get.snackbar(
         "Error",
-        response["error"]["message"],
+        "Error get providers",
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -473,13 +445,6 @@ class RegisterTaskController extends GetxController {
   }
 
   void clearFilters() {
-    /*  vuelvo los campos de filters vacios  filters = {
-    "date": "".obs,
-    "time": "".obs,
-    "price": "".obs,
-    "provider_type": "".obs,
-    }*/
-
     filters["date"].value = "";
     filters["time"].value = "";
     filters["price"].value = "";
@@ -524,12 +489,6 @@ class RegisterTaskController extends GetxController {
     } else {
       return false;
     }
-  }
-
-  @override
-  void onInit() async {
-    super.onInit();
-    await getSkills();
   }
 
   void showTimePicker(BuildContext context) {

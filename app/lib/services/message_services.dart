@@ -250,15 +250,6 @@ class MessageServices {
     try {
       // agrego a dio interceptor para errores
 
-      dio.interceptors.add(
-        InterceptorsWrapper(
-          onError: (DioException e, errorInterceptorHandler) {
-            // Mostrar el mensaje de error
-            print('Error: ${e.response?.data ?? e.message}');
-          },
-        ),
-      );
-
       final response = await dio.get("/task-assigneds/acepted/$id");
 
       if (response.statusCode != 200) {

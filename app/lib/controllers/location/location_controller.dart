@@ -32,6 +32,8 @@ class LocationController extends GetxController {
 
   TextEditingController textUbication = TextEditingController();
 
+  TextEditingController inputTextUbication = TextEditingController();
+
   RxSet<Marker> markers = <Marker>{}.obs;
 
   // placemark selected y location selected
