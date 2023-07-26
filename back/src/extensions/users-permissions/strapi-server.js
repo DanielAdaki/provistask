@@ -726,7 +726,9 @@ LIMIT ?;
 					delete proveedor.otp;
 					delete proveedor.blocked;
 					delete proveedor.confirmed;
-					//	delete proveedor.location ?  delete proveedor.location.id : null;
+					delete proveedor.stripe_customer_id;
+					delete proveedor.stripe_connect_id;
+					delete proveedor.is_stripe_connect;
 
 					proveedor.avatar_image = proveedor.avatar_image ?  URL + proveedor.avatar_image.url : null;
 
