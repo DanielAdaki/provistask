@@ -37,11 +37,11 @@
     },
     "datetime": {
       "type": "datetime",
-      "required": true
+      "required": false
     },
     "time": {
       "type": "time",
-      "required": true
+      "required": false
     },
     "transportation": {
       "type": "enumeration",
@@ -118,6 +118,14 @@
     },
     "idCreador": {
       "type": "integer"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ]
     }
   }
 }

@@ -4,33 +4,47 @@
   "info": {
     "singularName": "provider-skill",
     "pluralName": "provider-skills",
-    "displayName": "provider-skill"
+    "displayName": "provider-skill",
+    "description": ""
   },
   "options": {
     "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {
-    "cost": {
-      "type": "string"
-    },
     "media": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
       "allowedTypes": [
         "images"
-      ],
-      "type": "media",
-      "multiple": true
-    },
-    "provider": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "plugin::users-permissions.user",
-      "inversedBy": "provider_skill"
+      ]
     },
     "categorias_skill": {
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::skill.skill"
+    },
+    "type_price": {
+      "type": "enumeration",
+      "enum": [
+        "per_hour",
+        "by_project_flat_rate",
+        "free_trading"
+      ]
+    },
+    "provider": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "provider_skills"
+    },
+    "cost": {
+      "type": "decimal",
+      "max": 10000
+    },
+    "description": {
+      "type": "text"
     }
   }
 }

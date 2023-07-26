@@ -22,7 +22,8 @@
   "moment": "^2.29.4",
   "mysql": "2.18.1",
   "socket.io": "^4.6.1",
-  "strapi-plugin-duplicate-button": "^1.1.11",
+  "strapi-plugin-duplicate-button": "^1.1.12",
+  "strapi-plugin-generate-data": "^1.0.23",
   "strapi-plugin-slugify": "^2.3.3",
   "stripe": "^12.3.0"
  },

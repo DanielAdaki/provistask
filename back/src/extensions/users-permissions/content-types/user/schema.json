@@ -103,9 +103,6 @@
       "repeatable": false,
       "component": "location.location"
     },
-    "cost_per_houers": {
-      "type": "string"
-    },
     "lat": {
       "type": "float",
       "max": 90,
@@ -119,14 +116,6 @@
       "default": 180,
       "min": -180,
       "max": 180
-    },
-    "type_price": {
-      "type": "enumeration",
-      "enum": [
-        "per_hour",
-        "by_project_flat_rate",
-        "free_trading"
-      ]
     },
     "open_disponibility": {
       "type": "time"
@@ -145,21 +134,8 @@
       "default": "not_provider",
       "required": false
     },
-    "online": {
-      "type": "boolean",
-      "default": false
-    },
-    "socket_id": {
-      "type": "string",
-      "private": true
-    },
     "description": {
       "type": "text"
-    },
-    "skills": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::skill.skill"
     },
     "stripe_customer_id": {
       "type": "string",
@@ -186,9 +162,9 @@
       "type": "boolean",
       "default": false
     },
-    "provider_skill": {
+    "provider_skills": {
       "type": "relation",
-      "relation": "oneToOne",
+      "relation": "oneToMany",
       "target": "api::provider-skill.provider-skill",
       "mappedBy": "provider"
     }

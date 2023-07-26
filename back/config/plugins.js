@@ -16,7 +16,7 @@ module.exports = ({ env }) => ({
       }
     },
   },
-  'duplicate-button': true,
+  'duplicate-button': false,
   slugify: {
     enabled: true,
     config: {
@@ -28,6 +28,9 @@ module.exports = ({ env }) => ({
       },
     },
   },
+  "generate-data": {
+    enabled: true,
+},
 
   
   // ...

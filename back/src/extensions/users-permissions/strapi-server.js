@@ -2,9 +2,10 @@ const { sanitize } = require('@strapi/utils');
 let bcrypt = require("bcryptjs");
 let geolib = require("geolib");
 const { Client } = require('@googlemaps/google-maps-services-js');
-const { STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY, STRIPE_URL, STRIPE_ID_CLIENT, STRIPE_WEBHOOK_SECRET, REMOTE_URL } = process.env;
+const { STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY, STRIPE_URL, STRIPE_ID_CLIENT, STRIPE_WEBHOOK_SECRET, REMOTE_URL, URL } = process.env;
 const stripe = require('stripe')(STRIPE_SECRET_KEY);
 const unparsed = require("koa-body/unparsed.js");
+const moment = require('moment');
 module.exports = (plugin) => {
 
 	plugin.controllers.user.getOTP = async (ctx) => {
@@ -309,155 +310,314 @@ module.exports = (plugin) => {
 			throw error;
 		}
 	}
+	function convertirHoraAMPM(hora) {
+		let partesHora = hora.split(":");
+		let horas = parseInt(partesHora[0]);
+		let minutos = parseInt(partesHora[1].slice(0, 2));
+		let esAM = partesHora[1].slice(-2).toLowerCase() === "am";
+
+		if (!esAM && horas !== 12) {
+			horas += 12;
+		} else if (esAM && horas === 12) {
+			horas = 0;
+		}
+
+		return {
+			horas: horas,
+			minutos: minutos
+		};
+	}
+
+	function convertirFechaHora(fecha, hora) {
+		let partesFecha = fecha.split("-");
+		let anio = parseInt(partesFecha[0]);
+		let mes = parseInt(partesFecha[1]) - 1;
+		let dia = parseInt(partesFecha[2]);
+
+		let partesHora = convertirHoraAMPM(hora);
+		let horas = partesHora.horas;
+		let minutos = partesHora.minutos;
+
+		// Crear una cadena de texto con el formato deseado (YYYY-MM-DD HH:mm:ss.000000)
+		let fechaHoraFormateada = `${anio}-${(mes + 1).toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')} ${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:00.000000`;
+
+		return fechaHoraFormateada;
+	}
 
 	plugin.controllers.user.buscarProveedores = async (ctx) => {
 
 		try {
 
 
-			let { lat, lng, distance, start, limit, price, date, time, provider_type, sortBy, hour, day } = ctx.query;
+			let { lat, lng, transportation, distance, start, limit, type_price, time_of_day, provider_type, sortBy, hour, day, skill, long_task } = ctx.query;
 
-			if (!lat || !lng) {
+			if (!lat || !lng || !skill || !long_task || !day) {
 
-				return ctx.badRequest('Missing parameters');
+				return ctx.badRequest('No se envio latitud o longitud o skill o long_task o day');
 
 			}
 
-			start = start ? start : 0;
+			if (!time_of_day && !hour) {
+				return ctx.badRequest('No se envio time_of_day o hour');
 
-			limit = limit ? limit : 10;
+			}
+
+			// saco el usuario del token
+
+			const user = ctx.state.user ? ctx.state.user.id : null;
+
+
+			start = start ? parseInt(start) : 0;
+
+			limit = limit ? parseInt(limit) : 10;
 
 			sortBy = sortBy ? sortBy.toLowerCase() : 'distance';
 
+			let car, truck, motorcycle;
 
-			// reviso los filtros que me llegan por query 
+			if (transportation) {
+
+				// debe ser alguno de estos valores not_necessary motorcycle car truck , si es un valor distinto lo vuelvo  not_necessary
+
+				if (transportation != 'not_necessary' && transportation != 'motorcycle' && transportation != 'car' && transportation != 'truck') {
+
+					car = false;
+
+					truck = false;
+
+					motorcycle = false;
+
+				} else {
+
+					car = transportation == 'car' ? true : false;
+
+					truck = transportation == 'truck' ? true : false;
+
+					motorcycle = transportation == 'motorcycle' ? true : false;
+
+				}
+			} else {
+
+				transportation = 'not_necessary';
+				car = false;
+
+				truck = false;
+
+				motorcycle = false;
+
+			}
+
+			if (provider_type) {
+
+				// debe ser cualqueirda de los siguientes valores normal elite great not_provider
+
+				if (provider_type != 'normal' && provider_type != 'elite' && provider_type != 'great' && provider_type != 'not_provider') {
+
+					provider_type = 'not_provider';
+
+				}
+
+			} else {
+
+				provider_type = 'not_provider';
+
+			}
+			provider_type = provider_type == 'not_provider' ? null : provider_type;
+
+
+			if (type_price) {
+
+				// debe ser alguno de estos valores per_hour by_project_flat_rate free_trading sino es null
+
+				if (type_price != 'per_hour' && type_price != 'by_project_flat_rate' && type_price != 'free_trading') {
+
+					type_price = null;
+
+				}
+
+			} else {
+
+				type_price = null;
+
+
+
+			}
+
+			/*
+				@long_task es requerido. Debe ser uno de los siguientes valores: small, medium, large  y cada una corresponde a un rango de tiempo en horas
+
+
+			*/
+
+
+			if (long_task) {
+
+				// debe ser alguno de estos valores small medium large
+
+				if (long_task != 'small' && long_task != 'medium' && long_task != 'large') {
+
+					long_task = 'small';
+
+				}
+
+			}
+
+			// cada long_task tiene un rango de horas , lo que hago es convertirlo a un numero para poder hacer la consulta
+
 
 
 			let open_disponibility = "00:00:00";
 			let close_disponibility = "23:59:59";
+			let datetime = null;
 
-			if (time) {
-				// Colocar rangos de tiempo según el valor de time que puede ser "morning", "afternoon", "evening"
-				if (time == "morning") {
-					open_disponibility = "08:00:00";
-					close_disponibility = "12:00:00";
-				} else if (time == "afternoon") {
-					open_disponibility = "12:00:00";
-					close_disponibility = "17:00:00";
-				} else if (time == "evening") {
-					open_disponibility = "17:00:00";
-					close_disponibility = "23:00:00";
-				} else {
-					open_disponibility = "00:00:00";
-					close_disponibility = "23:59:59";
-				}
+			if(hour == 'flexible'){
+
+				hour = null;
+
 			}
 
-			// Convertir las cadenas de texto en objetos de tiempo
-			let openTime = new Date(`1970-01-01T${open_disponibility}Z`);
-			let closeTime = new Date(`1970-01-01T${close_disponibility}Z`);
+			if (time_of_day && !hour) {
+				console.log('entro a la condicion');
+				// Colocar rangos de tiempo según el valor de time_of_day que puede ser "morning", "afternoon", "evening"
+				if (time_of_day == "morning") {
+					open_disponibility = "08:00:00.000";
+					close_disponibility = "12:00:00.000";
+				} else if (time_of_day == "afternoon") {
+					open_disponibility = "12:00:00.000";
+					close_disponibility = "17:00:00.000";
+				} else if (time_of_day == "evening") {
+					open_disponibility = "17:00:00.000";
+					close_disponibility = "23:00:00.000";
+				}
+			} else if (hour) {
 
-			// Obtener la hora, minutos y segundos de los objetos de tiempo
-			let openHours = openTime.getHours();
-			let openMinutes = openTime.getMinutes();
-			let openSeconds = openTime.getSeconds();
-			let closeHours = closeTime.getHours();
-			let closeMinutes = closeTime.getMinutes();
-			let closeSeconds = closeTime.getSeconds();
-
-			// Crear nuevos objetos de tiempo utilizando las horas, minutos y segundos obtenidos
-			openTime = new Date(1970, 0, 1, openHours, openMinutes, openSeconds);
-			closeTime = new Date(1970, 0, 1, closeHours, closeMinutes, closeSeconds);
+				// no importa la disponibilidad , solo si tienen la hora y el range de tiempo disponible
+				open_disponibility = "00:00:00";
+				close_disponibility = "23:59:59";
 
 
 
 
-			
-			let proID = [];
-			if (hour != "I'm Flexible" && hour != "" && hour != undefined && hour != null) {
-console.log('entro a la condicion');
-				let hourParts = hour.split(':'); 
-				let hours = parseInt(hourParts[0]);
-				let minutes = parseInt(hourParts[1].substr(0, 2));
-				let isPM = hourParts[1].substr(2) === 'pm';
+				datetime = convertirFechaHora(day, hour);
 
-				if (isPM && hours !== 12) {
-					hours += 12;
-				} else if (!isPM && hours === 12) {
-					hours = 0;
+				//	datetimeOut = null;
+
+				if (long_task == 'large') {
+
+					// corresponde a a un rango de 4 a partir de la hora que se envia , por lo que el proveedor debe tener una disponibilidad de 5
+
+
+					//	datetimeOut = moment(datetime).add(4, 'hours').format('YYYY-MM-DD HH:mm:ss');
+					long_task = 4;
+
+
+				} else if (long_task == 'medium') {
+
+					long_task = 2;
+
+					//	datetimeOut = moment(datetime).add(2, 'hours').format('YYYY-MM-DD HH:mm:ss');
+
+
+
+				} else {
+
+					long_task = 1;
 				}
 
-				
 
 
-				let datex = new Date();
-				datex.setHours(hours);
-				datex.setMinutes(minutes);
+			}
 
 
 
-				const searchTime = datex.getHours() + ':' + ('0' + datex.getMinutes()).slice(-2);
 
-				// transformo day de 13-05-2023 a 2023-05-13
+			/*	return ctx.send({ data: { lat, lng, transportation, distance, start, limit, type_price, time_of_day, provider_type, sortBy, hour, day, skill,long_task,open_disponibility,close_disponibility, datetime } });*/
+			let proID = [];
 
-				const dayParts = day.split('-');
+			// convierto skill en un numero y verifico sea un numero valido
 
-				day = dayParts[2] + '-' + dayParts[1] + '-' + dayParts[0];
-
-
-
-				//uno day y searchTime day tuene forma de 2021-08-12 y searchTime tiene forma de 12:00
-
-				let datetime = day + ' ' + searchTime + ':00';
-
-				console.log('datetime', datetime);
-
-
-
-				// uno searchTime con date 
+			skill = parseInt(skill);
 
 
 
 
 
 
+console.log('skill', datetime);
+			proID = await strapi.db.connection.raw(`
+			SELECT up_users.id
+			FROM up_users
+			LEFT JOIN task_assigneds_provider_links ON up_users.id = task_assigneds_provider_links.user_id
+			LEFT JOIN task_assigneds ON task_assigneds_provider_links.task_assigned_id = task_assigneds.id
+			LEFT JOIN provider_skills_provider_links ON up_users.id = provider_skills_provider_links.user_id
+			LEFT JOIN provider_skills_categorias_skill_links ON provider_skills_provider_links.provider_skill_id = provider_skills_categorias_skill_links.provider_skill_id
+			LEFT JOIN skills ON provider_skills_categorias_skill_links.skill_id = skills.id
+			LEFT JOIN provider_skills ON provider_skills_provider_links.provider_skill_id = provider_skills.id -- Nueva unión con la tabla provider_skills
+			WHERE up_users.is_provider = true
+			AND up_users.confirmed = true 
+			AND up_users.blocked = false
+			AND (up_users.id <> ? OR ? IS NULL)
+			AND (up_users.car = ? OR ? = 'true')
+			AND (up_users.motorcycle = ? OR ? = 'true')
+			AND (up_users.truck = ? OR ? = 'true')
+			AND (up_users.type_provider = ? OR ? IS NULL)
+			AND (skills.id = ? OR ? IS NULL)
+			AND ST_Distance_Sphere(POINT(up_users.lng, up_users.lat), POINT(?, ?)) < ?
+			AND (
+							(TIME(up_users.open_disponibility) BETWEEN TIME(?) AND TIME(?))
+							OR
+							(TIME(up_users.close_disponibility) BETWEEN TIME(?) AND TIME(?))
+			)
+			AND (
+							? IS NULL
+							OR
+							up_users.id NOT IN (
+											SELECT DISTINCT task_assigneds_provider_links.user_id
+											FROM task_assigneds_provider_links
+											JOIN task_assigneds ON task_assigneds_provider_links.task_assigned_id = task_assigneds.id
+											WHERE task_assigneds.datetime >= ?
+											AND task_assigneds.datetime <= DATE_ADD(?, INTERVAL ? HOUR)
+											AND up_users.id IS NOT NULL
+							)
+			)
+			AND (provider_skills.type_price = ? OR ? IS NULL)
+			GROUP BY up_users.id
+			ORDER BY ST_Distance_Sphere(POINT(up_users.lng, up_users.lat), POINT(?, ?))
+			LIMIT ?, ?;	
+`, [user, user, car, car, motorcycle, motorcycle, truck, truck, provider_type, provider_type, skill, skill, lng, lat, 6000, open_disponibility, close_disponibility, open_disponibility, close_disponibility, datetime, datetime, datetime, long_task,type_price,type_price, lng, lat, start,limit]);
 
-				proID = await strapi.db.connection.raw(`
+
+/*
+sql
 SELECT up_users.id
 FROM up_users
+JOIN provider_skills_provider_links ON up_users.id = provider_skills_provider_links.user_id
+JOIN provider_skills_categorias_skill_links ON provider_skills_provider_links.provider_skill_id = provider_skills_categorias_skill_links.provider_skill_id
+JOIN skills ON provider_skills_categorias_skill_links.skill_id = skills.id
+JOIN provider_skills ON provider_skills_provider_links.provider_skill_id = provider_skills.id
 LEFT JOIN task_assigneds_provider_links ON up_users.id = task_assigneds_provider_links.user_id
 LEFT JOIN task_assigneds ON task_assigneds_provider_links.task_assigned_id = task_assigneds.id
 WHERE up_users.is_provider = true
+AND (up_users.id <> ? OR ? IS NULL)
+AND (up_users.car = ? OR ? = 'true')
+AND (up_users.motorcycle = ? OR ? = 'true')
+AND (up_users.truck = ? OR ? = 'true')
+AND (up_users.type_provider = ? OR ? IS NULL)
+AND (skills.id = ? OR ? IS NULL)
 AND ST_Distance_Sphere(POINT(up_users.lng, up_users.lat), POINT(?, ?)) < ?
-AND TIME_FORMAT(up_users.open_disponibility, '%H:%i:%s') >= ?
-AND TIME_FORMAT(up_users.close_disponibility, '%H:%i:%s') <= ?
-AND up_users.id NOT IN (
-	SELECT task_assigneds_provider_links.user_id
-	FROM task_assigneds_provider_links
-	 JOIN task_assigneds ON task_assigneds_provider_links.task_assigned_id = task_assigneds.id
-	WHERE task_assigneds_provider_links.user_id = up_users.id
-	AND DATE_FORMAT(task_assigneds.datetime, '%Y-%m-%d %H:%i:%s') = ?)
-
+AND TIME(up_users.open_disponibility) <= TIME(?)
+AND TIME(up_users.close_disponibility) >= TIME(?)
+AND (task_assigneds_provider_links.user_id IS NULL
+OR task_assigneds.datetime < ?
+OR task_assigneds.datetime > DATE_ADD(?, INTERVAL ? HOUR))
+AND (provider_skills.type_price = ? OR ? IS NULL)
 GROUP BY up_users.id
 ORDER BY ST_Distance_Sphere(POINT(up_users.lng, up_users.lat), POINT(?, ?))
-LIMIT ?
-`, [lng, lat, 6000, open_disponibility, close_disponibility, datetime, lng, lat, 10]);
+LIMIT ?;
 
-			} else {
-				console.log(open_disponibility, close_disponibility);
-				proID = await strapi.db.connection.raw(`
-	SELECT id
-	FROM up_users
-	WHERE is_provider = true
-		AND ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?)) < ?
-		AND (TIME_FORMAT(up_users.open_disponibility, '%H:%i:%s') >= ? OR up_users.open_disponibility IS NULL)
-		AND (TIME_FORMAT(up_users.close_disponibility, '%H:%i:%s') <= ? OR up_users.close_disponibility IS NULL)
-	ORDER BY ST_Distance_Sphere(POINT(lng, lat), POINT(?, ?))
-	LIMIT ?
-`, [lng, lat, 6000, open_disponibility, close_disponibility, lng, lat, 10]);
+*/
 
 
-			}
 
 			console.log('proID', proID);
 
@@ -473,25 +633,6 @@ LIMIT ?
 							$in: proID,
 						},
 					},
-					{
-
-						isProvider: {
-							$eq: true
-						},
-					},
-					{
-						...(provider_type && { type_provider: provider_type }),
-					},
-					{
-
-						...(price && { type_price: price }),
-					}
-
-
-
-
-
-
 
 					]
 
@@ -503,7 +644,7 @@ LIMIT ?
 
 				start: start,
 				limit: limit,
-				populate: { location: true, avatar_image: true }
+				populate: [ "location", "avatar_image" , "provider_skills", "provider_skills.categorias_skill,provider_skills.media" ]
 			});
 
 
@@ -531,13 +672,50 @@ LIMIT ?
 					// Agregar distancia al objeto proveedor
 					proveedor.distanceLineal = distance;
 
+				/*	proveedor.skills =await strapi.db.query('api::provider-skill.provider-skill').findMany({
+
+						where: { provider: proveedor.id },
+
+						populate: { categorias_skill: true }
+
+					});*/
+
 					// Calcular distancia usando Google Maps
-			//		const distanceGoogle = await calcularDistancia(lat, lng, proveedor.lat, proveedor.lng);
+					//		const distanceGoogle = await calcularDistancia(lat, lng, proveedor.lat, proveedor.lng);
 
 					// Agregar distancia Google Maps al objeto proveedor
-				//	proveedor.distanceGoogle = distanceGoogle;
+					//	proveedor.distanceGoogle = distanceGoogle;
 
 					//elimino datos no necesarios como lo son createdAt ,	updateAt , provider ,password ,"resetPasswordToken ,confirmationToken , 
+
+					proveedor.online = await strapi.db.query('api::online-user.online-user').findOne({
+						
+						where: { user: proveedor.id },
+						select: ['socket_id', 'lastConnection','status']
+
+				});
+
+				if(proveedor.online){
+
+					if(proveedor.online.status == 'offline'){
+
+					proveedor.online.lastConnection = generateConnectionMessage(proveedor.online.lastConnection);
+					
+				}else{
+					
+					proveedor.online.lastConnection = 'online';
+				}
+
+
+				}else{
+						
+					proveedor.online = {
+						"socket_id": null,
+						"lastConnection": null,
+						"status": "offline"
+					}
+
+				}
 
 					delete proveedor.createdAt;
 					delete proveedor.updatedAt;
@@ -545,9 +723,43 @@ LIMIT ?
 					delete proveedor.password;
 					delete proveedor.resetPasswordToken;
 					delete proveedor.confirmationToken;
-				//	delete proveedor.location ?  delete proveedor.location.id : null;
+					delete proveedor.otp;
+					delete proveedor.blocked;
+					delete proveedor.confirmed;
+					//	delete proveedor.location ?  delete proveedor.location.id : null;
 
-					proveedor.avatar_image = proveedor.avatar_image ? proveedor.avatar_image.url : null;
+					proveedor.avatar_image = proveedor.avatar_image ?  URL + proveedor.avatar_image.url : null;
+
+					proveedor.provider_skills = proveedor.provider_skills.map(skill => {
+
+						// retorno  "type_price" , cost , si media exisate retorno "media.url" , "categorias_skill.name" , "categorias_skill.id"
+
+						// si skill.media  existe la recorro para obtener solo un array de imagenes
+
+						let media = [];
+
+						if (skill.media) {
+
+							media = skill.media.map(media => {
+
+								return URL + media.url;
+
+							});
+
+						}
+
+						return {
+
+							type_price: skill.type_price,
+							cost: skill.cost,
+							media: skill.media ? media : null ,
+							categorias_skill: skill.categorias_skill ? skill.categorias_skill.name : null,
+							categorias_skill_id: skill.categorias_skill ? skill.categorias_skill.id : null,
+							description: skill.description	? skill.description : null,
+						}
+
+					});
+						
 
 
 				} catch (error) {
@@ -605,7 +817,31 @@ LIMIT ?
 
 
 	}
+	function generateConnectionMessage(lastConnectionTime) {
+		const now = new Date();
+		// Tu fecha y hora en formato ISO 8601 (ejemplo, reemplaza con tu fecha y hora)
+		const tuDatetime = new Date(lastConnectionTime);
+		// Calcular la diferencia de tiempo en milisegundos
+		const diferencia = now - tuDatetime;
+		// Convertir la diferencia a minutos, horas y días
+		const minutos = Math.floor(diferencia / (1000 * 60));
+		const horas = Math.floor(diferencia / (1000 * 60 * 60));
+		const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+		// Crear el mensaje de conexión
+		let mensaje = '';
+		if (dias > 0) {
+				mensaje = `${dias} days`;
+		} else if (horas > 0) {
+				mensaje = `${horas} hours`;
+		} else if (minutos > 0) {
+				mensaje = `${minutos} minutes`;
+		} else {
+				mensaje = 'a few seconds';
+		}
 
+		return mensaje;
+		
+}
 	plugin.controllers.user.perfilProveedor = async (ctx) => {
 
 		try {
