@@ -77,7 +77,7 @@ class RegisterTaskController extends GetxController {
 
   Rx<DateTime> selectedDay = Rx<DateTime>(DateTime.now());
 
-  var selectedHour = "".obs;
+  var selectedHour = "8:00am".obs;
 
   final disponibility = [].obs;
 
@@ -113,6 +113,37 @@ class RegisterTaskController extends GetxController {
     "9:30pm"
   ];
 
+  final disponibilityHour = [
+    "8:00am",
+    "8:30am",
+    "9:00am",
+    "9:30am",
+    "10:00am",
+    "10:30am",
+    "11:00am",
+    "11:30am",
+    "12:00pm",
+    "12:30pm",
+    "1:00pm",
+    "1:30pm",
+    "2:00pm",
+    "2:30pm",
+    "3:00pm",
+    "3:30pm",
+    "4:00pm",
+    "4:30pm",
+    "5:00pm",
+    "5:30pm",
+    "6:00pm",
+    "6:30pm",
+    "7:00pm",
+    "7:30pm",
+    "8:00pm",
+    "8:30pm",
+    "9:00pm",
+    "9:30pm"
+  ].obs;
+
   List<int> disabledHours = [1, 3, 5];
 
   //declaro totalMount como un double observable
@@ -145,18 +176,29 @@ class RegisterTaskController extends GetxController {
 
   final listSkills = [].obs;
 
-  registerTask([paymentId]) async {
+  final reviews = [].obs;
+  final currentPage = RxInt(1);
+  final lastPage = RxInt(0);
+  final totalPage = RxInt(0);
+  final limit = RxInt(10);
+  final isLoadingReviews = false.obs;
+
+  final count = RxInt(0);
+
+  final keyDialogSelect = GlobalKey<ScaffoldState>();
+
+  registerTask([paymentId, monto]) async {
     /* creo un objeto con los datos de la tarea, pero previamente reviso estén llenos.*/
 
-    final provider = infoProvider.value["id"];
+    final provider = perfilProvider.value["id"];
 
     final location = _locationController.selectedLocation;
 
     final locationGeo = _locationController.selectedAddress;
 
-    final length = lengthTask.value;
+    final length = filters['long_task'].value;
 
-    final car = carTask.value;
+    final car = filters['transportation'].value;
 
     final date = selectedDay.value;
 
@@ -166,57 +208,44 @@ class RegisterTaskController extends GetxController {
 
     // verifico que los campos no esten vacios
 
-    if (location != null &&
-        locationGeo != "" &&
-        length != "" &&
-        date != "" &&
-        time != "" &&
-        description != "") {
-      // si estan llenos, creo el objeto
+    // si estan llenos, creo el objeto
 
-      //  convierto location en un map de lat y lng
+    //  convierto location en un map de lat y lng
 
-      final locationMap = {
-        "lat": location.latitude,
-        "lng": location.longitude,
-      };
+    final locationMap = {
+      "lat": location!.latitude,
+      "lng": location.longitude,
+    };
 
-      final task = {
-        "provider": provider,
-        "location": locationMap,
-        "location_geo": locationGeo,
-        "length": length,
-        "date": date.toString(),
-        "time": time.toString(),
-        "car": car,
-        "description": description,
-        //"paymentIntentId": paymentId,
-        "status": "request"
-      };
+    final task = {
+      "provider": provider,
+      "location": locationMap,
+      "location_geo": locationGeo,
+      "length": length,
+      "date": date.toString(),
+      "time": time.toString(),
+      "car": car,
+      "description": description,
+      "paymentIntentId": paymentId,
+      "status": "acepted",
+      "skill": filters["skill"].value,
+      "netoPrice": monto,
+    };
 
-      //añado task a un objeto data
+    //añado task a un objeto data
 
-      final data = {"data": task};
+    final data = {"data": task};
 
-      final response = await _task.createTask(data);
+    final response = await _task.createTask(data);
 
-      if (response["status"] == 200) {
-        return response["data"];
-      } else {
-        Get.snackbar(
-          'Error!',
-          'Error creating task',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
+    // subo las imagenes
+
+    if (response["status"] == 200) {
+      return response["data"];
     } else {
-      // si los campos estan vacios, muestro un snackbar con el error
-
       Get.snackbar(
         'Error!',
-        'Please fill all the fields',
+        'Error creating task',
         backgroundColor: Colors.red,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -226,14 +255,22 @@ class RegisterTaskController extends GetxController {
     //
   }
 
-  String dateResume() {
-    final datetime = DateTime.parse(filters["day"].value);
+  String dateResume([String? datex = "", String? hourx = ""]) {
+    if (datex == "") {
+      datex = filters["day"].value;
+    }
+
+    if (hourx == "") {
+      hourx = filters["hour"].value;
+    }
+
+    final datetime = DateTime.parse(datex!);
 
     // le añado la hora seleccionada
 
     String date = DateFormat('MMM dd,').format(datetime);
 
-    String hour = filters["hour"].value;
+    String hour = hourx!;
 
     return '$date - $hour';
   }
@@ -469,8 +506,6 @@ class RegisterTaskController extends GetxController {
 
     perfilProvider.value = response["data"]["proveedor"];
 
-    Logger().d(perfilProvider.value);
-
     // lleno el listado de categorias con el resultado de la consulta
   }
 
@@ -486,7 +521,6 @@ class RegisterTaskController extends GetxController {
   }
 
   void verifySelectedDate(day) {
-    Logger().d(day);
     if (events.isNotEmpty) {
       for (var event in events) {
         if (event.getDateTime == day) {
@@ -505,7 +539,6 @@ class RegisterTaskController extends GetxController {
         }
       }
     }
-
     selectedDay.value = day;
   }
 
@@ -549,15 +582,15 @@ class RegisterTaskController extends GetxController {
     dynamic response = "";
 
     try {
-      final provider = infoProvider.value["id"];
+      final provider = perfilProvider.value["id"];
 
       final location = _locationController.selectedLocation;
 
       final locationGeo = _locationController.selectedAddress;
 
-      final length = lengthTask.value;
+      final length = filters['long_task'].value;
 
-      final car = carTask.value;
+      final car = filters['transportation'].value;
 
       final date = selectedDay.value;
 
@@ -590,7 +623,8 @@ class RegisterTaskController extends GetxController {
           "car": car,
           "description": description,
           "category": category,
-          "price": totalMount.value,
+          "price":
+              formatFinalMount(perfilProvider.value["skill_select"], length),
         };
 
         //añado task a un objeto data
@@ -619,6 +653,42 @@ class RegisterTaskController extends GetxController {
     }
   }
 
+  formatFinalMount(Map skillSelect, String longTask, [int tax = 12]) {
+    final double cost = skillSelect["cost"].toDouble();
+
+    final String minimalHour =
+        skillSelect["hourMinimum"].replaceAll("hour_", "");
+    int hour = 1;
+    if (longTask == "small") {
+      hour = 1;
+    } else if (longTask == "medium") {
+      hour = 4;
+    } else {
+      hour = 8;
+    }
+
+    if (int.parse(minimalHour) > hour) {
+      hour = int.parse(minimalHour);
+    }
+
+    final String type = skillSelect["type_price"];
+
+    // los tipos son by_project_flat_rate , per_hour y free_trading
+
+    if (type == "by_project_flat_rate") {
+      // si es por proyecto el precio es el mismo - el 12% de impuestos x la horas
+      return (cost) + ((cost * hour) * tax / 100);
+    } else if (type == "per_hour") {
+      // si es por hora el precio es el costo por la cantidad de horas mas el 12% de impuestos
+
+      return (cost * hour) + ((cost * hour) * tax / 100);
+    } else {
+      // si es free trading el precio es el costo por la cantidad de horas mas el 12% de impuestos
+
+      return (cost) + ((cost * hour) * tax / 100);
+    }
+  }
+
   Future<void> initPaymentSheet() async {
     try {
       // 1. create payment intent on the server
@@ -630,7 +700,7 @@ class RegisterTaskController extends GetxController {
 
       await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
-        merchantDisplayName: 'Provistask',
+        merchantDisplayName: 'Provitask',
         paymentIntentClientSecret: info['paymentIntent'],
         customerEphemeralKeySecret: info['ephemeralKey'],
         customerId: info['customer'],
@@ -639,7 +709,10 @@ class RegisterTaskController extends GetxController {
 
       await Stripe.instance.presentPaymentSheet();
 
-      final conversartion = await registerTask(info['paymentIntentId']);
+      final conversartion = await registerTask(
+          info['paymentIntentId'],
+          formatFinalMount(perfilProvider.value["skill_select"],
+              filters["long_task"].value));
 
       Get.dialog(
         AlertDialog(
@@ -655,6 +728,8 @@ class RegisterTaskController extends GetxController {
                   Get.offAllNamed(
                     '/chat/$conversartion',
                   );
+
+                  Get.back();
                 },
                 child: const Text('Aceptar'))
           ],
@@ -690,6 +765,44 @@ class RegisterTaskController extends GetxController {
       await Stripe.instance.presentPaymentSheet();
     } catch (e) {
       print('$e');
+    }
+  }
+
+  Future<void> getComments(int id) async {
+    try {
+      isLoadingReviews.value = true;
+      // Realiza la llamada al servidor para obtener los datos de las revisiones
+      // Puedes utilizar paquetes como http o dio para realizar la solicitud HTTP
+      // y obtener la respuesta del servidor
+
+      // Por ejemplo, utilizando el paquete dio:
+      final response = await _services.getComments(id,
+          int.parse(filters["skill"].value), currentPage.value, limit.value);
+
+      if (response['status'] == 200) {
+        final data = response['data'].data["data"];
+
+        reviews.value = data;
+
+        final metadata = response['data'].data["metadata"];
+
+        count.value = metadata['count'];
+
+        currentPage.value = metadata['page'];
+
+        // calculo el lastPage
+
+        lastPage.value = metadata['pages'] % limit.value;
+
+        totalPage.value = metadata['pages'];
+
+        isLoadingReviews.value = false;
+      } else {
+        throw Exception('Failed to fetch reviews');
+      }
+    } catch (error) {
+      isLoadingReviews.value = false;
+      throw Exception('Failed to fetch reviews: $error');
     }
   }
 }

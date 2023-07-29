@@ -1,15 +1,16 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:provitask_app/common/conexion_common.dart';
+import 'package:galleryimage/galleryimage.dart';
+import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 import 'package:provitask_app/pages/register_task/UI/register_task_controller.dart';
-
+import 'package:readmore/readmore.dart';
 import 'package:provitask_app/components/main_app_bar.dart';
 import 'package:provitask_app/components/provitask_bottom_bar.dart';
 import 'package:provitask_app/pages/register_task/UI/register_task_widgets.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class RegisterTaskPage3 extends GetView<RegisterTaskController> {
   final _widgets = RegisterTaskWidget();
@@ -304,8 +305,17 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                                 progressBgColor: Colors.transparent,
                               );
 
-                              await controller.getPerfilProvider(item.id, true,
-                                  int.parse(controller.filters["skill"].value));
+                              List<Future> futures = [
+                                controller.getPerfilProvider(
+                                    item.id,
+                                    true,
+                                    int.parse(
+                                        controller.filters["skill"].value)),
+                                controller.getComments(item.id),
+                              ];
+
+                              // Ejecutar las funciones en paralelo
+                              await Future.wait(futures);
 
                               pd.close();
 
@@ -327,75 +337,258 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                                       ),
                                     ),
 
-                                    body: SafeArea(
-                                      child: SingleChildScrollView(
-                                        child: Container(
-                                          width: Get.width * 1,
-                                          padding: const EdgeInsets.all(10),
-                                          child: Column(children: [
-                                            imageTask(controller.perfilProvider[
-                                                "avatar_image"]),
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                            Text(
-                                              controller.perfilProvider[
-                                                          "name"] +
-                                                      " " +
-                                                      controller.perfilProvider[
-                                                          "lastname"] ??
-                                                  "",
-                                              style: const TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
+                                    body: Scrollbar(
+                                      thickness:
+                                          3, // Ajusta el grosor de la barra de desplazamiento
+                                      radius: const Radius.circular(3),
+                                      child: SafeArea(
+                                        child: SingleChildScrollView(
+                                          child: Container(
+                                            width: Get.width * 1,
+                                            padding: const EdgeInsets.all(10),
+                                            child: Column(children: [
+                                              imageTask(
+                                                  controller.perfilProvider[
+                                                      "avatar_image"]),
+                                              const SizedBox(
+                                                height: 10,
                                               ),
-                                            ),
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                            priceTask(
+                                              Text(
                                                 controller.perfilProvider[
-                                                        "skill_select"]
-                                                    ["categorias_skill"],
-                                                controller.perfilProvider[
-                                                        "skill_select"]["cost"]
-                                                    .toString(),
-                                                controller.perfilProvider[
-                                                        "skill_select"]
-                                                    ["type_price"]),
-                                            proviData(
-                                                controller.perfilProvider[
-                                                    "type_provider"],
-                                                controller.perfilProvider[
-                                                        "skill_select"]["cost"]
-                                                    .toString(),
-                                                controller.perfilProvider[
-                                                        "distanceLineal"]
-                                                    .toString(),
-                                                controller.perfilProvider["scoreAverage"]
-                                                    .toString(),
-                                                controller.perfilProvider[
-                                                        "open_disponibility"]
-                                                    .toString(),
-                                                controller.perfilProvider[
-                                                        "close_disponibility"]
-                                                    .toString(),
-                                                controller.perfilProvider[
-                                                    "provider_skills"],
-                                                controller
-                                                    .perfilProvider?["car"],
-                                                controller
-                                                    .perfilProvider?["truck"],
-                                                controller.perfilProvider?[
-                                                    "motorcycle"],
-                                                Random()
-                                                    .nextInt(100)
-                                                    .toString()),
-                                            descriptionPro(
-                                                controller.perfilProvider[
-                                                        "description"] ??
-                                                    ""),
-                                          ]),
+                                                            "name"] +
+                                                        " " +
+                                                        controller
+                                                                .perfilProvider[
+                                                            "lastname"] ??
+                                                    "",
+                                                style: const TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              priceTask(
+                                                  controller.perfilProvider[
+                                                          "skill_select"]
+                                                      ["categorias_skill"],
+                                                  controller.perfilProvider[
+                                                          "skill_select"]
+                                                          ["cost"]
+                                                      .toString(),
+                                                  controller.perfilProvider[
+                                                          "skill_select"]
+                                                      ["type_price"]),
+                                              proviData(
+                                                  controller.perfilProvider[
+                                                      "type_provider"],
+                                                  controller
+                                                      .perfilProvider["skill_select"]
+                                                          ["cost"]
+                                                      .toString(),
+                                                  controller
+                                                      .perfilProvider[
+                                                          "distanceLineal"]
+                                                      .toString(),
+                                                  controller
+                                                      .perfilProvider["skill_select"]
+                                                          ["scoreAverage"]
+                                                      .toString(),
+                                                  controller.perfilProvider[
+                                                          "open_disponibility"]
+                                                      .toString(),
+                                                  controller.perfilProvider[
+                                                          "close_disponibility"]
+                                                      .toString(),
+                                                  controller.perfilProvider[
+                                                      "provider_skills"],
+                                                  controller
+                                                      .perfilProvider?["car"],
+                                                  controller
+                                                      .perfilProvider?["truck"],
+                                                  controller.perfilProvider?[
+                                                      "motorcycle"],
+                                                  controller
+                                                      .perfilProvider["skill_select"]
+                                                          ["count"]
+                                                      .toString()),
+                                              const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 10),
+                                                child: Divider(
+                                                  color: Colors.grey,
+                                                  height: 20,
+                                                  thickness: 1,
+                                                ),
+                                              ),
+                                              descriptionPro(
+                                                  "About me",
+                                                  controller.perfilProvider[
+                                                          "description"] ??
+                                                      ""),
+                                              const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 10),
+                                                child: Divider(
+                                                  color: Colors.grey,
+                                                  height: 20,
+                                                  thickness: 1,
+                                                ),
+                                              ),
+                                              descriptionPro(
+                                                  "Skills and Experience",
+                                                  controller.perfilProvider[
+                                                              "skill_select"]
+                                                          ["description"] ??
+                                                      ""),
+                                              Container(
+                                                margin: const EdgeInsets.only(
+                                                    top: 20),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Text(
+                                                      "Photos",
+                                                      style: TextStyle(
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                      textAlign: TextAlign.left,
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 20,
+                                                    ),
+                                                    GalleryImage(
+                                                      numOfShowImages: 3,
+                                                      imageUrls:
+                                                          (controller.perfilProvider[
+                                                                          "skill_select"]
+                                                                      ["media"]
+                                                                  as List<
+                                                                      dynamic>)
+                                                              .map<String>(
+                                                                  (item) {
+                                                        return item.toString();
+                                                      }).toList(),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 10),
+                                                child: Divider(
+                                                  color: Colors.grey,
+                                                  height: 20,
+                                                  thickness: 1,
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 20,
+                                              ),
+                                              Container(
+                                                margin: const EdgeInsets.only(
+                                                    top: 20),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10),
+                                                child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        "Reviews for ${controller.perfilProvider["skill_select"]["categorias_skill"]} (${controller.perfilProvider["skill_select"]["count"]})",
+                                                        style: const TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                        textAlign:
+                                                            TextAlign.left,
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 20,
+                                                      ),
+                                                      Container(
+                                                        width: Get.width * 1,
+                                                        //   height: 200,
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .symmetric(
+                                                                horizontal: 10),
+                                                        child: FutureBuilder(
+                                                            future: controller
+                                                                .getComments(
+                                                                    item.id),
+                                                            builder: (BuildContext
+                                                                    context,
+                                                                AsyncSnapshot<
+                                                                        void>
+                                                                    snapshot) {
+                                                              if (snapshot
+                                                                      .connectionState ==
+                                                                  ConnectionState
+                                                                      .waiting) {
+                                                                return const Center(
+                                                                  child:
+                                                                      CircularProgressIndicator(),
+                                                                );
+                                                              } else if (snapshot
+                                                                  .hasError) {
+                                                                return Center(
+                                                                  child: Text(
+                                                                      'Error: ${snapshot.error}'),
+                                                                );
+                                                              } else {
+                                                                return ListView
+                                                                    .builder(
+                                                                  shrinkWrap:
+                                                                      true,
+                                                                  itemCount:
+                                                                      controller
+                                                                          .count
+                                                                          .value,
+                                                                  itemBuilder:
+                                                                      (BuildContext
+                                                                              context,
+                                                                          int index) {
+                                                                    final review =
+                                                                        controller
+                                                                            .reviews[index];
+                                                                    Logger().i(
+                                                                        review[
+                                                                            "avatar"]);
+                                                                    return ReviewWidget(
+                                                                      avatarUrl:
+                                                                          review[
+                                                                              "avatar"],
+                                                                      username:
+                                                                          review[
+                                                                              "client"],
+                                                                      rating: review[
+                                                                          "valoration"],
+                                                                      review: review[
+                                                                          "comment"],
+                                                                      date: formatFecha(
+                                                                          review[
+                                                                              "date"]),
+                                                                    );
+                                                                  },
+                                                                );
+                                                              }
+                                                            }),
+                                                      )
+                                                    ]),
+                                              ),
+                                            ]),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -435,8 +628,654 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                           onPressed: () async {
                             // suma el id del provedor de servicio y paso al siguiente formulario
                             controller.idProvider.value = item.id;
-                            await controller.findProvider();
-                            Get.toNamed('/register_task/step4');
+
+                            Get.dialog(
+                              Dialog(
+                                key: controller.keyDialogSelect,
+                                insetPadding: const EdgeInsets.all(0),
+                                child: Scaffold(
+                                  // declaro una appBar que sea una fila con un boton oara cerrar el dialogo
+
+                                  appBar: AppBar(
+                                    backgroundColor: Colors.white,
+                                    elevation: 0,
+                                    leading: IconButton(
+                                      onPressed: () => Get.back(),
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.indigo,
+                                      ),
+                                    ),
+                                  ),
+                                  body: Scrollbar(
+                                    thickness:
+                                        3, // Ajusta el grosor de la barra de desplazamiento
+                                    radius: const Radius.circular(3),
+                                    child: SafeArea(
+                                      child: SingleChildScrollView(
+                                        child: Container(
+                                          width: Get.width * 1,
+                                          padding: const EdgeInsets.all(10),
+                                          child: Obx(
+                                            () => Column(
+                                              children: [
+                                                Container(
+                                                  margin: const EdgeInsets
+                                                      .symmetric(vertical: 20),
+                                                  alignment: Alignment.topLeft,
+                                                  width: Get.width * 0.8,
+                                                  padding:
+                                                      const EdgeInsets.all(5),
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                    color: Color(0xff170591),
+                                                    //
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                      Radius.circular(50),
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      // imagen del proveedor redondeada
+
+                                                      Image(
+                                                        image: NetworkImage(item
+                                                                .avatarImage ??
+                                                            "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png"),
+                                                        width: 75,
+                                                      ),
+
+                                                      const SizedBox(width: 10),
+                                                      Text(
+                                                        "${item.name} ${item.lastname!}",
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 22,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  color:
+                                                      const Color(0XFFEE8B38),
+                                                  child: TableCalendar(
+                                                    firstDay:
+                                                        DateTime.now().toUtc(),
+                                                    lastDay: DateTime.utc(
+                                                        2030, 3, 14),
+                                                    focusedDay: controller
+                                                        .selectedDay.value,
+                                                    selectedDayPredicate:
+                                                        (day) {
+                                                      final currentTime =
+                                                          controller.selectedDay
+                                                              .value;
+                                                      return day.year ==
+                                                              currentTime
+                                                                  .year &&
+                                                          day.month ==
+                                                              currentTime
+                                                                  .month &&
+                                                          day.day ==
+                                                              currentTime.day;
+                                                    },
+                                                    availableCalendarFormats: const {
+                                                      CalendarFormat.month:
+                                                          'Month',
+                                                    },
+
+                                                    onDaySelected: (selectedDay,
+                                                        focusedDay) {
+                                                      // Actualiza la variable observable 'selectedDay' en el controlador GetX
+                                                      controller
+                                                          .verifySelectedDate(
+                                                              selectedDay);
+                                                    },
+                                                    calendarBuilders:
+                                                        CalendarBuilders(
+                                                      dowBuilder:
+                                                          (context, dayOfWeek) {
+                                                        bool isSaturday =
+                                                            dayOfWeek.weekday ==
+                                                                6; // Sábado
+                                                        bool isSunday =
+                                                            dayOfWeek.weekday ==
+                                                                7; // Domingo
+                                                        if (isSaturday ||
+                                                            isSunday) {
+                                                          return Container(
+                                                            height: 70,
+                                                            // aplico padding a la derecha si es sabado y izquierda si es domingo
+                                                            margin: isSaturday
+                                                                ? const EdgeInsets
+                                                                        .only(
+                                                                    right: 10)
+                                                                : const EdgeInsets
+                                                                        .only(
+                                                                    left: 10),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                              borderRadius: // aplico borde a la parte derecha si es sabado y a la izquierda si es domingo
+
+                                                                  isSaturday
+                                                                      ? const BorderRadius
+                                                                          .only(
+                                                                          topRight:
+                                                                              Radius.circular(15),
+                                                                          bottomRight:
+                                                                              Radius.circular(15),
+                                                                        )
+                                                                      : const BorderRadius
+                                                                          .only(
+                                                                          topLeft:
+                                                                              Radius.circular(15),
+                                                                          bottomLeft:
+                                                                              Radius.circular(15),
+                                                                        ),
+                                                            ),
+                                                            child: Center(
+                                                              child: Text(
+                                                                DateFormat.E()
+                                                                    .format(
+                                                                        dayOfWeek),
+                                                                style:
+                                                                    const TextStyle(
+                                                                  color: Color(
+                                                                      0xFFDD7813),
+                                                                  fontSize: 15,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          );
+                                                        } else {
+                                                          // Personaliza la apariencia de los días de la semana que no son sábado ni domingo
+                                                          return Container(
+                                                            height: 70,
+                                                            decoration:
+                                                                const BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                            child: Center(
+                                                              child: Text(
+                                                                DateFormat.E()
+                                                                    .format(
+                                                                        dayOfWeek),
+                                                                style:
+                                                                    const TextStyle(
+                                                                  color: Color(
+                                                                      0xFFDD7813),
+                                                                  fontSize: 15,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }
+                                                      },
+                                                    ),
+                                                    eventLoader: (day) {
+                                                      // Filtrar los eventos que tienen fecha igual al día seleccionado
+                                                      final eventsForDay =
+                                                          controller.events
+                                                              .where((event) =>
+                                                                  isSameDay(
+                                                                      event
+                                                                          .dateTime,
+                                                                      day))
+                                                              .toList();
+
+                                                      // Puedes devolver la lista de eventos para ese día
+                                                      return eventsForDay;
+                                                    },
+                                                    enabledDayPredicate: (day) {
+                                                      // Verificar si hay eventos para el día seleccionado
+                                                      final eventsForDay =
+                                                          controller.events
+                                                              .where((event) =>
+                                                                  isSameDay(
+                                                                      event
+                                                                          .dateTime,
+                                                                      day))
+                                                              .toList();
+                                                      return eventsForDay
+                                                          .isEmpty; // Devuelve true si no hay eventos, y false si hay eventos
+                                                    },
+
+                                                    //damos estilos al calendario , que tenga fondo color  background: #EE8B38;
+
+                                                    calendarStyle:
+                                                        const CalendarStyle(
+                                                      todayTextStyle: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 18),
+                                                      defaultTextStyle:
+                                                          TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 18),
+                                                      outsideDaysVisible: false,
+                                                      selectedDecoration:
+                                                          BoxDecoration(
+                                                        color:
+                                                            Color(0xFF2B1B99),
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                      weekendTextStyle: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize:
+                                                              18 // Cambia el color de los días de fin de semana a rojo
+                                                          ),
+                                                      selectedTextStyle:
+                                                          TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              fontSize: 18),
+                                                      todayDecoration:
+                                                          BoxDecoration(
+                                                              // color: Colors.white,
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              border: Border(
+                                                                top: BorderSide(
+                                                                    width: 1.0,
+                                                                    color: Colors
+                                                                        .white),
+                                                                left: BorderSide(
+                                                                    width: 1.0,
+                                                                    color: Colors
+                                                                        .white),
+                                                                right: BorderSide(
+                                                                    width: 1.0,
+                                                                    color: Colors
+                                                                        .white),
+                                                                bottom: BorderSide(
+                                                                    width: 1.0,
+                                                                    color: Colors
+                                                                        .white),
+                                                              )),
+                                                    ),
+
+                                                    headerStyle:
+                                                        const HeaderStyle(
+                                                      decoration: BoxDecoration(
+                                                        color: Colors
+                                                            .white, // Color de fondo del encabezado
+                                                      ),
+                                                      titleCentered: true,
+                                                      formatButtonVisible:
+                                                          false,
+                                                      titleTextStyle: TextStyle(
+                                                        color: Color(
+                                                            0XFF2B1B99), // Color del texto del mes
+                                                        fontSize:
+                                                            20, // Tamaño de fuente del texto del mes
+                                                        fontWeight: FontWeight
+                                                            .bold, // Peso de fuente del texto del mes
+                                                      ),
+                                                      leftChevronIcon: Icon(
+                                                        Icons.chevron_left,
+                                                        color:
+                                                            Color(0XFF2B1B99),
+                                                        size: 40,
+                                                        // Color del icono de navegación a la izquierda
+                                                      ),
+                                                      rightChevronIcon: Icon(
+                                                        Icons.chevron_right,
+                                                        color:
+                                                            Color(0XFF2B1B99),
+                                                        size:
+                                                            40, // Color del icono de navegación a la derecha
+                                                      ),
+                                                      headerPadding:
+                                                          EdgeInsets.symmetric(
+                                                              vertical:
+                                                                  16), // Padding del encabezado del mes
+                                                      headerMargin:
+                                                          EdgeInsets.only(
+                                                              bottom: 16),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .center,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      // texto que diga en ingles: Horas disponibles
+
+                                                      const Text(
+                                                        'Available hours',
+                                                        style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ), // texto que diga en ingles: Horas disponibles
+
+                                                      Container(
+                                                          margin:
+                                                              const EdgeInsets
+                                                                      .only(
+                                                                  left: 20,
+                                                                  top: 20),
+                                                          width:
+                                                              Get.width * 0.4,
+                                                          child: Align(
+                                                            alignment: Alignment
+                                                                .centerLeft, // Alineación a la izquierda del DropdownButtonFormField
+                                                            child:
+                                                                DropdownButtonFormField(
+                                                              decoration:
+                                                                  const InputDecoration(
+                                                                border:
+                                                                    OutlineInputBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .all(
+                                                                    Radius
+                                                                        .circular(
+                                                                            50),
+                                                                  ),
+                                                                  borderSide:
+                                                                      BorderSide(
+                                                                    color: Color(
+                                                                        0xFFDD7813),
+                                                                    width: 2.0,
+                                                                  ),
+                                                                ),
+                                                                enabledBorder:
+                                                                    OutlineInputBorder(
+                                                                  borderSide:
+                                                                      BorderSide(
+                                                                    color: Color(
+                                                                        0xFFDD7813),
+                                                                    width: 2,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .all(
+                                                                    Radius
+                                                                        .circular(
+                                                                            50),
+                                                                  ),
+                                                                ),
+                                                                filled: true,
+                                                                fillColor: Color(
+                                                                    0xFFDD7813),
+                                                                contentPadding:
+                                                                    EdgeInsets
+                                                                        .symmetric(
+                                                                  vertical: 10,
+                                                                  horizontal:
+                                                                      15,
+                                                                ),
+                                                              ),
+                                                              dropdownColor:
+                                                                  const Color(
+                                                                      0xFFDD7813),
+                                                              value: controller
+                                                                  .selectedHour
+                                                                  .value,
+                                                              items: controller
+                                                                  .disponibilityHour
+                                                                  .map(
+                                                                    (hour) =>
+                                                                        DropdownMenuItem(
+                                                                      value:
+                                                                          hour,
+                                                                      child:
+                                                                          Text(
+                                                                        hour,
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          color:
+                                                                              Colors.white,
+                                                                          fontSize:
+                                                                              18,
+                                                                          fontWeight:
+                                                                              FontWeight.bold,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                  .toList(),
+                                                              onChanged:
+                                                                  (value) {
+                                                                print(value);
+                                                                controller
+                                                                        .selectedHour
+                                                                        .value =
+                                                                    value
+                                                                        .toString();
+                                                              },
+                                                            ),
+                                                          )
+                                                          // Agrega un Container vacío si controller.disponibility está vacío
+                                                          ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Column(
+                                                  children: [
+                                                    Container(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          vertical: 20,
+                                                          horizontal: 20),
+                                                      margin: const EdgeInsets
+                                                              .symmetric(
+                                                          vertical: 15),
+                                                      width: Get.width * 0.9,
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15),
+                                                        boxShadow: const [
+                                                          BoxShadow(
+                                                            color: Colors.grey,
+                                                            blurRadius: 5,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      child: Column(
+                                                        children: [
+                                                          Container(
+                                                            alignment: Alignment
+                                                                .centerLeft,
+                                                            child: Text(
+                                                              'Request for:',
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                        .indigo[
+                                                                    800],
+                                                                fontSize: 22,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          Container(
+                                                            alignment: Alignment
+                                                                .centerLeft,
+                                                            margin:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    top: 5),
+                                                            child: Column(
+                                                              children: [
+                                                                Text(
+                                                                  controller.dateResume(
+                                                                      controller
+                                                                          .selectedDay
+                                                                          .value
+                                                                          .toString(),
+                                                                      controller
+                                                                          .selectedHour
+                                                                          .value),
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    fontSize:
+                                                                        28,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w300,
+                                                                    color: Color(
+                                                                        0XFF2B1B99),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          Container(
+                                                            margin:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    top: 10),
+                                                            alignment: Alignment
+                                                                .centerLeft,
+                                                            child: Text(
+                                                              'This provider requires a minimum ${item.skillSelect!['hourMinimum'].replaceAll("hour_", "") ?? 0} hours for the ${item.skillSelect!["categorias_skill"]} task',
+                                                              style:
+                                                                  const TextStyle(
+                                                                color:
+                                                                    Colors.grey,
+                                                                fontSize: 14,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 20,
+                                                          ),
+                                                          Container(
+                                                            margin:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    top: 10),
+                                                            alignment: Alignment
+                                                                .centerLeft,
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                ElevatedButton(
+                                                                  style: ElevatedButton
+                                                                      .styleFrom(
+                                                                    backgroundColor:
+                                                                        const Color(
+                                                                            0xFFDD7813),
+                                                                    shape:
+                                                                        RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              50),
+                                                                    ),
+                                                                  ),
+                                                                  onPressed:
+                                                                      () async {
+                                                                    ProgressDialog
+                                                                        pd =
+                                                                        ProgressDialog(
+                                                                            context:
+                                                                                Get.context);
+
+                                                                    try {
+                                                                      pd.show(
+                                                                        max:
+                                                                            100,
+                                                                        msg:
+                                                                            'Please wait...',
+                                                                        progressBgColor:
+                                                                            Colors.transparent,
+                                                                      );
+
+                                                                      await controller.getPerfilProvider(
+                                                                          item
+                                                                              .id,
+                                                                          true,
+                                                                          int.parse(controller
+                                                                              .filters["skill"]
+                                                                              .value));
+                                                                      pd.close();
+                                                                      Get.toNamed(
+                                                                          '/register_task/step4');
+                                                                    } catch (e) {
+                                                                      Logger()
+                                                                          .e(e);
+                                                                      pd.close();
+                                                                    }
+                                                                  },
+                                                                  child:
+                                                                      const Text(
+                                                                    'Continue',
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontSize:
+                                                                          15,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+
+                            // await controller.findProvider();
+                            //Get.toNamed('/register_task/step4');
                           },
                           style: ElevatedButton.styleFrom(
                             elevation: 0,
@@ -592,6 +1431,8 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                           height: 10,
                         ),
                         Container(
+                          width: Get.width * 0.9,
+                          height: 100,
                           padding: const EdgeInsets.symmetric(
                               vertical: 8, horizontal: 10),
                           decoration: BoxDecoration(
@@ -626,7 +1467,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                         ),
 
                         // un text boton que diga "View comments" con un icono de flecha hacia  la derecha que al presionarlo se despliegue un listview con los comentarios
-                        const SizedBox(
+                        /*const SizedBox(
                           height: 10,
                         ),
                         Row(
@@ -649,7 +1490,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                               size: 12,
                             ),
                           ],
-                        ),
+                        ),*/
                       ],
                     ),
                   ),
@@ -695,17 +1536,19 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
 
   // widget que muestra la descripcion de la tarea
 
-  Widget descriptionPro(String? description) {
+  Widget descriptionPro(String title, String? description) {
     return Container(
+      alignment: Alignment.centerLeft,
       margin: const EdgeInsets.only(top: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // texto de titulo de "sobre mi"
 
-          const Text(
-            'About me',
-            style: TextStyle(
+          Text(
+            title,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -714,18 +1557,15 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
           const SizedBox(
             height: 20,
           ),
-          Text(
+          ReadMoreText(
             description ?? 'No description',
+            trimLines: 4,
             textAlign: TextAlign.justify,
-            style: const TextStyle(
-              fontSize: 18,
-              // fontWeight: FontWeight.bold,
-              //color gris
-              color: Colors.grey,
-              // alieneado a la izquierda
-
-              // textAlign: TextAlign.left,
-            ),
+            colorClickableText: const Color(0xFF2B1B99),
+            trimMode: TrimMode.Line,
+            trimCollapsedText: ' Show more',
+            trimExpandedText: ' Show less',
+            moreStyle: const TextStyle(fontSize: 18, color: Colors.grey),
           ),
         ],
       ),
@@ -837,7 +1677,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
       [String sales = '0']) {
     return Container(
       margin: const EdgeInsets.only(top: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -916,7 +1756,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                 width: 5,
               ),
               Text(
-                '$rating ($sales ventas)',
+                '$rating ($sales reviews)',
                 style: const TextStyle(
                   fontSize: 15,
                   color: Colors.grey,
@@ -1017,4 +1857,79 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
   }
 
   // widget con el perfil del provedor de servicio
+}
+
+class ReviewWidget extends StatelessWidget {
+  final String avatarUrl;
+  final String username;
+  final int rating;
+  final String review;
+  final String date;
+  const ReviewWidget({
+    Key? key,
+    required this.avatarUrl,
+    required this.username,
+    required this.rating,
+    required this.review,
+    required this.date,
+  }) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 50,
+            height: 50,
+            child: CircleAvatar(
+              backgroundImage: NetworkImage(avatarUrl),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  username,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Row(
+                  children: List.generate(
+                    rating,
+                    (index) => const Icon(
+                      Icons.star,
+                      color: Colors.yellow,
+                    ),
+                  ),
+                ),
+                ReadMoreText(
+                  review ?? 'No description',
+                  trimLines: 2,
+                  textAlign: TextAlign.justify,
+                  colorClickableText: const Color(0xFF2B1B99),
+                  trimMode: TrimMode.Line,
+                  trimCollapsedText: 'Show more',
+                  trimExpandedText: 'Show less',
+                  moreStyle: const TextStyle(fontSize: 18, color: Colors.grey),
+                ),
+                Text(date),
+                const SizedBox(width: 20),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String formatFecha(String fecha) {
+  final parsedDate = DateTime.parse(fecha);
+  final formattedDate = DateFormat('MMMM dd, yyyy').format(parsedDate);
+  return formattedDate;
 }

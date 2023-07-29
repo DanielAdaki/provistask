@@ -12,7 +12,6 @@ import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 class RegisterTaskPage4 extends GetView<RegisterTaskController> {
   final _widgets = RegisterTaskWidget();
-  final _controller = Get.find<RegisterTaskController>();
 
   final _controllerLocation = Get.find<LocationController>();
 
@@ -42,7 +41,7 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
               Column(
                 children: [
                   Visibility(
-                    visible: _controller.isLoading.value,
+                    visible: controller.isLoading.value,
                     child: const Center(
                       child: Column(
                         children: [
@@ -56,7 +55,7 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                   ),
                   Expanded(
                     child: Visibility(
-                      visible: !_controller.isLoading.value,
+                      visible: !controller.isLoading.value,
                       child: SingleChildScrollView(
                         child: Column(
                           children: [
@@ -97,20 +96,20 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
 
                                                 Image(
                                                   image: NetworkImage(
-                                                      ConexionCommon.hostBase +
-                                                          _controller
-                                                                  .infoProvider
-                                                                  .value[
-                                                              "avatar_image"]),
+                                                      controller.perfilProvider[
+                                                          "avatar_image"]),
                                                   width: 75,
                                                 ),
 
                                                 const SizedBox(width: 10),
                                                 Text(
-                                                  _controller.infoProvider
-                                                          .value["name"] +
-                                                      _controller.infoProvider
-                                                          .value["lastname"],
+                                                  controller.perfilProvider[
+                                                              "name"] +
+                                                          " " +
+                                                          controller
+                                                                  .perfilProvider[
+                                                              "lastname"] ??
+                                                      "",
                                                   style: const TextStyle(
                                                     color: Color(0xff170591),
                                                     fontSize: 22,
@@ -143,14 +142,19 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                                   alignment:
                                                       Alignment.centerLeft,
                                                   child: Text(
-                                                    _controller.dateResume(),
+                                                    controller.dateResume(
+                                                        controller
+                                                            .selectedDay.value
+                                                            .toString(),
+                                                        controller.selectedHour
+                                                            .value),
                                                     style: const TextStyle(
                                                       color: Colors.grey,
                                                       fontSize: 12,
                                                     ),
                                                   ),
                                                 ),
-                                                /*Align(
+                                                Align(
                                                   alignment:
                                                       Alignment.centerLeft,
                                                   child: Container(
@@ -165,16 +169,16 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                                           BorderRadius.circular(
                                                               45),
                                                     ),
-                                                    child: const Text(
-                                                      "1 hour min",
-                                                      style: TextStyle(
+                                                    child: Text(
+                                                      "${controller.perfilProvider['skill_select']!['hourMinimum'].replaceAll("hour_", "") ?? 0} hour min",
+                                                      style: const TextStyle(
                                                           color: Colors.white,
                                                           fontSize: 10,
                                                           fontWeight:
                                                               FontWeight.bold),
                                                     ),
                                                   ),
-                                                ),*/
+                                                ),
                                               ],
                                             ),
                                           ),
@@ -231,7 +235,9 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                               alignment: Alignment.centerLeft,
                                               child: // condicional de acuerdo a longitud de tartea elegida lengthTask
 
-                                                  _controller.lengthTask
+                                                  controller
+                                                              .filters[
+                                                                  'long_task']
                                                               .value ==
                                                           "small"
                                                       ? const Text(
@@ -241,7 +247,7 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                                             fontSize: 12,
                                                           ),
                                                         )
-                                                      : _controller.lengthTask
+                                                      : controller.lengthTask
                                                                   .value ==
                                                               "medium"
                                                           ? const Text(
@@ -283,7 +289,9 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                               alignment: Alignment.centerLeft,
                                               child: // condicional deacuerdo al vehiculo seleccionado  carTask , si es 1 es "Car" si es 2 es "Motorcycle" si es 3 es "Truck"  si es 4 es "Not needed"
 
-                                                  _controller.carTask.value == 1
+                                                  controller.filters[
+                                                              'transportation'] ==
+                                                          'car'
                                                       ? const Text(
                                                           'Car',
                                                           style: TextStyle(
@@ -291,9 +299,9 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                                             fontSize: 12,
                                                           ),
                                                         )
-                                                      : _controller.carTask
-                                                                  .value ==
-                                                              2
+                                                      : controller.filters[
+                                                                  'transportation'] ==
+                                                              'motorcycle'
                                                           ? const Text(
                                                               'Motorcycle',
                                                               style: TextStyle(
@@ -302,9 +310,9 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                                                 fontSize: 12,
                                                               ),
                                                             )
-                                                          : _controller.carTask
-                                                                      .value ==
-                                                                  3
+                                                          : controller.filters[
+                                                                      'transportation'] ==
+                                                                  'truck'
                                                               ? const Text(
                                                                   'Truck',
                                                                   style:
@@ -335,7 +343,7 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                             horizontal: 10),
                                         child: TextFormField(
                                           controller:
-                                              _controller.descriptionTask.value,
+                                              controller.descriptionTask.value,
                                           decoration: const InputDecoration(
                                             hintStyle: TextStyle(
                                               color: Colors.grey,
@@ -350,7 +358,7 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                         ),
                                       ),
                                       InkWell(
-                                        onTap: () => _controller.restartTask(),
+                                        onTap: () => controller.restartTask(),
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceEvenly,
@@ -379,8 +387,9 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                           ],
                                         ),
                                       ),
-
-                                      /*Container(
+                                      Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            vertical: 20),
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 10, vertical: 10),
                                         decoration: BoxDecoration(
@@ -451,7 +460,7 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                                       Alignment.centerLeft,
                                                   child: Text(
                                                     // ignore: prefer_interpolation_to_compose_strings
-                                                    '${'\$' + _controller.infoProvider.value["cost_per_houers"]}/hr',
+                                                    '${'\$' + controller.perfilProvider["skill_select"]["cost"].toString()}/bpfr',
                                                     style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 12,
@@ -483,7 +492,7 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                                   alignment:
                                                       Alignment.centerLeft,
                                                   child: const Text(
-                                                    '\$12.45/hr',
+                                                    '12%',
                                                     style: TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 12,
@@ -515,7 +524,7 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                                   alignment:
                                                       Alignment.centerLeft,
                                                   child: Text(
-                                                    '\$${_controller.totalMount.value}/hr',
+                                                    '\$ ${formatFinalMount(controller.perfilProvider["skill_select"], controller.filters['long_task'].value)}',
                                                     style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 14,
@@ -533,7 +542,7 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                                   const EdgeInsets.symmetric(
                                                       horizontal: 10),
                                               child: TextFormField(
-                                                controller: _controller
+                                                controller: controller
                                                     .descriptionTask.value,
                                                 decoration:
                                                     const InputDecoration(
@@ -551,23 +560,23 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                             ),
                                           ],
                                         ),
-                                      ),*/
+                                      ),
                                     ],
                                   ),
                                 ),
                                 _widgets.registerContinueButton(
                                     'Chat & confirm', 20, () async {
-                                  ProgressDialog pd =
+                                  /* ProgressDialog pd =
                                       ProgressDialog(context: Get.context);
 
-                                  try {
+                                                                  try {
                                     pd.show(
                                       max: 100,
                                       msg: 'Please wait...',
                                       progressBgColor: Colors.transparent,
                                     );
                                     final conversation =
-                                        await _controller.registerTask();
+                                        await controller.registerTask();
 
                                     Get.offAllNamed('/chat/$conversation');
                                   } catch (e) {
@@ -581,8 +590,8 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                       colorText: Colors.white,
                                       snackPosition: SnackPosition.BOTTOM,
                                     );
-                                  }
-                                  // _controller.initPaymentSheet();
+                                  }*/
+                                  controller.initPaymentSheet();
                                 }, bgColor: Colors.indigo[800]!),
                               ],
                             )
@@ -598,5 +607,41 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
         ),
       ),
     );
+  }
+
+  formatFinalMount(Map skillSelect, String longTask, [int tax = 12]) {
+    final double cost = skillSelect["cost"].toDouble();
+
+    final String minimalHour =
+        skillSelect["hourMinimum"].replaceAll("hour_", "");
+    int hour = 1;
+    if (longTask == "small") {
+      hour = 1;
+    } else if (longTask == "medium") {
+      hour = 4;
+    } else {
+      hour = 8;
+    }
+
+    if (int.parse(minimalHour) > hour) {
+      hour = int.parse(minimalHour);
+    }
+
+    final String type = skillSelect["type_price"];
+
+    // los tipos son by_project_flat_rate , per_hour y free_trading
+
+    if (type == "by_project_flat_rate") {
+      // si es por proyecto el precio es el mismo - el 12% de impuestos x la horas
+      return (cost) + ((cost * hour) * tax / 100);
+    } else if (type == "per_hour") {
+      // si es por hora el precio es el costo por la cantidad de horas mas el 12% de impuestos
+
+      return (cost * hour) + ((cost * hour) * tax / 100);
+    } else {
+      // si es free trading el precio es el costo por la cantidad de horas mas el 12% de impuestos
+
+      return (cost) + ((cost * hour) * tax / 100);
+    }
   }
 }

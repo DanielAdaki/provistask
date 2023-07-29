@@ -913,7 +913,7 @@ LIMIT ?;
 			const { id } = ctx.params;
 
 
-			let { lat, lng, idSkill } = ctx.query; 
+			let { lat, lng, idSkill,reviews } = ctx.query; 
 
 
 
@@ -962,21 +962,29 @@ LIMIT ?;
 				delete tarea.updatedAt;
 
 			});
+ 
+			if(lat && lng){
+				let distance = await geolib.getDistance(
+					{ latitude: lat, longitude: lng },
+					{ latitude: proveedor.lat, longitude: proveedor.lng }
+				);
+	
+				// Convertir distancia a kilómetros
+				distance = distance / 1000;
+	
+				// Redondear distancia a 2 decimales
+				distance = Math.round(distance * 100) / 100;
+	
+				// Agregar distancia al objeto proveedor
+				proveedor.distanceLineal = distance;
 
 
-			let distance = await geolib.getDistance(
-				{ latitude: lat, longitude: lng },
-				{ latitude: proveedor.lat, longitude: proveedor.lng }
-			);
+			}else{
+				
+				proveedor.distanceLineal = null;
+			}
 
-			// Convertir distancia a kilómetros
-			distance = distance / 1000;
 
-			// Redondear distancia a 2 decimales
-			distance = Math.round(distance * 100) / 100;
-
-			// Agregar distancia al objeto proveedor
-			proveedor.distanceLineal = distance;
 
 
 			proveedor.online = await strapi.db.query('api::online-user.online-user').findOne({
@@ -1025,6 +1033,41 @@ LIMIT ?;
 
 		proveedor["taskCompletedTotal"] = taskCompletedTotal;
 
+
+		if(reviews && idSkill){
+
+			var 	reviewsdb	= await strapi.db.query('api::valoration.valoration').findMany({
+
+				where: { provider: proveedor.id, categorias_skill: idSkill },
+
+				populate:["client","client.avatar_image"]
+
+			});
+
+
+			reviewsdb = reviewsdb.map(review => {
+
+				// rerorno valoracion, comentario, fecha, nombre del cliente, avatar del cliente
+
+				return {
+
+					valoration: review.valoration,
+					comment: review.description,
+					date: review.createdAt,
+					client: review.client.name + ' ' + review.client.lastname,
+					avatar: review.client.avatar_image ? URL + review.client.avatar_image.url : null
+
+
+
+		}
+
+			});
+
+			
+
+		}
+
+		proveedor["reviews"] = reviewsdb ? reviewsdb : [];
 
 
 		if(proveedor.online){
@@ -1607,20 +1650,19 @@ LIMIT ?;
 
 
 
-
-
-
-
-
-
-
 			// si el usuario tiene el campo stripe_customer_id vacio entonces lo creo en stripe
 
 			let customer = {};
-
+			console.log("dalmsñldmañlsdmañlsdmlñasmdlñamsñl");
 			if (!user.stripe_customer_id) {
 
-				customer["stripe_customer_id"] = await stripe.customers.create();
+				let aux = await stripe.customers.create();
+
+				customer["stripe_customer_id"]	= aux.id;
+
+
+
+				console.log(customer["stripe_customer_id"]);
 				await strapi.entityService.update('plugin::users-permissions.user', user.id, {
 
 					data: {
@@ -1897,6 +1939,115 @@ LIMIT ?;
 
 	}
 
+	// la funcion buscarReviewsProveedor
+
+	plugin.controllers.user.buscarReviewsProveedor = async (ctx) => {
+
+		try {
+
+
+			// saco el id del proveedor enviado como parametro
+
+			let { id, skill, page, limit } = ctx.params;
+
+
+			page = page ? parseInt(page) : 0;
+
+			limit = limit ? parseInt(limit) : 10;
+
+
+			// si id no existe retorno error
+
+			if (!id) return ctx.badRequest('No se envio el id del proveedor');
+
+
+
+
+			//	busco las valoraciones del proveedor si se envio el id de la skill entonces busco las valoraciones de esa skill tomando en cuenta la page y el limit
+
+			let reviews = [];
+
+			let reviewsCout = 0;
+
+			if (skill) {
+
+				reviews = await strapi.db.query('api::valoration.valoration').findMany({
+
+					where: { provider: id, categorias_skill: skill },
+
+					sort: 'createdAt:desc',
+
+					limit: limit ? limit : 10,
+
+					start: page ? page : 0,
+
+					populate: ["client", "client.avatar_image"]
+
+				});
+
+				reviewsCout = await strapi.db.query('api::valoration.valoration').count({
+
+					where: { provider: id, categorias_skill: skill },
+				});
+
+			}else {
+
+				reviews = await strapi.db.query('api::valoration.valoration').findMany({
+
+					where: { provider: id },
+
+					sort: 'createdAt:desc',
+
+					limit: limit ? limit : 10,
+
+					start: page ? page : 0,
+
+					populate: ["client", "client.avatar_image"]
+
+				});
+
+				reviewsCout = await strapi.db.query('api::valoration.valoration').count({
+
+					where: { provider: id },
+
+				});
+
+			}
+
+			// recorro las valoraciones para agregar la url de la imagen del cliente
+
+			reviews = reviews.map(review => {
+
+				return {
+
+					valoration: review.valoration,
+					comment: review.description,
+					date: review.createdAt,
+					client: review.client.name + ' ' + review.client.lastname,
+					avatar: review.client.avatar_image ? URL + review.client.avatar_image.url : null
+
+				}
+
+			});
+
+			let pages = Math.ceil(reviewsCout / limit);
+
+			console.log(pages);
+
+			return ctx.send({ data: reviews, metadata: { count: reviewsCout, page: page ? page : 0, pages } });
+
+
+
+		}	catch (error) {
+
+			console.error('Error al buscar proveedores:', error);
+
+			return ctx.badRequest('Error al buscar proveedores', error);
+
+		}
+
+	}
+
 
 	plugin.routes['content-api'].routes.push(
 
@@ -1916,6 +2067,12 @@ LIMIT ?;
 			"method": "GET",
 			"path": "/proveedores/fav-or-book",
 			"handler": "user.buscarProveedoresBorF"
+
+		},
+		{
+			"method": "GET",
+			"path": "/proveedores/reviews/:id",
+			"handler": "user.buscarReviewsProveedor"
 
 		},
 		{

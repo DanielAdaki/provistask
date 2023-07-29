@@ -19,34 +19,73 @@ module.exports = createCoreController(
 				const user = ctx.state.user;
 
 
-
-
 				if (!user) {
-	
+						console.log("No tienes permiso", { error: 'No autorizado' });
 					return ctx.unauthorized("No tienes permiso", { error: 'No autorizado' });
 				}
 	
 	
 	
-				let { provider, location, location_geo, length, car, date, time, description,status,descriptionProvis ,conversation,addDetails,addFinalPrice,finalPrice,skill,createType, brutePrice, netoPrice } = ctx.request.body.data;
+				let { provider, location, location_geo, length, car, date, time, description,status,descriptionProvis ,conversation,addDetails,addFinalPrice,finalPrice,skill,createType, brutePrice, netoPrice,paymentIntentId } = ctx.request.body.data;
+
+
 	
-				if (car == 1) {
-	
-					car = "motorcycle";
-	
-				} else if (car == 2) {
-	
-					car = "car";
-	
-				} else if (car == 3) {
-	
-					car = "truck";
-	
-				} else if (car == 4) {
-	
-					car = "not_necessary";
-	
+				
+				console.log("createType",ctx.request.body.data);
+
+				if (!provider) {
+console.log("El campo provider es obligatorio", { error: 'El campo provider es obligatorio' });
+					return ctx.badRequest("El campo provider es obligatorio", { error: 'El campo provider es obligatorio' });
+
 				}
+
+				console.log("provider",provider);
+
+				const providerx = await strapi.db.query('plugin::users-permissions.user').findOne({
+
+					where: { id: provider },
+
+					select: ['id', 'isProvider', 'username', 'name' , 'lastname'],
+
+				});
+
+
+				if (!providerx) {
+console.log("El provider no existe", { error: 'El provider no existe' });
+					return ctx.badRequest("El provider no existe", { error: 'El provider no existe' });
+
+				}
+
+				console.log(providerx);
+				if (!providerx.isProvider) {
+
+					console.log("El provider no es un proveedor", { error: 'El provider no es un proveedor' });
+					 return ctx.badRequest("El provider no es un proveedor", { error: 'El provider no es un proveedor' });
+
+				}
+
+
+				// verifico que el provider no sea el mismo que el cliente
+
+
+				if (provider == user.id) {
+
+					return ctx.badRequest("El provider no puede ser el mismo que el cliente", { error: 'El provider no puede ser el mismo que el cliente' });
+
+
+				}
+
+
+
+				// car solo puede ser "motorcycle"  "car"  "truck"  "not_necessary"
+
+				if (car != "motorcycle" && car != "car" && car != "truck" && car != "not_necessary") {
+
+					return ctx.badRequest("El campo car solo puede ser motorcycle, car, truck o not_necessary", { error: 'El campo car solo puede ser motorcycle, car, truck o not_necessary' });
+
+				}
+
+
 	
 	
 				let locat = {
@@ -72,44 +111,30 @@ module.exports = createCoreController(
 	
 	
 	
-					combinedDateTime = moment(date).format('YYYY-MM-DD') + ' ' + time + ':00';
+					combinedDateTime = moment(date).format('YYYY-MM-DD') + ' ' + time + ':00.000';
+
+					combinedDateTime	= Date.parse(combinedDateTime);
+
+					combinedDateTime	= moment(combinedDateTime).format('YYYY-MM-DD HH:mm:ss');
+
+					console.log("combinedDateTime",combinedDateTime);
 				}	else {
 	
-						combinedDateTime = moment(date).format('YYYY-MM-DD') + ' ' + "00:00:00";
+						combinedDateTime = moment(date).format('YYYY-MM-DD') + ' ' + "00:00:00.000";
+						combinedDateTime	= moment(combinedDateTime).format('YYYY-MM-DD HH:mm:ss');
 				}
 	
-	
+
 	
 				if(!conversation){
 	
-					ctx.request.body.data = {
-	
-						provider,
-		
-						client: user.id,
-						transportation: car,
-						description: description,
-						taskLength: length,
-						location: locat,
-						datetime: combinedDateTime,
-						time:  moment(combinedDateTime).format('HH:mm:ss'),
-						status :  status ? status : "request",
-						timeFlexible : time == "I'm Flexible" ? true : false,
-						idCreador : user.id,
-
-						createType	: 'client',
-				
-		
-		
-					}
 		
 					// creo una conversacion con el proveedor y el cliente. Las conversaciones se crean recibiendo un nombre  y un array de usuarios
 		
 					let users = [provider, user.id];
 		
 		
-					let name = "Conversation between " + user.username + " and " + provider.username;
-		
+					let name = "Conversation between " + user.username + " and " + providerx.username;
 					conversation = await strapi.entityService.create('api::conversation.conversation', {
 						data:{
 							name: name,
@@ -118,15 +143,36 @@ module.exports = createCoreController(
 		
 		
 					});
-		
-				
-		
-					// asugno la conversacion a la tarea
-		
-					ctx.request.body.data.conversation = conversation.id;
-		
+
+
 					// creo un mensaje de bienvenida para la conversacion
-						await super.create(ctx);
+
+
+						const entry = await strapi.entityService.create('api::task-assigned.task-assigned', {
+							data: {
+								provider,
+		
+								client: user.id,
+								transportation: car,
+								description: description,
+								taskLength: length,
+								location: locat,
+								datetime: combinedDateTime,
+								time:  moment(combinedDateTime).format('HH:mm:ss'),
+								status :  status ? status : "request",
+								timeFlexible : time == "I'm Flexible" ? true : false,
+								idCreador : user.id,
+		
+								paymentIntentId	:  paymentIntentId ? paymentIntentId : ""  ,
+								skill : skill,
+								createType	: 'client',
+								conversation : conversation.id,
+								netoPrice	: netoPrice.toString(),
+							},
+					});
+
+					
+
 					await strapi.entityService.create('api::chat-message.chat-message', {
 		
 						data:{

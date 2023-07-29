@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provitask_app/controllers/auth/login_controller.dart';
 import 'package:provitask_app/models/data/countries_data.dart';
 import 'package:provitask_app/services/auth_services.dart';
 import 'package:logger/logger.dart';
@@ -143,7 +144,9 @@ class ProfileController extends GetxController {
 
     clientZipCode.value.text = user['postal_code'] ?? "";
 
-    clientImage.value = user['avatar_image']["url"] ?? "";
+    clientImage.value = user['avatar_image'] != null
+        ? user['avatar_image']["url"]
+        : "/uploads/user_147dd8408e.png";
 
     isProvider.value = user['isProvider'] ?? false;
 
@@ -382,6 +385,10 @@ class ProfileController extends GetxController {
     auth.logout();
 
     Get.offAllNamed('/login');
+
+    // HAGO GET pu LOGIN CONTROLLER
+
+    Get.lazyPut<LoginController>(() => LoginController());
   }
 
   void becomeProvider() {}

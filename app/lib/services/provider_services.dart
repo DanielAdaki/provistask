@@ -38,35 +38,57 @@ class ProviderRegisterServices {
 
     return respuesta;
   }
+
+  Future<Map> getComments(
+      int provider, int skill, int currentPage, int limit) async {
+    Map respuesta;
+
+    try {
+      final response = await dio.get(
+          "/users-permissions/proveedores/reviews/$provider?page=$currentPage&limit=$limit&skill=$skill");
+
+      // reviso el status de la respuesta si es distinto a 200 lanzo error
+
+      if (response.statusCode != 200) {
+        throw response.data;
+      }
+
+      respuesta = {"status": 200, "data": response};
+    } catch (e) {
+      respuesta = {"status": 500, "error": e};
+    }
+
+    return respuesta;
+  }
+
+  Future<Map> getItem(int id) async {
+    Map respuesta;
+
+    try {
+      final response = await dio.get("/categories/$id");
+
+      // reviso el status de la respuesta si es distinto a 200 lanzo error
+
+      if (response.statusCode != 200) {
+        throw response.data;
+      }
+
+      logger.d(response.data);
+
+      // mando al modelo
+
+      var aux = response.data;
+
+      respuesta = {"status": 200, "data": aux};
+    } catch (e) {
+      respuesta = {"status": 500, "error": e};
+    }
+
+    return respuesta;
+  }
 }
 
 // defino getItem como una funcion asincrona que retorna un Map
-
-Future<Map> getItem(int id) async {
-  Map respuesta;
-
-  try {
-    final response = await dio.get("/categories/$id");
-
-    // reviso el status de la respuesta si es distinto a 200 lanzo error
-
-    if (response.statusCode != 200) {
-      throw response.data;
-    }
-
-    logger.d(response.data);
-
-    // mando al modelo
-
-    var aux = response.data;
-
-    respuesta = {"status": 200, "data": aux};
-  } catch (e) {
-    respuesta = {"status": 500, "error": e};
-  }
-
-  return respuesta;
-}
 
 // importo conexion_common.dart
 
