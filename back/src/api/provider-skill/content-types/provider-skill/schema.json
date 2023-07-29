@@ -45,6 +45,17 @@
     },
     "description": {
       "type": "text"
+    },
+    "hourMinimum": {
+      "type": "enumeration",
+      "enum": [
+        "hour_1",
+        "hour_2",
+        "hour_3",
+        "hour_4",
+        "hour_5"
+      ],
+      "default": "hour_1"
     }
   }
 }

@@ -14,7 +14,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "x-generation-date": "2023-07-26T20:39:23.086Z"
+    "x-generation-date": "2023-07-29T11:31:06.578Z"
   },
   "x-strapi-config": {
     "path": "/documentation",
@@ -2647,10 +2647,6 @@
                           }
                         }
                       },
-                      "scoreAverage": {
-                        "type": "number",
-                        "format": "float"
-                      },
                       "location": {
                         "type": "object",
                         "properties": {
@@ -3168,6 +3164,16 @@
                                     },
                                     "description": {
                                       "type": "string"
+                                    },
+                                    "hourMinimum": {
+                                      "type": "string",
+                                      "enum": [
+                                        "hour_1",
+                                        "hour_2",
+                                        "hour_3",
+                                        "hour_4",
+                                        "hour_5"
+                                      ]
                                     },
                                     "createdAt": {
                                       "type": "string",
@@ -5203,10 +5209,6 @@
                             }
                           }
                         },
-                        "scoreAverage": {
-                          "type": "number",
-                          "format": "float"
-                        },
                         "location": {
                           "type": "object",
                           "properties": {
@@ -5724,6 +5726,16 @@
                                       },
                                       "description": {
                                         "type": "string"
+                                      },
+                                      "hourMinimum": {
+                                        "type": "string",
+                                        "enum": [
+                                          "hour_1",
+                                          "hour_2",
+                                          "hour_3",
+                                          "hour_4",
+                                          "hour_5"
+                                        ]
                                       },
                                       "createdAt": {
                                         "type": "string",
@@ -6833,10 +6845,6 @@
                           }
                         }
                       },
-                      "scoreAverage": {
-                        "type": "number",
-                        "format": "float"
-                      },
                       "location": {
                         "type": "object",
                         "properties": {
@@ -7354,6 +7362,16 @@
                                     },
                                     "description": {
                                       "type": "string"
+                                    },
+                                    "hourMinimum": {
+                                      "type": "string",
+                                      "enum": [
+                                        "hour_1",
+                                        "hour_2",
+                                        "hour_3",
+                                        "hour_4",
+                                        "hour_5"
+                                      ]
                                     },
                                     "createdAt": {
                                       "type": "string",
@@ -8509,10 +8527,6 @@
                           }
                         }
                       },
-                      "scoreAverage": {
-                        "type": "number",
-                        "format": "float"
-                      },
                       "location": {
                         "type": "object",
                         "properties": {
@@ -9030,6 +9044,16 @@
                                     },
                                     "description": {
                                       "type": "string"
+                                    },
+                                    "hourMinimum": {
+                                      "type": "string",
+                                      "enum": [
+                                        "hour_1",
+                                        "hour_2",
+                                        "hour_3",
+                                        "hour_4",
+                                        "hour_5"
+                                      ]
                                     },
                                     "createdAt": {
                                       "type": "string",
@@ -10163,10 +10187,6 @@
                           }
                         }
                       },
-                      "scoreAverage": {
-                        "type": "number",
-                        "format": "float"
-                      },
                       "location": {
                         "type": "object",
                         "properties": {
@@ -10684,6 +10704,16 @@
                                     },
                                     "description": {
                                       "type": "string"
+                                    },
+                                    "hourMinimum": {
+                                      "type": "string",
+                                      "enum": [
+                                        "hour_1",
+                                        "hour_2",
+                                        "hour_3",
+                                        "hour_4",
+                                        "hour_5"
+                                      ]
                                     },
                                     "createdAt": {
                                       "type": "string",
@@ -11814,6 +11844,16 @@
               },
               "description": {
                 "type": "string"
+              },
+              "hourMinimum": {
+                "type": "string",
+                "enum": [
+                  "hour_1",
+                  "hour_2",
+                  "hour_3",
+                  "hour_4",
+                  "hour_5"
+                ]
               }
             }
           }
@@ -13126,10 +13166,6 @@
                           }
                         }
                       },
-                      "scoreAverage": {
-                        "type": "number",
-                        "format": "float"
-                      },
                       "location": {
                         "type": "object",
                         "properties": {
@@ -13417,6 +13453,16 @@
                                     "description": {
                                       "type": "string"
                                     },
+                                    "hourMinimum": {
+                                      "type": "string",
+                                      "enum": [
+                                        "hour_1",
+                                        "hour_2",
+                                        "hour_3",
+                                        "hour_4",
+                                        "hour_5"
+                                      ]
+                                    },
                                     "createdAt": {
                                       "type": "string",
                                       "format": "date-time"
@@ -13520,6 +13566,16 @@
           },
           "description": {
             "type": "string"
+          },
+          "hourMinimum": {
+            "type": "string",
+            "enum": [
+              "hour_1",
+              "hour_2",
+              "hour_3",
+              "hour_4",
+              "hour_5"
+            ]
           },
           "createdAt": {
             "type": "string",
@@ -16811,10 +16867,6 @@
                           }
                         }
                       },
-                      "scoreAverage": {
-                        "type": "number",
-                        "format": "float"
-                      },
                       "location": {
                         "type": "object",
                         "properties": {
@@ -17332,6 +17384,16 @@
                                     },
                                     "description": {
                                       "type": "string"
+                                    },
+                                    "hourMinimum": {
+                                      "type": "string",
+                                      "enum": [
+                                        "hour_1",
+                                        "hour_2",
+                                        "hour_3",
+                                        "hour_4",
+                                        "hour_5"
+                                      ]
                                     },
                                     "createdAt": {
                                       "type": "string",
@@ -18739,10 +18801,6 @@
                           }
                         }
                       },
-                      "scoreAverage": {
-                        "type": "number",
-                        "format": "float"
-                      },
                       "location": {
                         "type": "object",
                         "properties": {
@@ -19260,6 +19318,16 @@
                                     },
                                     "description": {
                                       "type": "string"
+                                    },
+                                    "hourMinimum": {
+                                      "type": "string",
+                                      "enum": [
+                                        "hour_1",
+                                        "hour_2",
+                                        "hour_3",
+                                        "hour_4",
+                                        "hour_5"
+                                      ]
                                     },
                                     "createdAt": {
                                       "type": "string",
@@ -21215,6 +21283,20 @@
             ],
             "example": "string or id"
           },
+          "categorias_skill": {
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": "string or id"
+          },
+          "description": {
+            "type": "string"
+          },
           "locale": {
             "type": "string"
           }
@@ -21253,6 +21335,20 @@
                   }
                 ],
                 "example": "string or id"
+              },
+              "categorias_skill": {
+                "oneOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ],
+                "example": "string or id"
+              },
+              "description": {
+                "type": "string"
               },
               "locale": {
                 "type": "string"
@@ -22241,10 +22337,6 @@
                           }
                         }
                       },
-                      "scoreAverage": {
-                        "type": "number",
-                        "format": "float"
-                      },
                       "location": {
                         "type": "object",
                         "properties": {
@@ -22763,6 +22855,16 @@
                                     "description": {
                                       "type": "string"
                                     },
+                                    "hourMinimum": {
+                                      "type": "string",
+                                      "enum": [
+                                        "hour_1",
+                                        "hour_2",
+                                        "hour_3",
+                                        "hour_4",
+                                        "hour_5"
+                                      ]
+                                    },
                                     "createdAt": {
                                       "type": "string",
                                       "format": "date-time"
@@ -22876,6 +22978,26 @@
                 }
               }
             }
+          },
+          "categorias_skill": {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number"
+                  },
+                  "attributes": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              }
+            }
+          },
+          "description": {
+            "type": "string"
           },
           "createdAt": {
             "type": "string",

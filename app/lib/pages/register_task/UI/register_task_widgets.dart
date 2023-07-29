@@ -1,6 +1,11 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:place_picker/place_picker.dart';
 import 'package:provitask_app/controllers/location/location_controller.dart';
 import 'package:provitask_app/pages/register_task/UI/register_task_controller.dart';
@@ -36,9 +41,10 @@ class RegisterTaskWidget {
                   // condicional imagen if _controller.formStepOne.value == 1 muestro la imagen stepCompleted.png sino muestro la imagen checkTask.png
 
                   Image.asset(
-                    _controller.formStepOne.value == 1
+                    'assets/images/REGISTER TASK/stepCompleted.png',
+                    /*  _controller.formStepTwo.value == 1
                         ? 'assets/images/REGISTER TASK/stepCompleted.png'
-                        : 'assets/images/REGISTER TASK/checkTask.png',
+                        : 'assets/images/REGISTER TASK/checkTask.png',*/
                     height: 30,
                     width: 30,
                   ),
@@ -94,9 +100,10 @@ class RegisterTaskWidget {
                     height: 20,
                   ),
                   Image.asset(
-                    _controller.formStepTwo.value == 1
+                    'assets/images/REGISTER TASK/stepCompleted.png',
+                    /* _controller.formStepTwo.value == 1
                         ? 'assets/images/REGISTER TASK/stepCompleted.png'
-                        : 'assets/images/REGISTER TASK/checkTask.png',
+                        : 'assets/images/REGISTER TASK/checkTask.png',*/
                     height: 30,
                     width: 30,
                   ),
@@ -370,6 +377,7 @@ class RegisterTaskWidget {
 
                     _controllerLocation.getAddressFromLatLng();
                     await _controller.findProviders();
+                    _controller.formStepOne.value = 0.7;
                     /* Get.dialog(
                       madDialogGooglePLace(),
                       barrierDismissible: false,
@@ -467,10 +475,10 @@ class RegisterTaskWidget {
                 ListTile(
                   contentPadding: const EdgeInsets.all(0),
                   leading: Checkbox(
-                    value: _controller.lengthTask.value == "small",
+                    value: _controller.filters["long_task"] == "small",
                     shape: const CircleBorder(),
                     onChanged: (a) {
-                      _controller.lengthTask.value = "small";
+                      _controller.filters["long_task"].value = "small";
                     },
                     activeColor: const Color(0xFFDD7813),
                     checkColor: const Color(0xFFDD7813),
@@ -482,10 +490,10 @@ class RegisterTaskWidget {
                 ListTile(
                   contentPadding: const EdgeInsets.all(0),
                   leading: Checkbox(
-                    value: _controller.lengthTask.value == "medium",
+                    value: _controller.filters["long_task"].value == "medium",
                     shape: const CircleBorder(),
                     onChanged: (a) {
-                      _controller.lengthTask.value = "medium";
+                      _controller.filters["long_task"].value = "medium";
                     },
                     activeColor: const Color(0xFFDD7813),
                     checkColor: const Color(0xFFDD7813),
@@ -497,10 +505,10 @@ class RegisterTaskWidget {
                 ListTile(
                   contentPadding: const EdgeInsets.all(0),
                   leading: Checkbox(
-                    value: _controller.lengthTask.value == "large",
+                    value: _controller.filters["long_task"].value == "large",
                     shape: const CircleBorder(),
                     onChanged: (a) {
-                      _controller.lengthTask.value = "large";
+                      _controller.filters["long_task"].value = "large";
                     },
                     activeColor: const Color(0xFFDD7813),
                     checkColor: const Color(0xFFDD7813),
@@ -627,13 +635,16 @@ class RegisterTaskWidget {
                     children: [
                       InkWell(
                         onTap: () {
-                          _controller.carTask.value = 1;
+                          _controller.filters["transportation"].value =
+                              "motorcycle";
                         },
                         child: Row(
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: _controller.carTask.value == 1
+                                color: _controller
+                                            .filters["transportation"].value ==
+                                        "motorcycle"
                                     ? Colors.grey[400]
                                     : Colors.transparent,
                                 shape: BoxShape.circle,
@@ -664,13 +675,15 @@ class RegisterTaskWidget {
                       ),
                       InkWell(
                         onTap: () {
-                          _controller.carTask.value = 2;
+                          _controller.filters["transportation"].value = "car";
                         },
                         child: Row(
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: _controller.carTask.value == 2
+                                color: _controller
+                                            .filters["transportation"].value ==
+                                        "car"
                                     ? Colors.grey[400]
                                     : Colors.transparent,
                                 shape: BoxShape.circle,
@@ -704,13 +717,15 @@ class RegisterTaskWidget {
                     children: [
                       InkWell(
                         onTap: () {
-                          _controller.carTask.value = 3;
+                          _controller.filters["transportation"].value = "truck";
                         },
                         child: Row(
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: _controller.carTask.value == 3
+                                color: _controller
+                                            .filters["transportation"].value ==
+                                        "truck"
                                     ? Colors.grey[400]
                                     : Colors.transparent,
                                 shape: BoxShape.circle,
@@ -741,13 +756,16 @@ class RegisterTaskWidget {
                       ),
                       InkWell(
                         onTap: () {
-                          _controller.carTask.value = 4;
+                          _controller.filters["transportation"].value =
+                              "not_necessary";
                         },
                         child: Row(
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: _controller.carTask.value == 4
+                                color: _controller
+                                            .filters["transportation"].value ==
+                                        "not_necessary"
                                     ? Colors.grey[400]
                                     : Colors.transparent,
                                 shape: BoxShape.circle,
@@ -779,6 +797,376 @@ class RegisterTaskWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget franjaInformativa(String texto,
+      [int colorText = 0xFFFFFFFF,
+      int colorFondo = 0xFFD67B21,
+      double border = 10,
+      double fontSize = 14,
+      double height = 30,
+      bool bold = false,
+      String alignment = "center"]) {
+    return Container(
+      alignment: alignment == "center"
+          ? Alignment.center
+          : alignment == "left"
+              ? Alignment.centerLeft
+              : Alignment.centerRight,
+      //padding: const EdgeInsets.only(left: 20),
+      width: Get.width * 0.9,
+      height: height,
+      decoration: BoxDecoration(
+        color: Color(colorFondo),
+        borderRadius: BorderRadius.circular(border),
+      ),
+      child: Text(
+        texto,
+        textAlign: alignment == "center"
+            ? TextAlign.center
+            : alignment == "left"
+                ? TextAlign.left
+                : TextAlign.right,
+        style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            color: Color(colorText)),
+      ),
+    );
+  }
+
+  Widget franjaInformativaFlecha(
+    String texto, [
+    int colorText = 0xFF838383,
+    int colorFondo = 0xFFFFFFFF,
+    double border = 10,
+    double fontSize = 18,
+    double height = 30,
+    bool bold = false,
+    String alignment = "center",
+    double iconSize = 20,
+    int iconColor = 0xFFD67B21,
+    IconData icon = Icons.watch_later_outlined,
+    // una funcion
+
+    Function? onTap,
+  ]) {
+    return GestureDetector(
+      onTap: onTap as void Function()?,
+      child: Container(
+        width: Get.width * 0.9,
+        height: height,
+        decoration: BoxDecoration(
+          color: Color(colorFondo),
+          borderRadius: BorderRadius.circular(border),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.only(left: 20),
+              child: Text(
+                texto,
+                textAlign: alignment == "center"
+                    ? TextAlign.center
+                    : alignment == "right"
+                        ? TextAlign.right
+                        : TextAlign.left,
+                style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight:
+                        bold == true ? FontWeight.bold : FontWeight.normal,
+                    color: Color(colorText)),
+              ),
+            ),
+            IconButton(
+              icon: Icon(icon, size: iconSize, color: Color(iconColor)),
+              onPressed: null,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget selectData() {
+    return Container(
+      width: Get.width * 0.9,
+      height: Get.height * 0.25,
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      //  margin: const EdgeInsets.only(top: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDD7813),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          franjaInformativa("Select date ", 0xFFFFFFFF, 0xFF3828a8, 15, 18, 30,
+              false, "center"),
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: MaterialButton(
+                    color: _controller.filters["typeDate"].value == "today"
+                        ? const Color(0xFF3828a8)
+                        : const Color(0xFF3828a8).withOpacity(0.7),
+                    onPressed: () {
+                      _controller.filters["typeDate"].value = "today";
+
+                      // calculo la fecha de hoy
+
+                      DateTime today = DateTime.now();
+
+                      _controller.filters["day"].value =
+                          DateFormat('yyyy-MM-dd').format(today);
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text('Today',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: MaterialButton(
+                    color: _controller.filters["typeDate"].value == "within_3"
+                        ? const Color(0xFF3828a8)
+                        : const Color(0xFF3828a8).withOpacity(0.7),
+                    onPressed: () {
+                      _controller.filters["typeDate"].value = "within_3";
+                      // calculo la fecha dentro de 3 dias iniciando desde hoy
+                      DateTime nextWeek = DateTime.now().add(const Duration(
+                        days: 3,
+                      ));
+
+                      _controller.filters["day"].value =
+                          DateFormat('yyyy-MM-dd').format(nextWeek);
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text('Within 3 days',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: MaterialButton(
+                    color: _controller.filters["typeDate"].value == "next_week"
+                        ? const Color(0xFF3828a8)
+                        : const Color(0xFF3828a8).withOpacity(0.7),
+                    onPressed: () {
+                      _controller.filters["typeDate"].value = "next_week";
+                      // calculo la fecha de la proxima semana iniciando desde hoy
+                      DateTime nextWeek = DateTime.now().add(const Duration(
+                        days: 7,
+                      ));
+                      // lo guardo en el filtro en el formato YYYY-MM-DD
+                      _controller.filters["day"].value =
+                          DateFormat('yyyy-MM-dd').format(nextWeek);
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text('Within A Week',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: MaterialButton(
+                    color:
+                        _controller.filters["typeDate"].value == "choose_date"
+                            ? const Color(0xFF3828a8)
+                            : const Color(0xFF3828a8).withOpacity(0.7),
+                    onPressed: () {
+                      _controller.filters["typeDate"].value = "choose_date";
+                      Get.dialog(
+                        Container(
+                          color: Colors.white,
+                          height: Get.height * 0.5,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: CupertinoDatePicker(
+                                  backgroundColor: Colors.white,
+                                  onDateTimeChanged: (DateTime newDate) {
+                                    _controller.filters["day"].value =
+                                        DateFormat('yyyy-MM-dd')
+                                            .format(newDate);
+                                  },
+                                  use24hFormat: true,
+                                  maximumDate: DateTime.now().add(
+                                    const Duration(days: 30),
+                                  ),
+                                  minimumYear: DateTime.now().year,
+                                  maximumYear: DateTime.now().year + 1,
+                                  minimumDate: DateTime.now(),
+                                  initialDateTime: DateTime.now().add(
+                                    const Duration(seconds: 10),
+                                  ),
+                                  minuteInterval: 1,
+                                  mode: CupertinoDatePickerMode.date,
+                                ),
+                              ),
+                              MaterialButton(
+                                onPressed: () {
+                                  Get.back();
+                                },
+                                child: const Text('Select'),
+                              )
+                            ],
+                          ),
+                        ),
+                        barrierDismissible: false,
+                      );
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                        _controller.filters["typeDate"] == 'choose_date' &&
+                                _controller.filters["day"].value != ''
+                            ? _controller.filters["day"].value
+                            : ' Choose date',
+                        style: const TextStyle(color: Colors.white)),
+
+                    // si el filtro es choose_date, muestro el datepicker en un dialog
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget selectDataRangeTime() {
+    return Container(
+      width: Get.width * 0.9,
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      margin: const EdgeInsets.only(top: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDD7813),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        children: [
+          Container(
+            alignment: Alignment.centerLeft,
+            margin: const EdgeInsets.only(top: 5),
+            child: const Text(
+              'Time of the day',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w400,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          Container(
+            alignment: Alignment.centerLeft,
+            margin: const EdgeInsets.only(top: 5),
+            child: const Text(
+              'Select a time range for the task',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w400,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(top: 5),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  spreadRadius: 5,
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                ListTile(
+                  contentPadding: const EdgeInsets.all(0),
+                  leading: Checkbox(
+                    value:
+                        _controller.filters["time_of_day"].value == "morning",
+                    shape: const CircleBorder(),
+                    onChanged: (a) {
+                      _controller.filters["time_of_day"].value = "morning";
+                      _controller.filters["hour"].value = "I'm Flexible";
+                    },
+                    activeColor: const Color(0xFFDD7813),
+                    checkColor: const Color(0xFFDD7813),
+                  ),
+                  title: const Text('Morning (8am - 12pm)',
+                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                      textAlign: TextAlign.left),
+                ),
+                ListTile(
+                  contentPadding: const EdgeInsets.all(0),
+                  leading: Checkbox(
+                    value:
+                        _controller.filters["time_of_day"].value == "afternoon",
+                    shape: const CircleBorder(),
+                    onChanged: (a) {
+                      _controller.filters["time_of_day"].value = "afternoon";
+                      _controller.filters["hour"].value = "I'm Flexible";
+                    },
+                    activeColor: const Color(0xFFDD7813),
+                    checkColor: const Color(0xFFDD7813),
+                  ),
+                  title: const Text('Afternoon (12pm - 5pm)',
+                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                      textAlign: TextAlign.left),
+                ),
+                ListTile(
+                  contentPadding: const EdgeInsets.all(0),
+                  leading: Checkbox(
+                    value:
+                        _controller.filters["time_of_day"].value == "evening",
+                    shape: const CircleBorder(),
+                    onChanged: (a) {
+                      _controller.filters["time_of_day"].value = "evening";
+                      _controller.filters["hour"].value = "I'm Flexible";
+                    },
+                    activeColor: const Color(0xFFDD7813),
+                    checkColor: const Color(0xFFDD7813),
+                  ),
+                  title: const Text('Evening (5pm - 9:30pm)',
+                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                      textAlign: TextAlign.left),
+                ),
+              ],
+            ),
+          )
         ],
       ),
     );
@@ -837,6 +1225,13 @@ class RegisterTaskWidget {
             child: TextField(
               controller: _controller.descriptionTask.value,
               maxLines: 3,
+              onChanged: (value) {
+                if (value.isNotEmpty) {
+                  _controller.formStepOne.value = 1;
+                } else {
+                  _controller.formStepOne.value = 0.7;
+                }
+              },
               style: TextStyle(
                 color: Colors.grey[700],
                 fontSize: 12,
@@ -891,140 +1286,151 @@ class RegisterTaskWidget {
             ],
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  _controller.filters["date"].value = "today";
-                },
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  minimumSize: Size.zero,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                  backgroundColor: _controller.filters["date"].value != "today"
-                      ? Colors.transparent
-                      : Colors.indigo[800],
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(
-                          color: _controller.filters["date"].value != "today"
-                              ? Colors.white
-                              : Colors.transparent)),
-                ),
-                child: Text(
-                  'Today',
-                  style: TextStyle(
-                    color: _controller.dateTask.value != 1
-                        ? Colors.white
-                        : Colors.white,
-                    fontSize: 12,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: MaterialButton(
+                    color: _controller.filters["typeDate"].value == "today"
+                        ? const Color(0xFF3828a8)
+                        : const Color(0xFF3828a8).withOpacity(0.7),
+                    onPressed: () {
+                      _controller.filters["typeDate"].value = "today";
+
+                      // calculo la fecha de hoy
+
+                      DateTime today = DateTime.now();
+
+                      _controller.filters["day"].value =
+                          DateFormat('yyyy-MM-dd').format(today);
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text('Today',
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  _controller.filters["date"].value = "whitin_3_days";
-                },
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  minimumSize: Size.zero,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                  backgroundColor:
-                      _controller.filters["date"].value != "whitin_3_days"
-                          ? Colors.transparent
-                          : Colors.indigo[800],
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(
-                          color: _controller.filters["date"].value !=
-                                  "whitin_3_days"
-                              ? Colors.white
-                              : Colors.transparent)),
-                ),
-                child: Text(
-                  'Within 3 days',
-                  style: TextStyle(
-                    color: _controller.filters["date"].value != "whitin_3_days"
-                        ? Colors.white
-                        : Colors.white,
-                    fontSize: 12,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: MaterialButton(
+                    color: _controller.filters["typeDate"].value == "within_3"
+                        ? const Color(0xFF3828a8)
+                        : const Color(0xFF3828a8).withOpacity(0.7),
+                    onPressed: () {
+                      _controller.filters["typeDate"].value = "within_3";
+                      // calculo la fecha dentro de 3 dias iniciando desde hoy
+                      DateTime nextWeek = DateTime.now().add(const Duration(
+                        days: 3,
+                      ));
+
+                      _controller.filters["day"].value =
+                          DateFormat('yyyy-MM-dd').format(nextWeek);
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text('Within 3 days',
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(
-            height: 2,
-          ),
-          Container(
-            alignment: Alignment.centerLeft,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    _controller.filters["date"].value = "whitin_week";
-                  },
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    minimumSize: Size.zero,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                    backgroundColor:
-                        _controller.filters["date"].value != "whitin_week"
-                            ? Colors.transparent
-                            : Colors.indigo[800],
+          Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: MaterialButton(
+                    color: _controller.filters["typeDate"].value == "next_week"
+                        ? const Color(0xFF3828a8)
+                        : const Color(0xFF3828a8).withOpacity(0.7),
+                    onPressed: () {
+                      _controller.filters["typeDate"].value = "next_week";
+                      // calculo la fecha de la proxima semana iniciando desde hoy
+                      DateTime nextWeek = DateTime.now().add(const Duration(
+                        days: 7,
+                      ));
+                      // lo guardo en el filtro en el formato YYYY-MM-DD
+                      _controller.filters["day"].value =
+                          DateFormat('yyyy-MM-dd').format(nextWeek);
+                    },
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(
-                            color: _controller.filters["date"].value !=
-                                    "whitin_week"
-                                ? Colors.white
-                                : Colors.transparent)),
-                  ),
-                  child: Text(
-                    'Within a week',
-                    style: TextStyle(
-                      color: _controller.dateTask.value != 3
-                          ? Colors.white
-                          : Colors.white,
-                      fontSize: 12,
+                      borderRadius: BorderRadius.circular(20),
                     ),
+                    child: const Text('Within A Week',
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: null,
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    minimumSize: Size.zero,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                    backgroundColor:
-                        _controller.filters["date"].value != "choose_date"
-                            ? Colors.transparent
-                            : Colors.indigo[800],
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: MaterialButton(
+                    color:
+                        _controller.filters["typeDate"].value == "choose_date"
+                            ? const Color(0xFF3828a8)
+                            : const Color(0xFF3828a8).withOpacity(0.7),
+                    onPressed: () {
+                      _controller.filters["typeDate"].value = "choose_date";
+                      Get.dialog(
+                        Container(
+                          color: Colors.white,
+                          height: Get.height * 0.5,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: CupertinoDatePicker(
+                                  backgroundColor: Colors.white,
+                                  onDateTimeChanged: (DateTime newDate) {
+                                    _controller.filters["day"].value =
+                                        DateFormat('yyyy-MM-dd')
+                                            .format(newDate);
+                                  },
+                                  use24hFormat: true,
+                                  maximumDate: DateTime.now().add(
+                                    const Duration(days: 30),
+                                  ),
+                                  minimumYear: DateTime.now().year,
+                                  maximumYear: DateTime.now().year + 1,
+                                  minimumDate: DateTime.now(),
+                                  initialDateTime: DateTime.now().add(
+                                    const Duration(seconds: 10),
+                                  ),
+                                  minuteInterval: 1,
+                                  mode: CupertinoDatePickerMode.date,
+                                ),
+                              ),
+                              MaterialButton(
+                                onPressed: () {
+                                  Get.back();
+                                },
+                                child: const Text('Select'),
+                              )
+                            ],
+                          ),
+                        ),
+                        barrierDismissible: false,
+                      );
+                    },
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(
-                            color: _controller.filters["date"].value !=
-                                    "choose_date"
-                                ? Colors.white
-                                : Colors.transparent)),
-                  ),
-                  child: Text(
-                    'Choose Date',
-                    style: TextStyle(
-                      color: _controller.filters["date"].value != "choose_date"
-                          ? Colors.white
-                          : Colors.white,
-                      fontSize: 12,
+                      borderRadius: BorderRadius.circular(20),
                     ),
+                    child: Text(
+                        _controller.filters["typeDate"] == 'choose_date' &&
+                                _controller.filters["day"].value != ''
+                            ? _controller.filters["day"].value
+                            : ' Choose date',
+                        style: const TextStyle(color: Colors.white)),
+
+                    // si el filtro es choose_date, muestro el datepicker en un dialog
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -1192,9 +1598,11 @@ class RegisterTaskWidget {
               Row(
                 children: [
                   Checkbox(
-                    value: _controller.filters["time"].value == "morning",
+                    value:
+                        _controller.filters["time_of_day"].value == "morning",
                     onChanged: (c) {
-                      _controller.filters["time"].value = "morning";
+                      _controller.filters["time_of_day"].value = "morning";
+                      _controller.filters["hour"].value = "I'm Flexible";
                     },
                     activeColor: Colors.indigo[800],
                     checkColor: Colors.indigo[800],
@@ -1209,9 +1617,11 @@ class RegisterTaskWidget {
               Row(
                 children: [
                   Checkbox(
-                    value: _controller.filters["time"].value == "afternoon",
+                    value:
+                        _controller.filters["time_of_day"].value == "afternoon",
                     onChanged: (c) {
-                      _controller.filters["time"].value = "afternoon";
+                      _controller.filters["time_of_day"].value = "afternoon";
+                      _controller.filters["hour"].value = "I'm Flexible";
                     },
                     activeColor: Colors.indigo[800],
                     checkColor: Colors.indigo[800],
@@ -1226,9 +1636,11 @@ class RegisterTaskWidget {
               Row(
                 children: [
                   Checkbox(
-                    value: _controller.filters["time"].value == "evening",
+                    value:
+                        _controller.filters["time_of_day"].value == "evening",
                     onChanged: (c) {
-                      _controller.filters["time"].value = "evening";
+                      _controller.filters["time_of_day"].value = "evening";
+                      _controller.filters["hour"].value = "I'm Flexible";
                     },
                     activeColor: Colors.indigo[800],
                     checkColor: Colors.indigo[800],
@@ -1376,14 +1788,109 @@ class RegisterTaskWidget {
               ),
               Container(
                 alignment: Alignment.centerLeft,
+                margin: const EdgeInsets.symmetric(horizontal: 26, vertical: 5),
+                width: Get.width * 0.8,
+                child: franjaInformativa("Or select a specific time",
+                    0xFFFFFFFF, 0xFF3828a8, 15, 18, 30, false, "center"),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Row(
+                children: [
+                  Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 26, vertical: 5),
+                      width: Get.width * 0.6,
+                      child: Align(
+                        alignment: Alignment
+                            .centerLeft, // Alineación a la izquierda del DropdownButtonFormField
+                        child: DropdownButtonFormField(
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(50),
+                              ),
+                              borderSide: BorderSide(
+                                color: Color.fromARGB(255, 255, 255, 255),
+                                width: 2.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Color.fromARGB(255, 255, 255, 255),
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(50),
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: Color.fromARGB(255, 255, 255, 255),
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 15,
+                            ),
+                          ),
+                          dropdownColor:
+                              const Color.fromARGB(255, 255, 255, 255),
+                          value: _controller.filters['hour'].value,
+                          items: _controller.arrayHours
+                              .map(
+                                (hour) => DropdownMenuItem(
+                                  value: hour,
+                                  child: Text(
+                                    hour,
+                                    style: const TextStyle(
+                                      color: Color(0xFF3828a8),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            _controller.filters['hour'].value =
+                                value.toString();
+
+                            _controller.filters["time_of_day"].value = "";
+
+                            _controller.formStepThree.value = 0.5;
+                          },
+                        ),
+                      )
+                      // Agrega un Container vacío si _controller.disponibility está vacío
+                      ),
+                ],
+              ),
+              Container(
+                alignment: Alignment.centerLeft,
                 margin: const EdgeInsets.only(left: 26, top: 10),
-                child: const Text(
-                  'Price',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Price',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (_controller.filters["type_price"].value !=
+                        "not_price") ...[
+                      IconButton(
+                        onPressed: () {
+                          _controller.filters["type_price"].value = "not_price";
+                        },
+                        icon: const Icon(
+                          Icons.clear,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ]
+                  ],
                 ),
               ),
               Container(
@@ -1395,10 +1902,11 @@ class RegisterTaskWidget {
                     Row(
                       children: [
                         Checkbox(
-                          value:
-                              _controller.filters["price"].value == "per_hour",
+                          value: _controller.filters["type_price"].value ==
+                              "per_hour",
                           onChanged: (c) {
-                            _controller.filters["price"].value = "per_hour";
+                            _controller.filters["type_price"].value =
+                                "per_hour";
                           },
                           activeColor: Colors.indigo[800],
                           checkColor: Colors.indigo[800],
@@ -1413,10 +1921,10 @@ class RegisterTaskWidget {
                     Row(
                       children: [
                         Checkbox(
-                          value: _controller.filters["price"].value ==
+                          value: _controller.filters["type_price"].value ==
                               "by_project_flat_rate",
                           onChanged: (c) {
-                            _controller.filters["price"].value =
+                            _controller.filters["type_price"].value =
                                 "by_project_flat_rate";
                           },
                           activeColor: Colors.indigo[800],
@@ -1432,10 +1940,11 @@ class RegisterTaskWidget {
                     Row(
                       children: [
                         Checkbox(
-                          value: _controller.filters["price"].value ==
+                          value: _controller.filters["type_price"].value ==
                               "free_trading",
                           onChanged: (c) {
-                            _controller.filters["price"].value = "free_trading";
+                            _controller.filters["type_price"].value =
+                                "free_trading";
                           },
                           activeColor: Colors.indigo[800],
                           checkColor: Colors.indigo[800],
@@ -1460,14 +1969,34 @@ class RegisterTaskWidget {
               Container(
                 alignment: Alignment.centerLeft,
                 margin: const EdgeInsets.only(left: 26, top: 10),
-                child: const Text(
-                  'Provider Type',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Provider Type',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (_controller.filters["provider_type"].value !=
+                        "not_provider") ...[
+                      IconButton(
+                        onPressed: () {
+                          _controller.filters["provider_type"].value =
+                              "not_provider";
+                        },
+                        icon: const Icon(
+                          Icons.clear,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ]
+                  ],
                 ),
+
+                // si el filtro esta activo, muestro el icono para limpiar el filtro
               ),
               Container(
                 width: Get.width * 0.9,
@@ -1921,6 +2450,147 @@ class RegisterTaskWidget {
             ),
           ],
         ));
+  }
+
+  Widget registerTaskImageZone() {
+    return Obx(
+      () => Container(
+        // height: Get.height * 0.2,
+        width: Get.width * 0.9,
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              width: double.infinity, // Hace que el botón ocupe todo el ancho
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.add_a_photo), // Añade un icono al botón
+                label: Text(
+                  'Añadir una foto',
+                  style: TextStyle(
+                    color: Colors.indigo[800],
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                onPressed: () {
+                  showDialog(
+                    context: Get.context!,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Selecciona una opción'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.camera_alt),
+                            title: const Text('Cámara'),
+                            onTap: () async {
+                              Navigator.pop(context);
+                              final picker = ImagePicker();
+                              final pickedFile = await picker.pickImage(
+                                source: ImageSource.camera,
+                                maxWidth: 800,
+                                maxHeight: 800,
+                                imageQuality: 80,
+                              );
+                              if (pickedFile == null) return;
+                              _controller.images.clear();
+                              int length = await pickedFile.length();
+                              if (length <= 10000000 &&
+                                  _controller.images.length < 3) {
+                                _controller.images.add(File(pickedFile.path));
+                              }
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.photo),
+                            title: const Text('Galería'),
+                            onTap: () async {
+                              Navigator.pop(context);
+                              final picker = ImagePicker();
+                              final List<XFile> pickedFile =
+                                  await picker.pickMultiImage(
+                                maxWidth: 800,
+                                maxHeight: 800,
+                                imageQuality: 80,
+                              );
+
+                              if (pickedFile.isEmpty) return;
+
+                              //vacio el array de imagenes
+
+                              _controller.images.clear();
+                              for (var img in pickedFile) {
+                                int length = await img.length();
+                                print("añadiendo");
+                                if (length <= 5000000 &&
+                                    _controller.images.length < 3) {
+                                  _controller.images.add(File(img.path));
+                                }
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.white),
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(90),
+                  )),
+                ),
+              ),
+            ),
+            const Text(
+              'Máximo 5MB por imagen, máximo 3 imágenes',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+              ),
+            ),
+            if (_controller.images.isNotEmpty) ...[
+              Container(
+                margin: const EdgeInsets.only(top: 30),
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  itemCount: _controller.images.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    var img = _controller.images[index];
+                    return Stack(
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: FileImage(img!),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _controller.images.remove(img),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              )
+            ]
+          ],
+        ),
+      ),
+    );
   }
 
   // widget de calentario usando table calendar y getx

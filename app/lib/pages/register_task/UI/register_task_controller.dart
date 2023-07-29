@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart' hide DatePickerTheme;
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
@@ -14,7 +16,14 @@ class RegisterTaskController extends GetxController {
   void onInit() async {
     super.onInit();
     await getSkills();
-    Logger().d(listSkills);
+
+    final datetime = DateTime.now().add(const Duration(days: 7));
+
+    // añado en filters["day"].value solo el dia y no la hora
+
+    filters["day"].value = datetime.toString().substring(0, 10);
+
+    Logger().d(filters["day"]);
   }
 
   final currentState = GlobalKey<FormState>();
@@ -31,22 +40,32 @@ class RegisterTaskController extends GetxController {
   final formStepThree = RxDouble(1);
   final formStepFour = RxDouble(1);
 
+  RxList<File?> images = RxList<File?>([]);
+
   final isLoading = false.obs;
 
   final selectedSkill = "1".obs;
-  final listProviders = RxList([]);
+  List<Provider> listProviders = RxList<Provider>();
   final lengthTask = RxString('');
 
+  // calculo el día actual en la seman que viene
+
   RxMap<String, dynamic> filters = {
-    "date": "".obs,
-    "time": "".obs,
-    "price": "".obs,
-    "provider_type": "".obs,
+    "time_of_day": "morning".obs,
+    "type_price": "".obs,
+    "provider_type": "not_provider".obs,
     "sortBy": "Distance".obs,
-    "hour": "".obs,
+    "hour": "I'm Flexible".obs,
     "day": "".obs,
+    "long_task": "small".obs,
     "skill": "1".obs,
+    "transportation": "not_necessary".obs,
+    "typeDate": "next_week".obs,
+    "limit": 10.obs,
+    "start": 0.obs
   }.obs;
+
+  // asigno nextWeek  a filters["day"]
 
   final idProvider = RxInt(0);
 
@@ -208,54 +227,87 @@ class RegisterTaskController extends GetxController {
   }
 
   String dateResume() {
-    // me baso en el valor de selectedDay y selectedHour para construir el string que se muestra en el resumen de la fecha, el formato es Mar 12, 2021 - 3:00 pm
+    final datetime = DateTime.parse(filters["day"].value);
 
-    String date = DateFormat('MMM dd,').format(selectedDay.value);
+    // le añado la hora seleccionada
 
-    String hour = selectedHour.value;
+    String date = DateFormat('MMM dd,').format(datetime);
+
+    String hour = filters["hour"].value;
 
     return '$date - $hour';
   }
 
   void continueForm1() async {
-    // determino la pagina actual del formulario
-
     if (Get.currentRoute != '/register_task') {
       return;
     }
 
-    if (formStepOne.value == 0.25) {
-      if (_locationController.selectedLocation != null &&
-          lengthTask.value.isNotEmpty &&
-          lengthTask.value != 'null') {
-        formStepOne.value = 0.5;
-      } else {
-        Get.snackbar(
-          'Error!',
-          'Please select a location and a length task',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
-    } else if (formStepOne.value == 0.5) {
-      if (carTask.value != 0 &&
-          descriptionTask.value.text.isNotEmpty &&
-          descriptionTask.value.text != 'null' &&
-          _locationController.selectedLocation != null &&
-          lengthTask.value.isNotEmpty &&
-          lengthTask.value != 'null') {
-        Get.toNamed('/register_task/step2');
-      } else {
-        Get.snackbar(
-          'Error!',
-          'Please select a car and a description task',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
+    //Get.toNamed('/register_task/step2');
+
+    if (_locationController.selectedLocation == null) {
+      Get.snackbar(
+        'Error!',
+        'Please select a location',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.only(bottom: 20),
+        maxWidth: Get.width * 0.9,
+      );
+
+      return;
+    } else if (filters["long_task"].value == "") {
+      Get.snackbar(
+        'Error!',
+        'Please select a task length',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        maxWidth: Get.width * 0.9,
+        margin: const EdgeInsets.only(bottom: 20),
+      );
+
+      return;
+    } else if (filters["time_of_day"].value == "") {
+      Get.snackbar(
+        'Error!',
+        'Please select a time of day',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        maxWidth: Get.width * 0.9,
+        margin: const EdgeInsets.only(bottom: 20),
+      );
+
+      return;
+    } else if (filters["transportation"].value == "") {
+      Get.snackbar(
+        'Error!',
+        'Please select a transportation',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        maxWidth: Get.width * 0.9,
+        margin: const EdgeInsets.only(bottom: 20),
+      );
+
+      return;
+    } else if (descriptionTask.value.text == "") {
+      Get.snackbar(
+        'Error!',
+        'Please enter a description',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        maxWidth: Get.width * 0.9,
+        margin: const EdgeInsets.only(bottom: 20),
+      );
+
+      return;
     }
+
+    Get.toNamed('/register_task/step2');
   }
 
   void prepareSkills(skills) {
@@ -304,7 +356,7 @@ class RegisterTaskController extends GetxController {
         filters);
 
     // si el status es 500 muestro un mensaje de error
-
+    listProviders.clear();
     if (response["status"] != 200) {
       // paso a json el body del erro
 
@@ -316,18 +368,42 @@ class RegisterTaskController extends GetxController {
         "Error get providers",
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.only(bottom: 20),
       );
 
       // lleno el listado de categorias con el resultado de la consulta
 
-      listProviders.value = [];
       //  isLoading.value = false;
-      Logger().e(listProviders);
 
       return;
     }
 
-    listProviders.value = response["data"]["data"];
+    final List<dynamic> data =
+        response['data']['data']; // Obtener la lista de proveedores
+
+    for (var json in data) {
+      listProviders.add(Provider(
+        id: json['id'],
+        isProvider: json['isProvider'],
+        name: json['name'],
+        lastname: json['lastname'],
+        averageScore: json['averageScore'].toDouble(),
+        averageCount: json['averageCount'],
+        typeProvider: json['type_provider'],
+        description: json['description'],
+        motorcycle: json['motorcycle'],
+        car: json['car'],
+        truck: json['truck'],
+        openDisponibility: json['open_disponibility'],
+        closeDisponibility: json['close_disponibility'],
+        avatarImage: json['avatar_image'],
+        skillSelect: json['skill_select'],
+        allSkills: ProviderSkill.fromJson(json['online']),
+        distanceLineal: json['distanceLineal'].toDouble(),
+        online: OnlineStatus.fromJson(json['online']),
+      ));
+    }
 
     // isLoading.value = false;
     // lleno el listado de categorias con el resultado de la consulta
@@ -344,7 +420,6 @@ class RegisterTaskController extends GetxController {
     // si el status es 500 muestro un mensaje de error
 
     if (response["status"] != 200) {
-      Logger().e(response);
       isLoading.value = false;
 
       Get.snackbar(
@@ -364,49 +439,10 @@ class RegisterTaskController extends GetxController {
 
     infoProvider.value = response["data"]["proveedor"];
 
-    disponibility.value = response["data"]["proveedor"]["horasDisponibles"];
-
-    var total = response["data"]["proveedor"]["cost_per_houers"];
-
-    //convierto total a double
-
-    total = double.parse(total);
-
-    totalMount.value = total;
-
-    // en base a lengthTask.value y totalMount calculo el monto total
-
-    if (lengthTask.value == 'small') {
-      totalMount.value = totalMount.value * 1;
-    } else if (lengthTask.value == 'medium') {
-      totalMount.value = totalMount.value * 2;
-    } else if (lengthTask.value == 'large') {
-      totalMount.value = totalMount.value * 3;
-    }
-
-    totalMount.value = totalMount.value + 12.45;
-
-    // saco las horas de disponibilidad del proveedor
-
-    final tareas = response["data"]["tareas"];
-
-    if (tareas.length > 0) {
-      for (var data in tareas) {
-        final dateTime = DateTime.parse(data['datetime']);
-        final id = data['id'];
-        final status = data['status'];
-        final time = TimeOfDay.fromDateTime(DateTime.parse(data['datetime']));
-        final event =
-            Event(dateTime: dateTime, id: id, status: status, time: time);
-        events.add(event);
-      }
-    }
-
     isLoading.value = false;
-    // lleno el listado de categorias con el resultado de la consulta
   }
 
-  getPerfilProvider(int id, [bool sendLocation = false]) async {
+  getPerfilProvider(int id, [bool sendLocation = false, int? skill]) async {
     if (id == 0) {
       return;
     }
@@ -415,26 +451,20 @@ class RegisterTaskController extends GetxController {
       response = await _task.getProvider(
           id,
           _locationController.selectedLocation?.latitude,
-          _locationController.selectedLocation?.longitude);
+          _locationController.selectedLocation?.longitude,
+          skill);
     } else {
-      response = await _task.getProvider(id);
+      response = await _task.getProvider(id, false, false, skill);
     }
 
     // si el status es 500 muestro un mensaje de error
 
     if (response["status"] != 200) {
-      Get.snackbar(
-        "Error",
-        response["error"]["message"],
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-
       // lleno el listado de categorias con el resultado de la consulta
 
       perfilProvider.value = {};
 
-      return;
+      return false;
     }
 
     perfilProvider.value = response["data"]["proveedor"];
@@ -445,11 +475,14 @@ class RegisterTaskController extends GetxController {
   }
 
   void clearFilters() {
-    filters["date"].value = "";
-    filters["time"].value = "";
-    filters["price"].value = "";
-    filters["provider_type"].value = "";
+    filters["time_of_day"].value = "morning";
+    filters["type_price"].value = "";
+    filters["provider_type"].value = "not_provider";
     filters["sortBy"].value = "Distance";
+    filters["hour"].value = "I'm Flexible";
+    filters["day"].value = "";
+    filters["long_task"].value = "small";
+    filters["typeDate"].value = "next_week";
   }
 
   void verifySelectedDate(day) {
@@ -532,7 +565,7 @@ class RegisterTaskController extends GetxController {
 
       final description = descriptionTask.value.text;
 
-      final category = selectedSkill.value;
+      final category = filters['skill'].value;
 
       // verifico que los campos no esten vacios
 
@@ -682,4 +715,91 @@ class Event {
   String get getStatus => status;
 
   TimeOfDay get getTime => time;
+}
+
+class Provider {
+  int id;
+  bool isProvider;
+  String name;
+  String? lastname;
+  double? averageScore;
+  int? averageCount;
+  String? typeProvider;
+  String? description;
+  bool? motorcycle;
+  bool? car;
+  bool? truck;
+  String openDisponibility;
+  String closeDisponibility;
+  String? avatarImage;
+  Map? skillSelect;
+  double distanceLineal;
+  ProviderSkill? allSkills;
+  OnlineStatus? online;
+  Provider({
+    required this.id,
+    required this.isProvider,
+    required this.name,
+    this.lastname,
+    this.averageScore,
+    this.averageCount,
+    this.typeProvider,
+    this.description,
+    this.motorcycle,
+    this.car,
+    this.truck,
+    required this.openDisponibility,
+    required this.closeDisponibility,
+    this.avatarImage,
+    this.skillSelect,
+    required this.distanceLineal,
+    this.allSkills,
+    this.online,
+  });
+}
+
+class ProviderSkill {
+  String? typePrice;
+  double? cost;
+  List<String>? media;
+  String categoriasSkill;
+  int categoriasSkillId;
+  String? description;
+  ProviderSkill({
+    this.typePrice,
+    this.cost,
+    this.media,
+    required this.categoriasSkill,
+    required this.categoriasSkillId,
+    this.description,
+  });
+  factory ProviderSkill.fromJson(Map<String, dynamic> json) {
+    return ProviderSkill(
+      typePrice: json['type_price'],
+      // ignore: prefer_null_aware_operators
+      cost: json['cost'] != null ? json['cost'].toDouble() : null,
+      media: json['media'] != null ? List<String>.from(json['media']) : [],
+      categoriasSkill: json['categorias_skill'] ?? "",
+      categoriasSkillId: json['categorias_skill_id'] ?? 0,
+      description: json['description'] ?? "",
+    );
+  }
+}
+
+class OnlineStatus {
+  String? socketId;
+  String? lastConnection;
+  String? status;
+  OnlineStatus({
+    this.socketId,
+    this.lastConnection,
+    this.status,
+  });
+  factory OnlineStatus.fromJson(Map<String, dynamic> json) {
+    return OnlineStatus(
+      socketId: json['socket_id'],
+      lastConnection: json['lastConnection'],
+      status: json['status'],
+    );
+  }
 }

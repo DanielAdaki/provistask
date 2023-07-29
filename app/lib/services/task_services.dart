@@ -99,26 +99,11 @@ class TaskServices extends GetxController {
     Map respuesta;
 
     try {
-      // saco los filtros date, time, price, provider_type
-
-      final date = filters["date"];
-      final time = filters["time"];
-      final price = filters["price"];
-      final providerType = filters["provider_type"];
-      final sortBy = filters["sortBy"];
-      final hour = filters["hour"];
-
-      final skill = filters["skill"];
-
-      final day = filters["day"];
-
-      // hago la peticion
-
-      print(
-          "/users-permissions/proveedores/?lat=$lat&lng=$lng&distance=$distance&date=$date&time=$time&price=$price&provider_type=$providerType&sortBy=$sortBy&hour=$hour&day=$day&skill=$skill");
+      Logger().d(
+          "/users-permissions/proveedores/?lat=$lat&lng=$lng&distance=$distance&time_of_day=${filters["time_of_day"]}&long_task=${filters["long_task"]}&type_price=${filters["type_price"]}&provider_type=${filters["provider_type"]}&sortBy=${filters["sortBy"]}&hour=${filters["hour"]}&day=${filters["day"]}&skill=${filters["skill"]}&transportation=${filters["transportation"]}&start=${filters["start"]}&limit=${filters["limit"]}");
 
       final response = await dio.get(
-          "/users-permissions/proveedores/?lat=$lat&lng=$lng&distance=$distance&date=$date&time=$time&price=$price&provider_type=$providerType&sortBy=$sortBy&hour=$hour&day=$day&skill=$skill");
+          "/users-permissions/proveedores?lat=$lat&lng=$lng&distance=$distance&time_of_day=${filters["time_of_day"]}&long_task=${filters["long_task"]}&type_price=${filters["type_price"]}&provider_type=${filters["provider_type"]}&sortBy=${filters["sortBy"]}&hour=${filters["hour"]}&day=${filters["day"]}&skill=${filters["skill"]}&transportation=${filters["transportation"]}&start=${filters["start"]}&limit=${filters["limit"]}");
 
       // reviso el status de la respuesta si es distinto a 200 lanzo error
 
@@ -138,15 +123,16 @@ class TaskServices extends GetxController {
     return respuesta;
   }
 
-  Future<Map> getProvider(int id, [lat = false, lng = false]) async {
+  Future<Map> getProvider(int id,
+      [lat = false, lng = false, int? idSkill]) async {
     Map respuesta;
 
     try {
       //
       // hago la peticion
 
-      final response =
-          await dio.get("/users-permissions/proveedores/$id?lat=$lat&lng=$lng");
+      final response = await dio.get(
+          "/users-permissions/proveedores/$id?lat=$lat&lng=$lng&idSkill=$idSkill");
 
       // reviso el status de la respuesta si es distinto a 200 lanzo error
 

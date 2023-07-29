@@ -39,7 +39,7 @@ class HomePageProvider extends GetView<HomeProviderController> {
                       height: 30,
                     ),
                     _widgets.titleGenerate(
-                        'Hello ' + controller.user!['name'] + ".",
+                        "${'Hello ' + controller.user!['name']}.",
                         "center",
                         170591,
                         false),

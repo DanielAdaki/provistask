@@ -348,7 +348,7 @@ module.exports = (plugin) => {
 
 		try {
 
-
+			console.log('entro a buscar proveedores');
 			let { lat, lng, transportation, distance, start, limit, type_price, time_of_day, provider_type, sortBy, hour, day, skill, long_task } = ctx.query;
 
 			if (!lat || !lng || !skill || !long_task || !day) {
@@ -470,7 +470,7 @@ module.exports = (plugin) => {
 			let close_disponibility = "23:59:59";
 			let datetime = null;
 
-			if(hour == 'flexible'){
+			if(hour == "I'm Flexible" || hour == "flexible"){
 
 				hour = null;
 
@@ -538,12 +538,6 @@ module.exports = (plugin) => {
 
 			skill = parseInt(skill);
 
-
-
-
-
-
-console.log('skill', datetime);
 			proID = await strapi.db.connection.raw(`
 			SELECT up_users.id
 			FROM up_users
@@ -619,7 +613,7 @@ LIMIT ?;
 
 
 
-			console.log('proID', proID);
+
 
 
 			proID = proID[0].map(pro => pro.id);
@@ -672,13 +666,6 @@ LIMIT ?;
 					// Agregar distancia al objeto proveedor
 					proveedor.distanceLineal = distance;
 
-				/*	proveedor.skills =await strapi.db.query('api::provider-skill.provider-skill').findMany({
-
-						where: { provider: proveedor.id },
-
-						populate: { categorias_skill: true }
-
-					});*/
 
 					// Calcular distancia usando Google Maps
 					//		const distanceGoogle = await calcularDistancia(lat, lng, proveedor.lat, proveedor.lng);
@@ -686,7 +673,6 @@ LIMIT ?;
 					// Agregar distancia Google Maps al objeto proveedor
 					//	proveedor.distanceGoogle = distanceGoogle;
 
-					//elimino datos no necesarios como lo son createdAt ,	updateAt , provider ,password ,"resetPasswordToken ,confirmationToken , 
 
 					proveedor.online = await strapi.db.query('api::online-user.online-user').findOne({
 						
@@ -694,6 +680,54 @@ LIMIT ?;
 						select: ['socket_id', 'lastConnection','status']
 
 				});
+
+				let average = await strapi.db.query('api::valoration.valoration').findMany({
+
+					where: { provider: proveedor.id }
+				});
+
+				proveedor["averageScore"] = average.length > 0 ? average.reduce((a, b) => a + b.valoration, 0) / average.length : 0;
+				proveedor["averageCount"] = average.length; 
+				let 	taskCompleted = await strapi.db.query('api::task-assigned.task-assigned').count({
+					where: {
+						provider: proveedor.id,
+						status: 'completed'
+					},
+				});
+
+
+
+					let avgAux={
+						"averageScore": 0,
+						"averageCount": 0			
+					}
+					let averageSkill = await strapi.db.query('api::valoration.valoration').findWithCount({
+			
+						where: { provider: proveedor.id, categorias_skill: skill  },
+
+
+			
+					});
+			
+					let 	taskCompletedSkill = await strapi.db.query('api::task-assigned.task-assigned').count({
+						where: {
+							provider: proveedor.id,
+							status: 'completed',
+							skill: skill
+						},
+					});
+			
+			
+			
+					
+			
+					avgAux.averageScore = averageSkill[1] > 0 ? averageSkill[0].reduce((a, b) => a + b.valoration, 0) / averageSkill[1] : 0;
+			
+					avgAux.averageCount = averageSkill[1];
+			
+
+			
+					proveedor["taskCompleted"] = taskCompleted;
 
 				if(proveedor.online){
 
@@ -729,20 +763,22 @@ LIMIT ?;
 					delete proveedor.stripe_customer_id;
 					delete proveedor.stripe_connect_id;
 					delete proveedor.is_stripe_connect;
+					delete proveedor.lat	;
+					delete proveedor.lng;
 
 					proveedor.avatar_image = proveedor.avatar_image ?  URL + proveedor.avatar_image.url : null;
 
-					proveedor.provider_skills = proveedor.provider_skills.map(skill => {
+					proveedor.provider_skills = proveedor.provider_skills.map(skillP => {
 
-						// retorno  "type_price" , cost , si media exisate retorno "media.url" , "categorias_skill.name" , "categorias_skill.id"
+						// si la skillP recorrida comparte id con skill de la consulta , lo agrego al campo proveedor.skill_select
 
-						// si skill.media  existe la recorro para obtener solo un array de imagenes
+
 
 						let media = [];
 
-						if (skill.media) {
+						if (skillP.media) {
 
-							media = skill.media.map(media => {
+							media = skillP.media.map(media => {
 
 								return URL + media.url;
 
@@ -750,14 +786,39 @@ LIMIT ?;
 
 						}
 
+						if (skillP.categorias_skill.id == skill) {
+
+
+						let 	average	= strapi.db.query('api::valoration.valoration').findMany({
+
+								where: { provider: proveedor.id, categorias_skill: skillP.categorias_skill.id }
+
+							});
+
+							proveedor.skill_select = {
+								taskCompleted : taskCompletedSkill,
+								scoreAverage: avgAux.averageScore,
+								count: avgAux.averageCount,
+								type_price: skillP.type_price,
+								cost: skillP.cost,
+								media: skillP.media ? media : null ,
+								categorias_skill: skillP.categorias_skill ? skillP.categorias_skill.name : null,
+								categorias_skill_id: skillP.categorias_skill ? skillP.categorias_skill.id : null,
+								description: skillP.description	? skillP.description : null,
+								hourMinimum: skillP.hourMinimum ? skillP.hourMinimum : "hour_1"
+							};
+
+						}
+
 						return {
 
-							type_price: skill.type_price,
-							cost: skill.cost,
-							media: skill.media ? media : null ,
-							categorias_skill: skill.categorias_skill ? skill.categorias_skill.name : null,
-							categorias_skill_id: skill.categorias_skill ? skill.categorias_skill.id : null,
-							description: skill.description	? skill.description : null,
+							type_price: skillP.type_price,
+							cost: skillP.cost,
+							media: skillP.media ? media : null ,
+							categorias_skill: skillP.categorias_skill ? skillP.categorias_skill.name : null,
+							categorias_skill_id: skillP.categorias_skill ? skillP.categorias_skill.id : null,
+							description: skillP.description	? skillP.description : null,
+							hourMinimum: skillP.hourMinimum ? skillP.hourMinimum : "hour_1"
 						}
 
 					});
@@ -779,12 +840,12 @@ LIMIT ?;
 
 			} else if (sortBy == 'rating') {
 
-				proveedores.sort((a, b) => b.scoreAverage - a.scoreAverage);
+				proveedores.sort((a, b) => b.averageScore - a.averageScore);
 
 			} else if (sortBy == 'price') {
 
 
-				proveedores.sort((a, b) => a.cost_per_houers - b.cost_per_houers);
+				proveedores.sort((a, b) => a.skill_select.cost - b.skill_select.cost);
 
 			}
 
@@ -851,12 +912,10 @@ LIMIT ?;
 
 			const { id } = ctx.params;
 
-			// verifico si viene lat y lng en el query , si no vienen los seteo en null
+
+			let { lat, lng, idSkill } = ctx.query; 
 
 
-			let { lat, lng } = ctx.query;
-
-			// imprimo el tipo de dato de lat y lng para ver si son string o number
 
 
 
@@ -867,48 +926,17 @@ LIMIT ?;
 
 			}
 
+			
+
 			// saco el id del usuario logueado
 
 			if (!id) return ctx.badRequest('No se envio el id del proveedor');
 
-			const user = ctx.state.user;
-
 
 			const proveedor = await strapi.entityService.findOne('plugin::users-permissions.user', id, {
-				populate: { location: true, avatar_image: true }
+				populate: ["avatar_image" , "provider_skills", "provider_skills.categorias_skill,provider_skills.media"]
 			});
 
-
-			const skills = await strapi.entityService.findMany('api::skill.skill', {
-
-				filters: {
-
-					user: id,
-
-				},
-
-				fields: ['name']
-
-
-			});
-
-			proveedor.skills = skills.map(skill => skill.name);
-
-
-			//elimino datos no necesarios como lo son createdAt ,	updateAt , provider ,password ,"resetPasswordToken ,confirmationToken ,
-
-
-
-
-			/*const calificaciones = await strapi.entityService.findMany('calificacion', {
-				filters: {
-					provider: id,
-				},
-				populate: { user: true }
-			});*/
-
-
-			//busco todas las tareas que tenga el proveedor y no estén terminadas 
 
 
 			const tareas = await strapi.entityService.findMany('api::task-assigned.task-assigned', {
@@ -916,9 +944,9 @@ LIMIT ?;
 				filters: {
 
 					provider: id,
-					status: 'pending'
+					status: 'acepted'
 				},
-				// ordeno por el campo datetime
+				fields: ['id', 'datetime'],
 
 				sort: 'datetime:asc',
 
@@ -936,36 +964,90 @@ LIMIT ?;
 			});
 
 
-			if (lat && lng) {
-				console.log("entro a la condicion");
-				let distance = await geolib.getDistance(
-					{ latitude: lat, longitude: lng },
-					{ latitude: proveedor.location.latitud, longitude: proveedor.location.longitud }
-				);
+			let distance = await geolib.getDistance(
+				{ latitude: lat, longitude: lng },
+				{ latitude: proveedor.lat, longitude: proveedor.lng }
+			);
 
-				// Convertir distancia a kilómetros
-				distance = distance / 1000;
+			// Convertir distancia a kilómetros
+			distance = distance / 1000;
 
-				// Redondear distancia a 2 decimales
-				distance = Math.round(distance * 100) / 100;
+			// Redondear distancia a 2 decimales
+			distance = Math.round(distance * 100) / 100;
 
-				// Agregar distancia al objeto proveedor
-				proveedor.distanceLineal = distance;
-
-				// Calcular distancia usando Google Maps
-				const distanceGoogle = await calcularDistancia(lat, lng, proveedor.location.latitud, proveedor.location.longitud);
-
-				// Agregar distancia Google Maps al objeto proveedor
-				proveedor.distanceGoogle = distanceGoogle;
-
-				//elimino datos no necesarios como lo son createdAt ,	updateAt , provider ,password ,"resetPasswordToken ,confirmationToken , 
+			// Agregar distancia al objeto proveedor
+			proveedor.distanceLineal = distance;
 
 
+			proveedor.online = await strapi.db.query('api::online-user.online-user').findOne({
+				
+				where: { user: proveedor.id },
+				select: ['socket_id', 'lastConnection','status']
 
+		});
+
+		let 	taskCompletedTotal = await strapi.db.query('api::task-assigned.task-assigned').count({
+			where: {
+				provider: proveedor.id,
+				status: 'completed'
+			},
+		});
+
+		if(idSkill){
+
+		var avgAux={
+			"averageScore": 0,
+			"averageCount": 0			
+		}
+		var averageSkill = await strapi.db.query('api::valoration.valoration').findWithCount({
+
+			where: { provider: proveedor.id , categorias_skill: idSkill },
+
+		});
+
+		var 	taskCompletedSkill = await strapi.db.query('api::task-assigned.task-assigned').count({
+			where: {
+				provider: proveedor.id,
+				status: 'completed',
+				skill: idSkill
+			},
+		});
+
+
+
+		
+
+		avgAux.averageScore = averageSkill[1] > 0 ? averageSkill[0].reduce((a, b) => a + b.valoration, 0) / averageSkill[1] : 0;
+
+		avgAux.averageCount = averageSkill[1];
+
+	}
+
+		proveedor["taskCompletedTotal"] = taskCompletedTotal;
+
+
+
+		if(proveedor.online){
+
+			if(proveedor.online.status == 'offline'){
+
+			proveedor.online.lastConnection = generateConnectionMessage(proveedor.online.lastConnection);
+			
+		}else{
+			
+			proveedor.online.lastConnection = 'online';
+		}
+
+
+		}else{
+				
+			proveedor.online = {
+				"socket_id": null,
+				"lastConnection": null,
+				"status": "offline"
 			}
-			proveedor.avatar_image = proveedor.avatar_image ? proveedor.avatar_image.url : null;
 
-
+		}
 
 			delete proveedor.createdAt;
 			delete proveedor.updatedAt;
@@ -973,11 +1055,88 @@ LIMIT ?;
 			delete proveedor.password;
 			delete proveedor.resetPasswordToken;
 			delete proveedor.confirmationToken;
-			delete proveedor.location;
+			delete proveedor.otp;
+			delete proveedor.blocked;
+			delete proveedor.confirmed;
+			delete proveedor.stripe_customer_id;
+			delete proveedor.stripe_connect_id;
+			delete proveedor.is_stripe_connect;
 			delete proveedor.lat;
 			delete proveedor.lng;
-			delete proveedor.stripe_connect_id;
-			delete proveedor.stripe_customer_id;
+			delete proveedor.email;
+			delete proveedor.phone;
+			delete proveedor.username;
+			delete proveedor.postal_code;
+
+			proveedor.avatar_image = proveedor.avatar_image ?  URL + proveedor.avatar_image.url : null;
+
+			proveedor.provider_skills = proveedor.provider_skills.map(skillP => {
+
+				let media = [];
+
+				if (skillP.media) {
+
+					media = skillP.media.map(media => {
+
+						return URL + media.url;
+
+					});
+
+				}
+				if(idSkill){
+
+					if (skillP.categorias_skill.id == idSkill) {
+
+
+
+						proveedor.skill_select = {
+							taskCompleted : taskCompletedSkill,
+							scoreAverage: avgAux.averageScore,
+							count: avgAux.averageCount,
+							type_price: skillP.type_price,
+							cost: skillP.cost,
+							media: skillP.media ? media : null ,
+							categorias_skill: skillP.categorias_skill ? skillP.categorias_skill.name : null,
+							categorias_skill_id: skillP.categorias_skill ? skillP.categorias_skill.id : null,
+							description: skillP.description	? skillP.description : null,
+							hourMinimum: skillP.hourMinimum ? skillP.hourMinimum : "hour_1",
+						};
+	
+					}
+				}
+
+
+				return {
+
+					type_price: skillP.type_price,
+					cost: skillP.cost,
+					media: skillP.media ? media : null ,
+					categorias_skill: skillP.categorias_skill ? skillP.categorias_skill.name : null,
+					categorias_skill_id: skillP.categorias_skill ? skillP.categorias_skill.id : null,
+					description: skillP.description	? skillP.description : null,
+					hourMinimum: skillP.hourMinimum ? skillP.hourMinimum : "hour_1"
+				}
+
+			});
+
+			// calculo el averageScore del proveedor , basandome en	las valoraciones que tiene la respuesta de la consulta tiene esta fomra [Entry[], number] , por lo que accedo al primer elemento del array y luego al segundo elemento del array que es la cantidad de valoraciones que tiene el proveedor
+
+			let average = await strapi.db.query('api::valoration.valoration').findWithCount({
+
+				where: { provider: proveedor.id }
+
+			});
+
+			
+
+			proveedor["averageScore"] = average[1] > 0 ? average[0].reduce((a, b) => a + b.valoration, 0) / average[1] : 0;
+
+			proveedor["averageCount"] = average[1];
+
+
+
+
+
 
 
 
@@ -1743,7 +1902,7 @@ LIMIT ?;
 
 		{
 			"method": "GET",
-			"path": "/proveedores/",
+			"path": "/proveedores",
 			"handler": "user.buscarProveedores"
 
 		},

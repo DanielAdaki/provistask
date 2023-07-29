@@ -92,12 +92,6 @@
       "repeatable": false,
       "component": "auth.otp"
     },
-    "scoreAverage": {
-      "type": "decimal",
-      "max": 5,
-      "min": 0,
-      "default": 0
-    },
     "location": {
       "type": "component",
       "repeatable": false,

@@ -23,7 +23,7 @@ class CalendarPage extends GetView<HomeProviderController> {
       drawer: const HomeDrawer(),
       bottomNavigationBar: const ProvitaskBottomBar(),
       body: Scrollbar(
-        thickness: 2, // Ajusta el grosor de la barra de desplazamiento
+        thickness: 3, // Ajusta el grosor de la barra de desplazamiento
         radius: const Radius.circular(3),
 
         child: SingleChildScrollView(

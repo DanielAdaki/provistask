@@ -25,47 +25,49 @@ class RegisterTaskPage extends GetView<RegisterTaskController> {
         drawer: const HomeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),
         drawerEnableOpenDragGesture: false,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              Container(
-                height: Get.height,
-                width: Get.width,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(
-                        'assets/images/REGISTER TASK/bg_degraded.png'),
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ),
-              Column(
-                children: [
-                  Visibility(
-                    visible: controller.isLoading.value,
-                    child: const Center(
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: 10,
-                          ),
-                          CircularProgressIndicator(),
-                        ],
-                      ),
+        body: Scrollbar(
+          thickness: 3, // Ajusta el grosor de la barra de desplazamiento
+          radius: const Radius.circular(3),
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Container(
+                  height: Get.height,
+                  width: Get.width,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(
+                          'assets/images/REGISTER TASK/bg_degraded.png'),
+                      fit: BoxFit.fill,
                     ),
                   ),
-                  Expanded(
-                    child: Visibility(
-                      visible: !controller.isLoading.value,
-                      child: SingleChildScrollView(
+                ),
+                Column(
+                  children: [
+                    Visibility(
+                      visible: controller.isLoading.value,
+                      child: const Center(
                         child: Column(
                           children: [
-                            _widgets.registerTaskTopBar(1),
-                            const SizedBox(
-                              height: 30,
+                            SizedBox(
+                              height: 10,
                             ),
-                            Obx(
-                              () => Column(
+                            CircularProgressIndicator(),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Visibility(
+                        visible: !controller.isLoading.value,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              _widgets.registerTaskTopBar(1),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              Column(
                                 children: [
                                   if (controller.listSkills.isNotEmpty) ...[
                                     Container(
@@ -75,7 +77,8 @@ class RegisterTaskPage extends GetView<RegisterTaskController> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 30),
                                       child: DropdownButton<String>(
-                                        value: controller.selectedSkill.value,
+                                        value:
+                                            controller.filters['skill'].value,
                                         icon: const Icon(Icons.arrow_drop_down),
                                         iconSize: 24,
                                         elevation: 16,
@@ -86,12 +89,18 @@ class RegisterTaskPage extends GetView<RegisterTaskController> {
                                         ),
                                         onChanged: (String? newValue) {
                                           if (newValue != null) {
-                                            controller.selectedSkill.value =
-                                                newValue;
                                             controller.filters['skill'].value =
                                                 newValue;
+
+                                            // si la ubicacion ya está seleccionada consulto proveedores para ver si hay
+
+                                            if (_controllerLocation
+                                                    .selectedAddress !=
+                                                "") {
+                                              controller.findProviders();
+                                            }
                                           } else {
-                                            controller.selectedSkill.value =
+                                            controller.filters['skill'].value =
                                                 "Ninguna habilidad seleccionada";
                                           }
                                         },
@@ -104,81 +113,66 @@ class RegisterTaskPage extends GetView<RegisterTaskController> {
                                         }).toList(),
                                       ),
                                     )
-                                  ] else ...[
-                                    Container()
                                   ],
                                   _widgets.registerTaskSelectLocation(),
                                   const SizedBox(width: 50),
-                                  controller.formStepOne.value == 0.25 &&
-                                          _controllerLocation.selectedAddress ==
-                                              ""
-                                      ? Container(
-                                          margin: const EdgeInsets.symmetric(
-                                              vertical: 20),
-                                          alignment: Alignment.topLeft,
-                                          width: Get.width * 0.9,
-                                          padding: const EdgeInsets.all(10),
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xff170591),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                              bottomLeft: Radius.circular(15),
-                                              bottomRight: Radius.circular(15),
-                                            ),
+                                  if (_controllerLocation.selectedAddress !=
+                                          "" &&
+                                      controller.listProviders.isNotEmpty) ...[
+                                    /*Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            vertical: 20),
+                                        alignment: Alignment.topLeft,
+                                        width: Get.width * 0.9,
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xff170591),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                            bottomLeft: Radius.circular(15),
+                                            bottomRight: Radius.circular(15),
                                           ),
-                                          child: const Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              SizedBox(width: 10),
-                                              Text(
-                                                'How long is your task?',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 14,
-                                                  //fontWeight: FontWeight.bold,
-                                                ),
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SizedBox(width: 10),
+                                            Text(
+                                              'How long is your task?',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                                //fontWeight: FontWeight.bold,
                                               ),
-                                            ],
-                                          ),
-                                        )
-                                      : Container(),
-                                  controller.formStepOne.value == 0.25 &&
-                                          _controllerLocation.selectedAddress !=
-                                              "" &&
-                                          controller.listProviders.isNotEmpty
-                                      ? _widgets.registerTaskSelectTimeLong()
-                                      : Container(),
-                                  controller.formStepOne.value >= 0.50
-                                      ? _widgets.timeLongSelected()
-                                      : Container(),
-                                  controller.formStepOne.value >= 0.50
-                                      ? _widgets.registerTaskSelectTransport()
-                                      : Container(),
-                                  controller.formStepOne.value >= 0.50
-                                      ? _widgets.registerTaskTellDetails()
-                                      : Container(),
-                                  controller.listProviders.isNotEmpty
-                                      ? _widgets.registerContinueButton(
-                                          'Continue',
-                                          5,
-                                          () => controller.continueForm1(),
-                                          bgColor: Colors.indigo[800]!)
-                                      : Container(),
+                                            ),
+                                          ],
+                                        ),
+                                      ),*/
+                                    _widgets.registerTaskSelectTimeLong(),
+                                    // _widgets.timeLongSelected(),
+                                    _widgets.registerTaskSelectTransport(),
+                                    _widgets.registerTaskTellDetails(),
+
+                                    _widgets.registerTaskImageZone(),
+                                    _widgets.registerContinueButton('Continue',
+                                        15, () => controller.continueForm1(),
+                                        bgColor: Colors.indigo[800]!)
+                                  ]
                                 ],
                               ),
-                            ),
-                            const SizedBox(
-                              height: 30,
-                            )
-                          ],
+                              const SizedBox(
+                                height: 30,
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

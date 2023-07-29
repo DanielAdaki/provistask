@@ -13,14 +13,14 @@ import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 class RegisterTaskPage3 extends GetView<RegisterTaskController> {
   final _widgets = RegisterTaskWidget();
-  final _controller = Get.find<RegisterTaskController>();
+  //final controller = Get.find<RegisterTaskController>();
 
   RegisterTaskPage3({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Obx(
       () => Scaffold(
-        key: _controller.key,
+        key: controller.key,
         appBar: const HomeMainAppBar(),
         bottomNavigationBar: const ProvitaskBottomBar(),
         drawerEnableOpenDragGesture: false,
@@ -43,7 +43,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
               Column(
                 children: [
                   Visibility(
-                    visible: _controller.isLoading.value,
+                    visible: controller.isLoading.value,
                     child: const Center(
                       child: Column(
                         children: [
@@ -57,7 +57,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                   ),
                   Expanded(
                     child: Visibility(
-                      visible: !_controller.isLoading.value,
+                      visible: !controller.isLoading.value,
                       child: SingleChildScrollView(
                         child: Column(
                           children: [
@@ -76,11 +76,11 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                                           alignment: Alignment.centerLeft,
                                           child: ElevatedButton(
                                             onPressed: () {
-                                              if (_controller.key.currentState!
+                                              if (controller.key.currentState!
                                                   .isDrawerOpen) {
                                                 Navigator.pop(context);
                                               } else {
-                                                _controller.key.currentState
+                                                controller.key.currentState
                                                     ?.openDrawer();
                                               }
                                             },
@@ -126,7 +126,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                                               // un selector con opciones de "recommended", "price", "distance"
 
                                               DropdownButton<String>(
-                                                value: _controller
+                                                value: controller
                                                         .filters["sortBy"]
                                                         .value ??
                                                     "Distance",
@@ -140,10 +140,12 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                                                   height: 2,
                                                   color: Colors.indigo[800],
                                                 ),
-                                                onChanged: (String? newValue) {
-                                                  _controller.filters["sortBy"]
+                                                onChanged:
+                                                    (String? newValue) async {
+                                                  controller.filters["sortBy"]
                                                       .value = newValue;
-                                                  _controller.findProviders();
+                                                  await controller
+                                                      .findProviders();
                                                 },
                                                 items: <String>[
                                                   'Recommended',
@@ -168,9 +170,9 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                                       child: Center(
                                         child: ListView(
                                           children: List.generate(
-                                            _controller.listProviders.length,
+                                            controller.listProviders.length,
                                             (index) => registerTaskProCard(
-                                                _controller
+                                                controller
                                                     .listProviders[index]),
                                           ),
                                         ),
@@ -192,7 +194,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
     );
   }
 
-  Widget registerTaskProCard(dynamic item) {
+  Widget registerTaskProCard(Provider item) {
     return Container(
       width: Get.width * 9,
       height: 250,
@@ -228,9 +230,8 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                             image: DecorationImage(
                               // si item.avatar es null, se usa el avatar por defecto
 
-                              image: item["avatar_image"] != null
-                                  ? NetworkImage(ConexionCommon.hostBase +
-                                      item["avatar_image"])
+                              image: item.avatarImage != null
+                                  ? NetworkImage(item.avatarImage!)
                                   : const AssetImage(
                                       "assets/images/REGISTER TASK/avatar.jpg",
                                     ) as ImageProvider,
@@ -249,10 +250,9 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 1, horizontal: 7),
                                 decoration: BoxDecoration(
-                                  color: // if item["online"] == true
-                                      item["online"] == true
-                                          ? Colors.greenAccent[400]
-                                          : Colors.grey[350],
+                                  color: item.online!.status == 'online'
+                                      ? Colors.greenAccent[400]
+                                      : Colors.grey[350],
                                   borderRadius: const BorderRadius.only(
                                     topLeft: Radius.circular(10),
                                     bottomLeft: Radius.circular(10),
@@ -271,7 +271,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                                     vertical: 1, horizontal: 7),
                                 decoration: BoxDecoration(
                                   color: // if item["online"] == true
-                                      item["online"] == true
+                                      item.online!.status == 'online'
                                           ? Colors.grey[350]
                                           : Colors.red,
                                   borderRadius: const BorderRadius.only(
@@ -297,76 +297,114 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                           onPressed: () async {
                             ProgressDialog pd =
                                 ProgressDialog(context: Get.context);
-                            pd.show(
-                              max: 100,
-                              msg: 'Please wait...',
-                              progressBgColor: Colors.transparent,
-                            );
+                            try {
+                              pd.show(
+                                max: 100,
+                                msg: 'Please wait...',
+                                progressBgColor: Colors.transparent,
+                              );
 
-                            await _controller.getPerfilProvider(
-                                item["id"], true);
+                              await controller.getPerfilProvider(item.id, true,
+                                  int.parse(controller.filters["skill"].value));
 
-                            pd.close();
+                              pd.close();
 
-                            Get.dialog(
-                              Dialog(
-                                child: SingleChildScrollView(
-                                  child: Container(
-                                    width: Get.width * 0.9,
-                                    padding: const EdgeInsets.all(10),
-                                    child: Column(children: [
-                                      imageTask(_controller
-                                          .perfilProvider["avatar_image"]),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      Text(
-                                        _controller.perfilProvider["name"] +
-                                                " " +
-                                                _controller.perfilProvider[
-                                                    "lastname"] ??
-                                            "",
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
+                              Get.dialog(
+                                Dialog(
+                                  insetPadding: const EdgeInsets.all(0),
+                                  child: Scaffold(
+                                    // declaro una appBar que sea una fila con un boton oara cerrar el dialogo
+
+                                    appBar: AppBar(
+                                      backgroundColor: Colors.white,
+                                      elevation: 0,
+                                      leading: IconButton(
+                                        onPressed: () => Get.back(),
+                                        icon: const Icon(
+                                          Icons.close,
+                                          color: Colors.indigo,
                                         ),
                                       ),
-                                      const SizedBox(
-                                        height: 10,
+                                    ),
+
+                                    body: SafeArea(
+                                      child: SingleChildScrollView(
+                                        child: Container(
+                                          width: Get.width * 1,
+                                          padding: const EdgeInsets.all(10),
+                                          child: Column(children: [
+                                            imageTask(controller.perfilProvider[
+                                                "avatar_image"]),
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            Text(
+                                              controller.perfilProvider[
+                                                          "name"] +
+                                                      " " +
+                                                      controller.perfilProvider[
+                                                          "lastname"] ??
+                                                  "",
+                                              style: const TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 10,
+                                            ),
+                                            priceTask(
+                                                controller.perfilProvider[
+                                                        "skill_select"]
+                                                    ["categorias_skill"],
+                                                controller.perfilProvider[
+                                                        "skill_select"]["cost"]
+                                                    .toString(),
+                                                controller.perfilProvider[
+                                                        "skill_select"]
+                                                    ["type_price"]),
+                                            proviData(
+                                                controller.perfilProvider[
+                                                    "type_provider"],
+                                                controller.perfilProvider[
+                                                        "skill_select"]["cost"]
+                                                    .toString(),
+                                                controller.perfilProvider[
+                                                        "distanceLineal"]
+                                                    .toString(),
+                                                controller.perfilProvider["scoreAverage"]
+                                                    .toString(),
+                                                controller.perfilProvider[
+                                                        "open_disponibility"]
+                                                    .toString(),
+                                                controller.perfilProvider[
+                                                        "close_disponibility"]
+                                                    .toString(),
+                                                controller.perfilProvider[
+                                                    "provider_skills"],
+                                                controller
+                                                    .perfilProvider?["car"],
+                                                controller
+                                                    .perfilProvider?["truck"],
+                                                controller.perfilProvider?[
+                                                    "motorcycle"],
+                                                Random()
+                                                    .nextInt(100)
+                                                    .toString()),
+                                            descriptionPro(
+                                                controller.perfilProvider[
+                                                        "description"] ??
+                                                    ""),
+                                          ]),
+                                        ),
                                       ),
-                                      priceTask(_controller
-                                          .perfilProvider["cost_per_houers"]),
-                                      proviData(
-                                          _controller
-                                              .perfilProvider["type_provider"],
-                                          _controller.perfilProvider[
-                                              "cost_per_houers"],
-                                          _controller
-                                              .perfilProvider["distanceGoogle"]
-                                              .toString(),
-                                          _controller
-                                              .perfilProvider["scoreAverage"]
-                                              .toString(),
-                                          _controller.perfilProvider[
-                                                  "open_disponibility"]
-                                              .toString(),
-                                          _controller.perfilProvider[
-                                                  "close_disponibility"]
-                                              .toString(),
-                                          _controller.perfilProvider["skills"],
-                                          _controller.perfilProvider?["car"],
-                                          _controller.perfilProvider?["truck"],
-                                          _controller
-                                              .perfilProvider?["motorcycle"],
-                                          Random().nextInt(100).toString()),
-                                      descriptionPro(_controller
-                                              .perfilProvider["description"] ??
-                                          ""),
-                                    ]),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
+                              );
+                            } catch (e) {
+                              pd.close();
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             elevation: 0,
@@ -396,8 +434,8 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                         ElevatedButton(
                           onPressed: () async {
                             // suma el id del provedor de servicio y paso al siguiente formulario
-                            _controller.idProvider.value = item["id"];
-                            await _controller.findProvider();
+                            controller.idProvider.value = item.id;
+                            await controller.findProvider();
                             Get.toNamed('/register_task/step4');
                           },
                           style: ElevatedButton.styleFrom(
@@ -448,7 +486,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                           child: Row(
                             children: [
                               Text(
-                                item["name"] + ' ' + item["lastname"],
+                                '${item.name} ${item.lastname!}',
                                 style: TextStyle(
                                   color: Colors.indigo[800],
                                   fontWeight: FontWeight.w800,
@@ -458,7 +496,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                               ),
                               // otro texto con el costo del servicio por hora
                               Text(
-                                ' \$${item["cost_per_houers"]}',
+                                ' \$${item.skillSelect!['cost'] ?? 0}',
                                 style: TextStyle(
                                   color: Colors.indigo[800],
                                   fontWeight: FontWeight.w800,
@@ -487,7 +525,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                               ),
                             ),
                             Text(
-                              '#### Furniture Assembly Task',
+                              '${item.skillSelect!["taskCompleted"]} - ${item.skillSelect!["categorias_skill"]}',
                               style: TextStyle(
                                 color: Colors.grey[400],
                                 fontSize: 12,
@@ -540,7 +578,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                             ),
                             Flexible(
                               child: Text(
-                                'Vehicles: Minivan/Sub, Car, Bicycle, Motocycle',
+                                'Vehicles: ${item.car == true ? 'Car,' : ''} ${item.motorcycle == true ? 'Motocycle' : ''} ${item.truck == true ? 'Truck' : ''}',
                                 style: TextStyle(
                                   color: Colors.grey[400],
                                   overflow: TextOverflow.ellipsis,
@@ -575,7 +613,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                                 height: 5,
                               ),
                               Text(
-                                item["description"] ?? 'No description',
+                                item.description ?? 'No description',
                                 maxLines: 4,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -644,7 +682,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(100),
             child: Image.network(
-              ConexionCommon.hostBase + url,
+              url,
               height: 100,
               width: 100,
               fit: BoxFit.cover,
@@ -696,53 +734,91 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
 
   // widget que muestra el precio de la tarea donde el precio está dentro de un cuadro de color amarillo y el simbolo de la moneda dentgro de otro cuadro de color azul abos pegados. Sin usar la palabra precio
 
-  Widget priceTask(String price) {
-    return Container(
-      margin: const EdgeInsets.only(top: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: Colors.amber[800],
-              //  solo radius en la esquina superior izquierda
+  Widget priceTask(String name, String price, String type) {
+    return Stack(children: [
+      Container(
+        margin: const EdgeInsets.only(top: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // texo con el name de la tarea
 
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(10),
-                bottomLeft: Radius.circular(10),
-              ),
-            ),
-            child: Text(
-              '\$$price',
+            Text(
+              '$name for: ',
               style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  overflow: TextOverflow.clip),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                )),
-            child: Text(
-              '/hr',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.amber[800],
-              ),
-            ),
-          ),
-        ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.amber[800],
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    '\$$price',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(10),
+                      bottomRight: Radius.circular(10),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        type == 'per_hour'
+                            ? '/hr'
+                            : type == 'by_project_flat_rate'
+                                ? '/bpfr'
+                                : '/ft',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber[800],
+                          overflow: TextOverflow.clip,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
       ),
-    );
+      Positioned(
+        top: 0,
+        right: 0,
+        child: Tooltip(
+          message: type == 'per_hour'
+              ? 'Price per hour'
+              : type == 'by_project_flat_rate'
+                  ? 'Price by project flat rate'
+                  : 'Free trading',
+          child: const Icon(Icons.info_outline, size: 18),
+        ),
+      ),
+    ]);
   }
 
   // widget que muestra el nombre del usuario que publicó la tarea y su foto de perfil
@@ -908,7 +984,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
           const SizedBox(
             height: 5,
           ),
-          SizedBox(
+          /*SizedBox(
               width: Get.width * 0.8,
               height: 35,
               child: ListView(
@@ -934,7 +1010,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
               )),
           const SizedBox(
             height: 30,
-          )
+          )*/
         ],
       ),
     );
