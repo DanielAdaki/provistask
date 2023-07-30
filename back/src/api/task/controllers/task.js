@@ -128,7 +128,7 @@ module.exports = createCoreController("api::task.task", ({ strapi }) => ({
       const entity = await strapi.entityService.findMany('api::category.category', 
 
       {
-        fields : ["id","title","costaverage","rating"],
+        fields : ["id","title","costAverage","rating", "description", "countPurchase"],
         filters: {
           featured: featured, 
           status : true
@@ -177,7 +177,7 @@ module.exports = createCoreController("api::task.task", ({ strapi }) => ({
 
         // busco en api::provider-skill.provider-skill el campo cost  filtrando que type_price sea per_hour
 
-        const providerSkill = await strapi.entityService.findMany('api::provider-skill.provider-skill',
+        const providerSkillP =  strapi.entityService.findMany('api::provider-skill.provider-skill',
 
         {
 
@@ -198,27 +198,7 @@ module.exports = createCoreController("api::task.task", ({ strapi }) => ({
 
         });
 
-        // si providerSkill tiene datos hago un promedio de los costos y lo agrego a categoriaHome en el campo acgcost
-
-
-        if(providerSkill.length > 0){
-
-          let cost = 0;
-
-          for (let i = 0; i < providerSkill.length; i++) {
-            
-            cost += providerSkill[i].cost;
-            
-          }
-
-          categoriaHome.costaverage = cost / providerSkill.length;
-
-        }
-
-        // busco valoraciones api::valoration.valoration filtrando por categorias_skill
-
-
-        const valoraciones = await strapi.entityService.findMany('api::valoration.valoration',
+        const valoracionesP =  strapi.entityService.findMany('api::valoration.valoration',
 
         {
 
@@ -237,6 +217,55 @@ module.exports = createCoreController("api::task.task", ({ strapi }) => ({
           fields : ["valoration"],
 
         });
+
+        // cuento la cantidad de tareas asignadas a la categoria api::task-assigned.task-assigned para saber cuantas tareas se han realizado de esa categoria
+
+        const taskAssignedP =  strapi.entityService.count('api::task-assigned.task-assigned',
+
+        {
+
+          filters : {
+
+            categorias_skill : {
+
+              id : categoriaHome.categoria.id
+
+            },
+
+            status : "completed"
+
+
+          },
+
+        });
+
+
+
+
+
+        const [providerSkill,valoraciones, taskAssigned] = await Promise.all([providerSkillP,valoracionesP,taskAssignedP]);
+
+        // si providerSkill tiene datos hago un promedio de los costos y lo agrego a categoriaHome en el campo acgcost
+
+
+        if(providerSkill.length > 0){
+
+          let cost = 0;
+
+          for (let i = 0; i < providerSkill.length; i++) {
+            
+            cost += providerSkill[i].cost;
+            
+          }
+
+          categoriaHome.costAverage = cost / providerSkill.length;
+
+        }
+
+        // busco valoraciones api::valoration.valoration filtrando por categorias_skill
+
+
+
 
         // si valoraciones tiene datos hago un promedio de las valoraciones y lo agrego a categoriaHome en el campo rating
 
@@ -261,9 +290,15 @@ module.exports = createCoreController("api::task.task", ({ strapi }) => ({
 
         }
 
-        if(!categoriaHome.costaverage){
+        if(!categoriaHome.costAverage){
 
-          categoriaHome.costaverage = 0;
+          categoriaHome.costAverage = 0;
+
+        }
+
+        if(!categoriaHome.countPurchase){
+
+          categoriaHome.countPurchase =  taskAssigned;
 
         }
 

@@ -14,7 +14,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "x-generation-date": "2023-07-30T17:43:36.431Z"
+    "x-generation-date": "2023-07-30T18:34:17.669Z"
   },
   "x-strapi-config": {
     "path": "/documentation",
@@ -527,12 +527,15 @@
             "type": "number",
             "format": "float"
           },
-          "costaverage": {
+          "costAverage": {
             "type": "number",
             "format": "float"
           },
           "status": {
             "type": "boolean"
+          },
+          "countPurchase": {
+            "type": "integer"
           },
           "locale": {
             "type": "string"
@@ -586,12 +589,15 @@
                 "type": "number",
                 "format": "float"
               },
-              "costaverage": {
+              "costAverage": {
                 "type": "number",
                 "format": "float"
               },
               "status": {
                 "type": "boolean"
+              },
+              "countPurchase": {
+                "type": "integer"
               },
               "locale": {
                 "type": "string"
@@ -1602,12 +1608,15 @@
             "type": "number",
             "format": "float"
           },
-          "costaverage": {
+          "costAverage": {
             "type": "number",
             "format": "float"
           },
           "status": {
             "type": "boolean"
+          },
+          "countPurchase": {
+            "type": "integer"
           },
           "createdAt": {
             "type": "string",

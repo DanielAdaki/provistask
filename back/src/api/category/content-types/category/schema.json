@@ -30,7 +30,7 @@
           "localized": true
         }
       },
-      "type": "string"
+      "type": "text"
     },
     "image": {
       "type": "media",
@@ -75,7 +75,7 @@
       },
       "type": "decimal"
     },
-    "costaverage": {
+    "costAverage": {
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -91,6 +91,14 @@
       },
       "type": "boolean",
       "default": true
+    },
+    "countPurchase": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "integer"
     }
   }
 }
