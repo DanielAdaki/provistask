@@ -90,7 +90,7 @@ module.exports = createCoreController('api::conversation.conversation', ({ strap
 
 						const userp = await strapi.entityService.findOne('plugin::users-permissions.user', users[j].id, {
 							populate: { avatar_image: true },
-							fields: ['id', 'name', 'lastname', 'isProvider', 'online']
+							fields: ['id', 'name', 'lastname', 'isProvider']
 						});
 
 

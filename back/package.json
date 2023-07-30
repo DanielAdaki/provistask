@@ -24,6 +24,7 @@
   "socket.io": "^4.6.1",
   "strapi-plugin-duplicate-button": "^1.1.12",
   "strapi-plugin-generate-data": "^1.0.23",
+  "strapi-plugin-rest-cache": "^4.2.8",
   "strapi-plugin-slugify": "^2.3.3",
   "stripe": "^12.3.0"
  },

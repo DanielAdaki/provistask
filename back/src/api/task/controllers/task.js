@@ -54,15 +54,15 @@ module.exports = createCoreController("api::task.task", ({ strapi }) => ({
           proveedor.distanceLineal = distance;
 
           // Calcular distancia usando Google Maps
-          const distanceGoogle = await this.calcularDistancia(
-            lat,
-            lng,
-            proveedor.lat,
-            proveedor.lng
-          );
+          /*  const distanceGoogle = await this.calcularDistancia(
+              lat,
+              lng,
+              proveedor.lat,
+              proveedor.lng
+            );*/
 
           // Agregar distancia Google Maps al objeto proveedor
-          proveedor.distanceGoogle = distanceGoogle;
+          proveedor.distanceGoogle = distance;
 
           //elimino datos no necesarios como lo son createdAt ,	updateAt , provider ,password ,"resetPasswordToken ,confirmationToken ,
         }
@@ -108,89 +108,275 @@ module.exports = createCoreController("api::task.task", ({ strapi }) => ({
       console.log(error);
     }
   },
-
-
-		async generateChat (ctx) {
-
-			const user = ctx.state.user;
-
-			if (!user) {
-				return ctx.unauthorized('No tienes permiso', {
-					error: 'No autorizado'
-				});
-			}
-
-			const { id } = ctx.params;
+  async find(ctx) {
+    try {
 
 
 
-			// busco una conversacion con el id del provvedor enviado y el id del usuario logueado en api::conversation.conversation usando findMany y el where users in [id del usuario logueado, id del proveedor]
-
-console.log(id);
-
-		/*	const chat = await strapi.entityService.findMany( 'api::conversation.conversation', {
-
-				filters : {
-
-					users : {
-
-					 id:{
-
-							$eq : [user.id, id]
-						}	
-
-					}
-
-				},
-
-				populate: ["users"],
+      let  { start,limit , featured} = ctx.query;
 
 
 
-			
 
-			});*/
+      start = start ? parseInt(start) : 0;
 
+      limit = limit ? parseInt(limit) : 6;
 
-			
-
-
-	
+      featured = featured ? featured : false;
 
 
-			// recorro los chats y extraigo los usuarios de cada chat
+      const entity = await strapi.entityService.findMany('api::category.category', 
+
+      {
+        fields : ["id","title","costaverage","rating"],
+        filters: {
+          featured: featured, 
+          status : true
+        },
+        populate: ["image", "categoria"],
+        start,
+        limit
+      }
+      );
+      const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
 
 
 
 
-			
-
-			 
-	//		if (chat.length == 0) {
-
-				const newChat = await strapi.entityService.create( 'api::conversation.conversation', {
-
-					data : {
-
-						users: [user.id, id],
-						name: "chat entre " + user.username + " y " + id
-
-					}
-
-				});
-				console.log(newChat);
-				return newChat.id;
-/*			}else{
-
-				console.log("aca");
-
-				return chat[0].id;
-			}*/
+  
+      let { data, meta } = this.transformResponse(sanitizedEntity);
 
 
 
-		},
+      for (let i = 0; i < data.length; i++) {
+
+
+        let categoriaHome = data[i].attributes;
+
+        // image 
+
+        categoriaHome.image =   categoriaHome.image ?  process.env.URL + categoriaHome.image.data.attributes.url : null;
+
+        // categoria
+
+        if(categoriaHome.categoria){
+
+          categoriaHome.categoria = {
+            id : categoriaHome.categoria.id,
+            name : categoriaHome.categoria.name,
+            slug : categoriaHome.categoria.slug,
+
+          }
+
+        }else	{
+            
+            categoriaHome.categoria = null;
+        }
+
+
+        // busco en api::provider-skill.provider-skill el campo cost  filtrando que type_price sea per_hour
+
+        const providerSkill = await strapi.entityService.findMany('api::provider-skill.provider-skill',
+
+        {
+
+          filters : {
+
+            categorias_skill : {
+
+              id : categoriaHome.categoria.id
+
+            },
+          
+            type_price : "per_hour"
+
+          },
+
+          fields : ["cost"],
+
+
+        });
+
+        // si providerSkill tiene datos hago un promedio de los costos y lo agrego a categoriaHome en el campo acgcost
+
+
+        if(providerSkill.length > 0){
+
+          let cost = 0;
+
+          for (let i = 0; i < providerSkill.length; i++) {
+            
+            cost += providerSkill[i].cost;
+            
+          }
+
+          categoriaHome.costaverage = cost / providerSkill.length;
+
+        }
+
+        // busco valoraciones api::valoration.valoration filtrando por categorias_skill
+
+
+        const valoraciones = await strapi.entityService.findMany('api::valoration.valoration',
+
+        {
+
+          filters : {
+
+            categorias_skill : {
+
+              id : categoriaHome.categoria.id
+
+            }
+
+            
+
+          },
+
+          fields : ["valoration"],
+
+        });
+
+        // si valoraciones tiene datos hago un promedio de las valoraciones y lo agrego a categoriaHome en el campo rating
+
+        if(valoraciones.length > 0){
+
+          let valoration = 0;
+
+          for (let i = 0; i < valoraciones.length; i++) {
+            
+            valoration += valoraciones[i].valoration;
+            
+          }
+
+          categoriaHome.rating = valoration / valoraciones.length;
+
+        }
+
+
+        if(!categoriaHome.rating){
+
+          categoriaHome.rating = 0;
+
+        }
+
+        if(!categoriaHome.costaverage){
+
+          categoriaHome.costaverage = 0;
+
+        }
+
+      
+
+
+
+      }
+
+     
+  
+      return {
+        data,
+        meta: {
+          ...meta,
+          total: await strapi.db.query("api::category.category").count(  { filters: { featured: true } , 
+          start , limit} ),
+          start,
+          limit,
+
+        },
+      };
+
+
+
+
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+
+  async generateChat(ctx) {
+
+    const user = ctx.state.user;
+
+    if (!user) {
+      return ctx.unauthorized('No tienes permiso', {
+        error: 'No autorizado'
+      });
+    }
+
+    const { id } = ctx.params;
+
+
+
+    // busco una conversacion con el id del provvedor enviado y el id del usuario logueado en api::conversation.conversation usando findMany y el where users in [id del usuario logueado, id del proveedor]
+
+    console.log(id);
+
+    /*	const chat = await strapi.entityService.findMany( 'api::conversation.conversation', {
+
+        filters : {
+
+          users : {
+
+           id:{
+
+              $eq : [user.id, id]
+            }	
+
+          }
+
+        },
+
+        populate: ["users"],
+
+
+
+    	
+
+      });*/
+
+
+
+
+
+
+
+
+    // recorro los chats y extraigo los usuarios de cada chat
+
+
+
+
+
+
+
+
+    //		if (chat.length == 0) {
+
+    const newChat = await strapi.entityService.create('api::conversation.conversation', {
+
+      data: {
+
+        users: [user.id, id],
+        name: "chat entre " + user.username + " y " + id
+
+      }
+
+    });
+    console.log(newChat);
+    return newChat.id;
+    /*			}else{
+    
+            console.log("aca");
+    
+            return chat[0].id;
+          }*/
+
+
+
+  },
 
   getTimes(start, end) {
     const startHour = parseInt(start.split(":")[0]);

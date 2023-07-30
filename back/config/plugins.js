@@ -31,6 +31,24 @@ module.exports = ({ env }) => ({
   "generate-data": {
     enabled: true,
 },
+"rest-cache": {
+  config: {
+    provider: {
+      name: "memory",
+      options: {
+        max: 32767,
+        maxAge: 3600,
+      },
+    },
+    strategy: {
+      contentTypes: [
+        "api::category.category",
+        "api::task.task",
+        "plugin::users-permissions.user" 
+      ],
+    },
+  },
+},
 
   
   // ...

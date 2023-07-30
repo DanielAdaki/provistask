@@ -62,7 +62,7 @@ module.exports = {
 
           await strapi.entityService.update('plugin::users-permissions.user', result.id,
 
-            { data: { online: true, socket_id: socket.id } });
+            { data: {  socket_id: socket.id } });
 
 
 
@@ -128,7 +128,7 @@ module.exports = {
 
             otherUser = await strapi.entityService.findOne('plugin::users-permissions.user', otherUser.id, {
 
-              fields: ['id', "online", "name", "lastname"],
+              fields: ['id', "name", "lastname"],
               populate: { avatar_image: true }
 
             });
@@ -179,7 +179,7 @@ module.exports = {
                 user = await strapi.entityService.findOne('plugin::users-permissions.user', mensaje.emit.id, {
 
                   populate: { avatar_image: true },
-                  fields: ['id', "online", "name", "lastname"],
+                  fields: ['id', "name", "lastname"],
                   //ordeno por createdAt
                   sort: 'createdAt:DESC'
 

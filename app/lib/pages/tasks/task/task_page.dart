@@ -58,7 +58,12 @@ class TaskPage extends GetView<TaskController> {
                                             .provider.value["lastname"] ??
                                     "",
                                 _controller.provider.value["type_provider"],
-                                _controller.provider.value["cost_per_houers"],
+                                _controller.provider.value["cost_per_houers"] !=
+                                        null
+                                    ? _controller
+                                        .provider.value["cost_per_houers"]
+                                        .toString()
+                                    : "",
                                 _controller.provider.value["distanceGoogle"]
                                     .toString(),
                                 _controller.provider.value["scoreAverage"]

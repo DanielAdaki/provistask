@@ -20,6 +20,12 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "plugin::users-permissions.user"
+    },
+    "task_assigned": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::task-assigned.task-assigned",
+      "mappedBy": "conversation"
     }
   }
 }

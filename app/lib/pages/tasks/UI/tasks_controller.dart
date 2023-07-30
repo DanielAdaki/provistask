@@ -38,15 +38,6 @@ class TasksController extends GetxController {
       // muestro el mensaje de error en un snackbar en la parte inferior de la pantalla y fondo en rojo
       isLoading.value = false;
 
-      Get.snackbar(
-        "Error",
-        response["error"]["message"],
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-
-      // lleno el listado de categorias con el resultado de la consulta
-
       tasks.value = [];
       isLoading.value = false;
 

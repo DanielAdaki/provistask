@@ -21,7 +21,8 @@ class HomeController extends GetxController {
 
   final isLoading = false.obs;
 
-  final listCategory = [].obs;
+  final listCategory = <HomeCategory>[]
+      .obs; // Declara listCategory como una lista vacía de objetos HomeCategory
 
   final listTask = [].obs;
 
@@ -42,8 +43,8 @@ class HomeController extends GetxController {
     _getCurrentLocation();
 
     await Future.wait<void>([
-      _findCategory(),
-      _findTask(),
+      findCategory(),
+      findTask(),
       _getPopularTask(),
       _getCategoryHomeSlider(),
     ]);
@@ -63,8 +64,10 @@ class HomeController extends GetxController {
     });
   }
 
-  _findCategory() async {
-    final response = await _category.getItems(searchController.value.text);
+  findCategory([int start = 0, int limit = 6, bool featured = false]) async {
+    start = start * limit;
+
+    final response = await _task.getItems(limit, start, false);
 
     // si el status es 500 muestro un mensaje de error
 
@@ -81,24 +84,31 @@ class HomeController extends GetxController {
         colorText: Colors.white,
       );
 
-      // lleno el listado de categorias con el resultado de la consulta
-
       listCategory.value = [];
     }
 
-    // imprimo el tipo de dato que devuelve la consulta
-
-    // chago cast a json el body de la respuesta
+    Logger().i(response["data"]);
 
     final data = jsonDecode(response["data"].toString());
 
-    //imprimo tipo de dato de data
+    listCategory.clear();
 
-    listCategory.value = data["data"];
+    data["data"].forEach((element) {
+      listCategory.add(HomeCategory(
+        id: element["id"],
+        title: element["attributes"]["title"],
+        image: element["attributes"]["image"],
+        costaverage:
+            double.parse(element["attributes"]["costaverage"].toString()),
+        rating: double.parse(element["attributes"]["rating"].toString()),
+      ));
+    });
   }
 
-  _findTask() async {
-    final response = await _task.getItems(searchController.value.text);
+  findTask([int start = 0, int limit = 6, bool featured = false]) async {
+    start = start * limit;
+
+    final response = await _task.getItems(limit, start, featured);
 
     // si el status es 500 muestro un mensaje de error
 
@@ -204,4 +214,22 @@ class HomeController extends GetxController {
       print(e);
     }
   }
+}
+
+class HomeCategory {
+  final int id;
+  final String slug;
+  final String title;
+  final String image;
+  final double? costaverage;
+  final double? rating;
+
+  HomeCategory({
+    required this.id,
+    this.slug = '',
+    required this.title,
+    required this.image,
+    this.costaverage = 0.0,
+    this.rating = 0.0,
+  });
 }

@@ -2,7 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:flutter_pagewise/flutter_pagewise.dart';
 
 import 'package:provitask_app/controllers/home/home_controller.dart';
 
@@ -169,8 +169,9 @@ class HomeWidgets {
   }
 
   Widget homeNeedHelpServicesCard(
-      rating, String title, price, String image, bool OnSiteStimation) {
-    return InkWell(
+      int id, double rating, String title, price, String image,
+      [bool onSiteStimation = false]) {
+    return GestureDetector(
       child: Column(
         children: [
           Container(
@@ -259,7 +260,7 @@ class HomeWidgets {
               ),
               // texto de estimacion en sitio o no
 
-              OnSiteStimation
+              onSiteStimation
                   ? Text(
                       ' / On site estimate',
                       style: TextStyle(
@@ -277,25 +278,28 @@ class HomeWidgets {
     );
   }
 
-  Widget categoryCard(String title, String image) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
-        border: Border.all(
-          color: const Color(0xFF170591),
-          width: 2,
+  Widget categoryCard(int id, String title, String image) {
+    return GestureDetector(
+      onTap: () {
+        print(id);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
+          border: Border.all(
+            color: const Color(0xFF170591),
+            width: 2,
+          ),
         ),
-      ),
-      alignment: Alignment.center,
-      child: InkWell(
+        alignment: Alignment.center,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           //añado un espacio entre la imagen y el texto
 
           children: [
             Image.network(
-              ConexionCommon.hostBase + image,
+              image,
               width: 50,
               height: 50,
             ),
@@ -322,76 +326,77 @@ class HomeWidgets {
 
   // retorno con obx un listado de categoryCard recorriendo la variable _controllerlistCategory
 
-  Widget listCategory() {
+  Widget listCategory(List<HomeCategory> items) {
     return Obx(() => Expanded(
-          child: GridView.count(
-            scrollDirection: Axis.horizontal,
+          child: PagewiseGridView.count(
+            pageSize: 6, // Número de elementos por página
             crossAxisCount: 2,
             childAspectRatio: 1.3,
             crossAxisSpacing: 20,
             mainAxisSpacing: 30,
             physics: const ClampingScrollPhysics(),
-            children: List.generate(
-                _controller.listCategory.length,
-                (index) => categoryCard(
-                    _controller.listCategory[index]["attributes"]["title"],
-                    _controller.listCategory[index]["attributes"]["image"]
-                        ["data"]["attributes"]["url"])),
+            itemBuilder: (BuildContext context, dynamic item, int index) {
+              return categoryCard(
+                  item["attributes"]["id"],
+                  item["attributes"]["title"],
+                  ConexionCommon.hostBase +
+                      item["attributes"]["image"]["data"]["attributes"]["url"]);
+            },
+            pageFuture: (pageIndex) => _controller.findCategory(
+                pageIndex!, 7), // Método para obtener los datos de la página
           ),
         ));
   }
 
   Widget listTasks() {
     return Obx(() => Expanded(
-          child: GridView.count(
-            // scrollDirection: Axis.horizontal,
+          child: PagewiseGridView.count(
+            pageSize: 10, // Número de elementos por página
             crossAxisCount: 3,
             childAspectRatio: 0.6,
             crossAxisSpacing: 5,
             mainAxisSpacing: 10,
             physics: const ClampingScrollPhysics(),
-            children: List.generate(
-                _controller.listTask.length,
-                (index) => homeNeedHelpServicesCard(
-                    _controller.listTask[index]["attributes"]["averageScore"],
-                    _controller.listTask[index]["attributes"]["name"],
-                    _controller.listTask[index]["attributes"]["price"],
-                    _controller.listTask[index]["attributes"]["image"]["data"]
-                        ["attributes"]["url"],
-                    _controller.listTask[index]["attributes"]
-                        ["on_site_estimate"])),
+            itemBuilder: (BuildContext context, dynamic item, int index) {
+              return homeNeedHelpServicesCard(
+                item["attributes"]["categoria"]["id"],
+                double.parse(item["attributes"]["rating"]),
+                item["attributes"]["title"],
+                item["attributes"]["costaverage"].toString(),
+                item["attributes"]["image"],
+                false,
+              );
+            },
+            pageFuture: (pageIndex) => _controller.findTask(
+                pageIndex!), // Función para obtener los datos de la página
           ),
         ));
   }
 
   Widget listPopularTasks() {
-    return Obx(() => Expanded(
-          child: GridView.count(
-            // scrollDirection: Axis.horizontal,
-            crossAxisCount: 2,
-            childAspectRatio: 1,
-            crossAxisSpacing: 5,
-            mainAxisSpacing: 20,
-            physics: const ClampingScrollPhysics(),
-            children: List.generate(
-                _controller.popularTask.length,
-                (index) => InkWell(
-                      onTap: () {
-                        Get.toNamed(
-                            '/task/${_controller.popularTask[index]["id"]}');
-                      },
-                      child: homeTopPicksCard(
-                          _controller.popularTask[index]["attributes"]["image"]
-                              ["data"]["attributes"]["url"],
-                          _controller.popularTask[index]["attributes"]["name"],
-                          _controller.popularTask[index]["attributes"]
-                                  ["averageScore"]
-                              .toString(),
-                          '3 Km',
-                          'Book Now '),
-                    )),
-          ),
-        ));
+    return GridView.count(
+      // scrollDirection: Axis.horizontal,
+      crossAxisCount: 2,
+      childAspectRatio: 1,
+      crossAxisSpacing: 5,
+      mainAxisSpacing: 20,
+      physics: const ClampingScrollPhysics(),
+      children: List.generate(
+          _controller.popularTask.length,
+          (index) => InkWell(
+                onTap: () {
+                  Get.toNamed('/task/${_controller.popularTask[index]["id"]}');
+                },
+                child: homeTopPicksCard(
+                    _controller.popularTask[index]["attributes"]["image"]
+                        ["data"]["attributes"]["url"],
+                    _controller.popularTask[index]["attributes"]["name"],
+                    _controller.popularTask[index]["attributes"]["averageScore"]
+                        .toString(),
+                    '3 Km',
+                    'Book Now '),
+              )),
+    );
   }
 
   Widget titleGenerate(String title,

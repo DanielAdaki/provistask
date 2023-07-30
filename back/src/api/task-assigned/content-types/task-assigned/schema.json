@@ -121,6 +121,12 @@
       "allowedTypes": [
         "images"
       ]
+    },
+    "conversation": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::conversation.conversation",
+      "inversedBy": "task_assigned"
     }
   }
 }

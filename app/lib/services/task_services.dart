@@ -22,11 +22,13 @@ Dio dio = Dio(options);
 // confiuguro dio para que muestre los logs de las peticiones
 
 class TaskServices extends GetxController {
-  Future<Map> getItems(String search) async {
+  Future<Map> getItems(
+      [int limit = 6, int start = 0, bool featured = true]) async {
     Map respuesta;
 
     try {
-      final response = await dio.get("/tasks?populate=image");
+      final response =
+          await dio.get("/tasks?featured=$featured&start=$start&limit=$limit");
 
       // reviso el status de la respuesta si es distinto a 200 lanzo error
 
