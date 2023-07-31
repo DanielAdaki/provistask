@@ -1076,7 +1076,6 @@ LIMIT ?;
 				};
 			});
 
-			// calculo el averageScore del proveedor , basandome en	las valoraciones que tiene la respuesta de la consulta tiene esta fomra [Entry[], number] , por lo que accedo al primer elemento del array y luego al segundo elemento del array que es la cantidad de valoraciones que tiene el proveedor
 
 			let average = await strapi.db
 				.query("api::valoration.valoration")
@@ -1974,18 +1973,18 @@ LIMIT ?;
 					netoPrice,
 			});
 
-
+			let metodo_pago =  paymentIntent.payment_method_types ? paymentIntent.payment_method_types[0] : "Stripe";
 
 			const data= {
 				total: netoPrice,
 				sub_total: brutePrice,
 				usuario: user.id,
-				metodo_de_pago: "stripe",
+				metodo_de_pago: metodo_pago,
 				monto_comision: comision,
 				estado: paymentIntent.status,
 				stripe_sesion_id: paymentIntent.id,
 				fee: COMISION_BASE,
-				paymentInId: paymentIntent.id,
+				paymentIntentId: paymentIntent.id,
 				paymentIntent: paymentIntent,
 				provider: provider,
 				datosTarea: {
@@ -2057,7 +2056,7 @@ LIMIT ?;
 			return ctx.badRequest(`Webhook Error: ${err.message}`);
 		}
 
-
+var response = [];
 
 
   switch (event.type) {
@@ -2091,22 +2090,34 @@ LIMIT ?;
 					break;
 			case 'payment_intent.succeeded':
 					const paymentIntentSucceeded = event.data.object;
-					console.log("payment_intent.succeeded", paymentIntentSucceeded);
 
 
-					// busco la orden con el paymentIntentId
+					let order  = await strapi.db
+						.query("api::order.order")
+						.findOne({
+							where: { paymentIntentId: paymentIntentSucceeded.id },
 
-					const order = await strapi.db.findOne("api::order.order", {
+							populate: { usuario: true },
+						});
 
-						where: {
 
-							paymentIntentId: paymentIntentSucceeded.id
+						// actualizo el estado de la orden
 
-						}
+						await strapi.entityService.update("api::order.order",order.id,{
+							data: {
+									estado: paymentIntentSucceeded.status,
 
-					});
+								}
+							});
 
-					console.log("order", order);
+
+							// creo la tarea 
+
+					response =	await	crearTarea(order.usuario, order.datosTarea,ctx);
+
+	
+
+
 
 					break;
 			// ... handle other event types
@@ -2115,10 +2126,330 @@ LIMIT ?;
 	}
 
 		// Return a response to acknowledge receipt of the event
+console.log("response", response);
+		return ctx.send({ data : response });
 
-		return ctx.send('ok');
+	};
 
-	},
+	async function crearTarea(user, data,ctx ) {
+
+		try {
+			
+
+
+			if (!user) {
+					console.log("No tienes permiso", { error: 'No autorizado' });
+				return ctx.unauthorized("No tienes permiso", { error: 'No autorizado' });
+			}
+
+
+
+			let { provider, location, location_geo, length, car, date, time, description,status,descriptionProvis ,conversation,addDetails,addFinalPrice,finalPrice,skill,createType, brutePrice, netoPrice,paymentIntentId } = data;
+
+
+
+			
+
+			if (!provider) {
+console.log("El campo provider es obligatorio", { error: 'El campo provider es obligatorio' });
+				return ctx.badRequest("El campo provider es obligatorio", { error: 'El campo provider es obligatorio' });
+
+			}
+
+
+			const providerx = await strapi.db.query('plugin::users-permissions.user').findOne({
+
+				where: { id: provider },
+
+				select: ['id', 'isProvider', 'username', 'name' , 'lastname'],
+
+			});
+
+
+			if (!providerx) {
+console.log("El provider no existe", { error: 'El provider no existe' });
+				return ctx.badRequest("El provider no existe", { error: 'El provider no existe' });
+
+			}
+
+			console.log(providerx);
+			if (!providerx.isProvider) {
+
+				console.log("El provider no es un proveedor", { error: 'El provider no es un proveedor' });
+					return ctx.badRequest("El provider no es un proveedor", { error: 'El provider no es un proveedor' });
+
+			}
+
+
+			// verifico que el provider no sea el mismo que el cliente
+
+
+			if (provider == user.id) {
+
+				return ctx.badRequest("El provider no puede ser el mismo que el cliente", { error: 'El provider no puede ser el mismo que el cliente' });
+
+
+			}
+
+
+
+			// car solo puede ser "motorcycle"  "car"  "truck"  "not_necessary"
+
+			if (car != "motorcycle" && car != "car" && car != "truck" && car != "not_necessary") {
+
+				return ctx.badRequest("El campo car solo puede ser motorcycle, car, truck o not_necessary", { error: 'El campo car solo puede ser motorcycle, car, truck o not_necessary' });
+
+			}
+
+
+
+
+			let locat = {
+				latitud: location.lat,
+				longitud: location.lng,
+				name: location_geo,
+
+			}
+
+
+
+
+		let	combinedDateTime  = "";
+			if (time != "I'm Flexible") {
+
+				// TIME TIENE FORMATO 11:30am o 11:30pm LE QUITO EL AM O PM
+
+				time = time.replace("am", "");
+
+				time = time.replace("pm", "");
+
+
+
+
+
+				combinedDateTime = moment(date).format('YYYY-MM-DD') + ' ' + time + ':00.000';
+
+				combinedDateTime	= Date.parse(combinedDateTime);
+
+				combinedDateTime	= moment(combinedDateTime).format('YYYY-MM-DD HH:mm:ss');
+
+				console.log("combinedDateTime",combinedDateTime);
+			}	else {
+
+					combinedDateTime = moment(date).format('YYYY-MM-DD') + ' ' + "00:00:00.000";
+					combinedDateTime	= moment(combinedDateTime).format('YYYY-MM-DD HH:mm:ss');
+			}
+
+			let taskEntity = [];
+
+			let chatEntity = [];
+
+
+
+			if(!conversation){
+
+	
+				// creo una conversacion con el proveedor y el cliente. Las conversaciones se crean recibiendo un nombre  y un array de usuarios
+	
+				let users = [provider, user.id];
+	
+	
+				let name = "Conversation between " + user.username + " and " + providerx.username;
+				conversation = await strapi.entityService.create('api::conversation.conversation', {
+					data:{
+						name: name,
+						users: users
+					}
+	
+	
+				});
+
+
+				// creo un mensaje de bienvenida para la conversacion
+
+
+					 let taskp = strapi.entityService.create('api::task-assigned.task-assigned', {
+						data: {
+							provider,
+	
+							client: user.id,
+							transportation: car,
+							description: description,
+							taskLength: length,
+							location: locat,
+							datetime: combinedDateTime,
+							time:  moment(combinedDateTime).format('HH:mm:ss'),
+							status :  status ? status : "request",
+							timeFlexible : time == "I'm Flexible" ? true : false,
+							idCreador : user.id,
+							paymentIntentId	:  paymentIntentId ? paymentIntentId : ""  ,
+							skill : skill,
+							createType	: 'client',
+							conversation : conversation.id,
+							netoPrice	: netoPrice.toString(),
+						},
+				});
+
+				
+
+			let chatP =	await strapi.entityService.create('api::chat-message.chat-message', {
+	
+					data:{
+						conversation: conversation.id,
+						bot: true,
+						message: "Task request created "	,
+						emit	:provider,
+						type :"system" // mensaje de bienvenida
+					}
+	
+				});
+	
+				let [taskEntity1, chatEntity1] = await Promise.all([taskp, chatP]);
+
+				taskEntity = taskEntity1;
+				chatEntity = chatEntity1;
+
+			}else{
+
+				// busco la conversacion por el id que recibo por params
+
+				conversation = await strapi.entityService.findOne('api::conversation.conversation', conversation, {
+
+					populate: { users: true }
+
+				});
+
+
+				if(createType == "provider"){
+
+					provider = conversation.users.find(u => u.id == user.id);
+
+					provider = provider.id;
+
+					var userx = conversation.users.find(u => u.id != user.id);
+
+					userx = userx.id;
+
+				}else{
+
+				var	userx = conversation.users.find(u => u.id == user.id);
+
+					userx = userx.id;
+
+					provider = conversation.users.find(u => u.id != user.id);
+
+					provider = provider.id;
+
+				}
+
+
+				// filtro las skills por el nombre que recibo por params
+
+
+				skill = await strapi.db.query('api::skill.skill').findOne({
+
+					where: { name: skill },
+
+					select: ['id'],
+
+				});
+
+
+				let dataInsert= {
+
+					provider,
+
+					client: userx,
+	
+					transportation: car,
+
+					description: description,
+
+					taskLength: length,
+
+					location: locat,
+
+					datetime: combinedDateTime,
+
+					time:  moment(combinedDateTime).format('HH:mm:ss'),
+
+					status :  status ? status : "request",
+
+					timeFlexible : time == "I'm Flexible" ? true : false,
+
+					skill : skill.id,
+
+					createType : createType,
+
+					conversation : conversation.id,
+
+					idCreador : user.id,
+
+				}
+
+				if(createType	== "provider"){
+
+					dataInsert.descriptionProvis = descriptionProvis;
+					dataInsert.brutePrice = brutePrice;
+					dataInsert.netoPrice = netoPrice;
+					dataInsert.addDetails = addDetails;
+
+
+				}
+
+
+	let taskp =		await strapi.entityService.create('api::task-assigned.task-assigned', {
+
+					data: dataInsert
+
+			});
+					
+
+
+			let chatP =	await strapi.entityService.create('api::chat-message.chat-message', {
+
+					data:{
+
+						conversation: conversation.id,
+
+						bot: true,
+
+						message: "Task request created"	,
+
+						emit	:provider ,
+
+						type:	"system"
+
+					}});
+
+
+				let	[taskEntity1, chatEntit1] = await Promise.all([taskp, chatP]);
+
+
+
+				taskEntity = taskEntity1;
+				chatEntity = chatEntit1;
+
+			}
+
+
+
+
+
+			//await super.create(ctx);
+
+			return ctx.send( {
+				taskEntity,
+				chatEntity,
+				conversation
+			} );
+		} catch (error) {
+			console.error("Error al crear tarea:", error);
+			throw new	Error(error);
+		}
+
+	};
+
 
 	function getTimes(start, end) {
 		const startHour = parseInt(start.split(":")[0]);
@@ -2145,7 +2476,6 @@ LIMIT ?;
 			]).map(([h, m]) => `${h.toString().padStart(2, "0")}:00`);
 		}
 	}
-
 	plugin.controllers.user.stripeConnect = async (ctx) => {
 		// recibo el usuario logueado
 

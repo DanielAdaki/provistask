@@ -50,7 +50,7 @@
       "default": "requires_payment_method",
       "private": true
     },
-    "paymentInId": {
+    "paymentIntentId": {
       "type": "string",
       "unique": true
     },

@@ -14,7 +14,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "x-generation-date": "2023-07-31T16:19:06.730Z"
+    "x-generation-date": "2023-07-31T17:50:57.647Z"
   },
   "x-strapi-config": {
     "path": "/documentation",
@@ -11857,7 +11857,7 @@
                   "succeeded"
                 ]
               },
-              "paymentInId": {
+              "paymentIntentId": {
                 "type": "string"
               },
               "paypal_sesion_id": {
@@ -13906,7 +13906,7 @@
               "succeeded"
             ]
           },
-          "paymentInId": {
+          "paymentIntentId": {
             "type": "string"
           },
           "paypal_sesion_id": {

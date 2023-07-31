@@ -720,9 +720,9 @@ class RegisterTaskController extends GetxController {
           actions: [
             TextButton(
                 onPressed: () {
-                  Get.offAllNamed(
+                  /* Get.offAllNamed(
                     '/chat/$conversartion',
-                  );
+                  );*/
 
                   Get.back();
                 },
