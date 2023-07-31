@@ -726,7 +726,7 @@ class RegisterTaskController extends GetxController {
                     '/chat/$conversartion',
                   );
 
-                  //Get.back();
+                  Get.back();
                 },
                 child: const Text('Aceptar'))
           ],

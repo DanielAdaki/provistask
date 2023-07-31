@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import 'package:provitask_app/pages/register_client/UI/register_client_controller.dart';
+import 'package:provitask_app/controllers/auth/register_controller.dart';
 
 class RegisterClientWidgets {
-  final _controller = Get.find<RegisterCLientController>();
+  final _controller = Get.find<RegisterController>();
 
   Widget registerHeader() {
     return Container(
@@ -217,7 +216,7 @@ class RegisterClientWidgets {
     );
   }
 
-  Widget registerPhoneCodeSelect() {
+  /*Widget registerPhoneCodeSelect() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5),
       margin: const EdgeInsets.only(top: 10),
@@ -246,6 +245,17 @@ class RegisterClientWidgets {
         },
       ),
     );
+  }*/
+  Widget registerPhoneCodeSelect() {
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        margin: const EdgeInsets.only(top: 10),
+        child: const Text(
+          '+1',
+          style: TextStyle(
+            fontSize: 20,
+          ),
+        ));
   }
 
   Widget registerPhoneField() {
@@ -320,7 +330,11 @@ class RegisterClientWidgets {
             fontSize: 24,
           ),
         ),
-        onPressed: () => _controller.register(),
+        onPressed: () async {
+          await _controller.register();
+
+          Get.toNamed('/login');
+        },
       ),
     );
   }
@@ -372,7 +386,7 @@ class RegisterClientWidgets {
             width: 8,
           ),
           InkWell(
-            onTap: () => Get.offAndToNamed('/login'),
+            onTap: () => Get.back(),
             child: Text(
               'Log In',
               style: TextStyle(

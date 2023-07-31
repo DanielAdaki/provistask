@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provitask_app/pages/register_client/UI/register_client_controller.dart';
+import 'package:provitask_app/controllers/auth/register_controller.dart';
 import 'package:provitask_app/pages/register_client/UI/register_client_widgets.dart';
 
-class RegisterClientPage extends GetView<RegisterCLientController> {
+class RegisterClientPage extends GetView<RegisterController> {
   final _widgets = RegisterClientWidgets();
 
   RegisterClientPage({Key? key}) : super(key: key);

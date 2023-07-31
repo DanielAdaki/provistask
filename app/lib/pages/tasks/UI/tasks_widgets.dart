@@ -181,14 +181,14 @@ class TasksWidgets {
   Widget taskProCard(dynamic item) {
     return Container(
       width: Get.width * 9,
-      height: 250,
+      height: Get.height * 0.23,
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       child: Center(
         child: Stack(
           children: [
             Container(
               width: Get.width * 1,
-              height: 170,
+              height: Get.height * 0.23,
               padding: const EdgeInsets.only(top: 10, bottom: 15, right: 10),
               decoration: BoxDecoration(
                   color: Colors.white,

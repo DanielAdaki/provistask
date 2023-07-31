@@ -86,7 +86,6 @@ class CategoryServices {
 
 // defino getItem como una funcion asincrona que retorna un Map
 
-
 // importo conexion_common.dart
 
-//CategoryServices auth = CategoryServices();
+CategoryServices auth = CategoryServices();

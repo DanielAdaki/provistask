@@ -1,33 +1,38 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
+import 'package:provitask_app/common/socket.dart';
+import 'package:provitask_app/controllers/location/location_controller.dart';
+import 'package:provitask_app/models/data/countries_data.dart';
 
 import 'package:provitask_app/services/auth_services.dart';
-
+import 'package:provitask_app/services/preferences.dart';
 // creo clase de controlador de registro
 
 class RegisterController extends GetxController {
   // creo variable de tipo Auth para poder usar los servicios de autenticacion
   final AuthService _auth = AuthService();
-
+  final prefs = Preferences();
 // los campos de mi formulario son name, email, password, password_confirmatio, surname, postal_code, phone_number
 
   // genero los campos de mi formulario
 
-  final TextEditingController nameController = TextEditingController();
+  RxString phoneCodeRegister = ''.obs;
 
-  final TextEditingController emailController = TextEditingController();
-
-  final TextEditingController passwordController = TextEditingController();
-
-  final TextEditingController passwordConfirmationController =
-      TextEditingController();
-
-  final TextEditingController surnameController = TextEditingController();
-
-  final TextEditingController postalCodeController = TextEditingController();
-
-  final TextEditingController phoneNumberController = TextEditingController();
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final nameController = Rx<TextEditingController>(TextEditingController());
+  final surnameController = Rx<TextEditingController>(TextEditingController());
+  final emailController = Rx<TextEditingController>(TextEditingController());
+  final passwordController = Rx<TextEditingController>(TextEditingController());
+  final confirmPasswordController =
+      Rx<TextEditingController>(TextEditingController());
+  final phoneController = Rx<TextEditingController>(TextEditingController());
+  final postalCodeController =
+      Rx<TextEditingController>(TextEditingController());
+  RxList<CountryPhoneCode>? phoneCodes = <CountryPhoneCode>[].obs;
 
   // creo variable para mostrar el loading
 
@@ -49,17 +54,11 @@ class RegisterController extends GetxController {
 
   final success = false.obs;
 
-  // creo variable para mostrar el mensaje de bienvenida
-
-  final formKey = GlobalKey<FormState>();
-
-  // creo variable para mostrar el mensaje de bienvenida
-
   final loginController = RxInt(0);
 
   // creo metodo para registrar un usuario
 
-  void register() async {
+  register() async {
     // valido el formulario
 
     if (!formKey.currentState!.validate()) return;
@@ -70,13 +69,13 @@ class RegisterController extends GetxController {
 
     // llamo al servicio de registro
 
-    var response = await _auth.register(
-        nameController.text,
-        emailController.text,
-        passwordController.text,
-        passwordConfirmationController.text,
-        surnameController.text,
-        postalCodeController.text);
+    final response = await _auth.register(
+        nameController.value.text,
+        emailController.value.text,
+        passwordController.value.text,
+        surnameController.value.text,
+        postalCodeController.value.text,
+        phoneController.value.text);
 
     // si el status es 500 muestro un mensaje de error
 
@@ -91,9 +90,11 @@ class RegisterController extends GetxController {
 
           margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20));
       await Future.delayed(const Duration(seconds: 2));
+
+      return;
     }
 
-    // si el status es 200 muestro un mensaje de bienvenida
+    isLoading.value = false;
 
     if (response["status"] == 200) {
       // muestro el mensaje de bienvenida en un snackbar en la parte inferior de la pantalla y fondo en verde
@@ -107,9 +108,5 @@ class RegisterController extends GetxController {
           margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20));
       await Future.delayed(const Duration(seconds: 2));
     }
-
-    // oculto el loading
-
-    isLoading.value = false;
   }
 }

@@ -60,8 +60,6 @@ class LoginWidgets {
   }
 
   Widget loginEmailField() {
-    _controller.emailController.value =
-        TextEditingController(text: "anchorquery@gmail.com");
     return Container(
       padding: EdgeInsets.symmetric(horizontal: Get.width * 0.12),
       child: TextFormField(
@@ -89,8 +87,6 @@ class LoginWidgets {
   }
 
   Widget loginPasswordField() {
-    _controller.passwordController.value =
-        TextEditingController(text: "Daniel1995=");
     return Container(
       padding: EdgeInsets.symmetric(horizontal: Get.width * 0.12),
       margin: const EdgeInsets.only(top: 10),

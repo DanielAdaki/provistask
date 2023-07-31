@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:galleryimage/galleryimage.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 import 'package:provitask_app/services/provider_services.dart';
 import 'package:readmore/readmore.dart';
 
@@ -142,17 +143,15 @@ class ProfileDialog extends StatelessWidget {
                         ),
                         if (general == false) ...[
                           GalleryImage(
-                              numOfShowImages: 3,
-                              imageUrls: (perfilProvider["provider_skills"]
-                                      as List<dynamic>)
-                                  .map<String>(
-                                      (item) => item["media"].toString())
-                                  .toList()),
+                            numOfShowImages: 3,
+                            imageUrls: formatImages(
+                                perfilProvider["skill_select"], false),
+                          ),
                         ] else ...[
                           GalleryImage(
                             numOfShowImages: 3,
-                            imageUrls:
-                                formatImages(perfilProvider["provider_skills"]),
+                            imageUrls: formatImages(
+                                perfilProvider["provider_skills"], true),
                           ),
                         ]
                       ],
@@ -634,12 +633,36 @@ class ProfileDialog extends StatelessWidget {
     );
   }
 
-  formatImages(perfilProvider) {
+  formatImages(perfilProvider, [bool? general = false]) {
     final List<String> images = [];
 
-    for (var i = 0; i < perfilProvider.length; i++) {
-      for (var j = 0; j < perfilProvider[i]["media"].length; j++) {
-        images.add(perfilProvider[i]["media"][j]);
+    if (general == true) {
+      Logger().i("hola");
+      for (var i = 0; i < perfilProvider.length; i++) {
+        for (var j = 0; j < perfilProvider[i]["media"].length; j++) {
+          images.add(perfilProvider[i]["media"][j]);
+        }
+      }
+    } else {
+      /*
+      Media posee esta forma
+
+      [
+                    "http://192.168.0.105:1337/uploads/xc43zrqui3zfoelrsfgm_8b23af7112.jpg",
+                    "http://192.168.0.105:1337/uploads/amettkxuazq8eboccwv4_2d7a906098.jpg",
+                    "http://192.168.0.105:1337/uploads/mlwksl1epv9p2m9qyf3d_24fe8bed86.jpg",
+                    "http://192.168.0.105:1337/uploads/jllohootiiiazrqdlgni_d82f4af117.jpg",
+                    "http://192.168.0.105:1337/uploads/eyewgsovtngmyue8oren_315c80d3e9.jpg",
+                    "http://192.168.0.105:1337/uploads/v5widhmbcu7ho0sb1kzn_8c16a08fb1.jpg",
+                    "http://192.168.0.105:1337/uploads/jaiosj2hipr0enssqr4l_ce6ea80a3f.jpg",
+                    "http://192.168.0.105:1337/uploads/unyjxr7d2jxdb2nkvltx_78ac2a90b7.jpg"
+                ]
+      
+      */
+      Logger().i(perfilProvider["media"]);
+
+      for (var i = 0; i < perfilProvider["media"].length; i++) {
+        images.add(perfilProvider["media"][i]);
       }
     }
 

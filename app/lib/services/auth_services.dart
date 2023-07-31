@@ -46,8 +46,6 @@ class AuthService {
         throw jsonDecode(response.body);
       }
 
-      logger.d(response.body);
-
       // mando al modelo
 
       var aux = jsonDecode(response.body);
@@ -69,7 +67,17 @@ class AuthService {
     // uso try catch para capturar errores
 
     try {
-      // creo un map con los datos del usuario
+      // creo nuev instancai de dio
+
+      final dio = Dio();
+
+      // añado interceptor para que muestre los logs de las peticiones
+
+      dio.interceptors.add(LogInterceptor(responseBody: true));
+
+      // añado los headers
+
+      dio.options.headers["content-type"] = "application/json";
 
       Map data = {
         "username": email,
@@ -84,32 +92,17 @@ class AuthService {
         "role": 1,
       };
 
-      // añado   data a otro map con  nombre data
-
-      Map credentials = {
-        "data": data,
-      };
-
-      print(jsonEncode(credentials));
-
-      // hago la peticion post a la api
-
-      http.Response response = await http.post(
-        Uri.parse("${ConexionCommon.hostApi}/auth/local/register"),
-        headers: {"content-type": "application/json"},
-        body: credentials,
+      final response = await dio.post(
+        "${ConexionCommon.hostApi}/auth/local/register",
+        data: data,
       );
 
-      // guardo el body de la respuesta en una variable
+      if (response.statusCode != 200) {
+        throw response.data;
+      }
 
-      var aux = jsonDecode(response.body);
-
-      // retorno el body de la respuesta
-
-      respuesta = aux;
+      respuesta = {"status": 200, "data": response};
     } catch (e) {
-      // e es un string lo vuelvo a convertir en json y lo guardo en el map _respuesta y lo retorno con status 500
-
       respuesta = {"status": 500, "error": e};
     }
 

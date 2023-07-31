@@ -47,21 +47,19 @@ class RegisterCLientController extends GetxController {
 
     // llamo al servicio de registro
 
-    var response = await _auth.register(
+    final response = await _auth.register(
         nameController.value.text,
         emailController.value.text,
         passwordController.value.text,
         surnameController.value.text,
         postalCodeController.value.text,
         phoneController.value.text);
-    Logger().i(response);
-
-    // si el status es 500 muestro un mensaje de error
 
     if (response["status"] != 200) {
       // muestro el mensaje de error en un snackbar en la parte inferior de la pantalla y fondo en rojo
 
-      Get.snackbar("Error", "Ha ocurrido un error al registrar el usuario",
+      Get.snackbar("Error",
+          "Ha ocurrido un error al registrar el usuario, email o teléfono ya existen",
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -69,23 +67,23 @@ class RegisterCLientController extends GetxController {
 
           margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20));
       await Future.delayed(const Duration(seconds: 2));
+
+      return;
     }
 
     // si el status es 200 muestro un mensaje de bienvenida
 
-    if (response["status"] == 200) {
-      // muestro el mensaje de bienvenida en un snackbar en la parte inferior de la pantalla y fondo en verde
+    Get.snackbar("Bienvenido", "Has registrado un usuario correctamente",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        // subo un poco el snackbar
 
-      Get.snackbar("Bienvenido", "Has registrado un usuario correctamente",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          // subo un poco el snackbar
+        margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20));
+    await Future.delayed(const Duration(seconds: 2));
 
-          margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20));
-      await Future.delayed(const Duration(seconds: 2));
-    }
+    // tomo de la respuesta el token y lo guardo en las preferencias
 
-    // oculto el loading
+    // final token = response["data"].data["jwt"];
   }
 }

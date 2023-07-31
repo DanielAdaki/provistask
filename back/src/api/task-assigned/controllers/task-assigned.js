@@ -617,7 +617,7 @@ console.log(items.data);
 			// verifico que la tarea esté marcada como pending
 
 
-			if (tarea.status != "pending") {
+			if (tarea.status != "acepted") {
 
 				return ctx.badRequest("La tarea no está pendiente", { error: 'La tarea no está pendiente' });
 
@@ -654,7 +654,7 @@ console.log(items.data);
 
 			const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-			console.log(paymentIntent);
+	
 
 			// verifico que el paymentIntentId exista en stripe
 
