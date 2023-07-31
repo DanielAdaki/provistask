@@ -1909,7 +1909,7 @@ LIMIT ?;
 			console.log("brutePrice", brutePrice);
 
 
-			return	ctx.send({	data: { brutePrice: brutePrice } });
+	
 
 
 
@@ -1917,7 +1917,9 @@ LIMIT ?;
 
 			brutePrice = parseInt(brutePrice); // lo paso a entero
 
-			// calculo la comision con la logica correspondiente sino la base que son 12%
+ 
+
+			COMISION_BASE = parseFloat(COMISION_BASE);
 
 			let comision = brutePrice * COMISION_BASE;
 
@@ -1930,7 +1932,7 @@ LIMIT ?;
 			let netoPrice = brutePrice - comision;
 
 
-
+			return	ctx.send({	data: { brutePrice: netoPrice } });
 
 
 
