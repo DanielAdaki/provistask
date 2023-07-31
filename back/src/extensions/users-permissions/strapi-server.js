@@ -1930,15 +1930,13 @@ LIMIT ?;
 			let comision = brutePrice * COMISION_BASE;
 
 
-			console.log("comision", comision);
+
 			comision = parseInt(comision);
 
 			
 
 			let netoPrice = brutePrice - comision;
 
-
-			return	ctx.send({	data: { brutePrice: netoPrice } });
 
 
 
