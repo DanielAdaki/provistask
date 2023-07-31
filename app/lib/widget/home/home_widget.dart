@@ -2,11 +2,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
-import 'package:flutter_pagewise/flutter_pagewise.dart';
-
 import 'package:provitask_app/controllers/home/home_controller.dart';
-
 import 'package:provitask_app/common/conexion_common.dart';
+import 'package:provitask_app/models/home/home_category_model.dart';
 
 class HomeWidgets {
   // final _controller = Get.find<HomeController>();
@@ -51,7 +49,7 @@ class HomeWidgets {
           ),
         ],
         image: DecorationImage(
-          image: NetworkImage(ConexionCommon.hostBase + imageLink),
+          image: NetworkImage(imageLink),
           fit: BoxFit.cover,
         ),
       ),
@@ -172,108 +170,117 @@ class HomeWidgets {
       int id, double rating, String title, price, String image,
       [bool onSiteStimation = false]) {
     return GestureDetector(
-      child: Column(
-        children: [
-          Container(
-            height: Get.height * 0.15,
-            width: Get.width * 0.25,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              image: DecorationImage(
-                image: NetworkImage(ConexionCommon.hostBase + image),
-                fit: BoxFit.fitHeight,
+      onTap: () {
+        Get.toNamed('/register_task', arguments: {'id': id, 'name': title});
+      },
+      child: Tooltip(
+        message: "Book Now $title",
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: Get.height * 0.15,
+              width: Get.width * 0.25,
+              alignment: Alignment.centerLeft,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                image: DecorationImage(
+                  image: NetworkImage(image),
+                  fit: BoxFit.fitHeight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: const Offset(3, 2), // changes position of shadow
+                  ),
+                ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 1,
-                  blurRadius: 4,
-                  offset: const Offset(3, 2), // changes position of shadow
+            ),
+            const SizedBox(
+              height: 3,
+            ),
+            Text(
+              title,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                fontStyle: FontStyle.italic,
+                color: Colors.indigo[900],
+              ),
+            ),
+            const SizedBox(
+              height: 3,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                RatingBar(
+                  initialRating: rating.toDouble(),
+                  direction: Axis.horizontal,
+                  allowHalfRating: true,
+                  itemCount: 5,
+                  itemSize: 12,
+                  ratingWidget: RatingWidget(
+                    full: Icon(
+                      Icons.star,
+                      color: Colors.amber[900],
+                    ),
+                    half: Icon(
+                      Icons.star_half,
+                      color: Colors.amber[900],
+                    ),
+                    empty: Icon(
+                      Icons.star_border,
+                      color: Colors.amber[900],
+                    ),
+                  ),
+                  itemPadding: const EdgeInsets.symmetric(horizontal: 0.5),
+                  onRatingUpdate: (rating) {
+                    print(rating);
+                  },
+                ),
+                Text(
+                  '($rating)',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.amber[900],
+                  ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(
-            height: 3,
-          ),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.italic,
-              color: Colors.indigo[900],
-            ),
-          ),
-          const SizedBox(
-            height: 3,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              RatingBar(
-                initialRating: rating.toDouble(),
-                direction: Axis.horizontal,
-                allowHalfRating: true,
-                itemCount: 5,
-                itemSize: 12,
-                ratingWidget: RatingWidget(
-                  full: Icon(
-                    Icons.star,
-                    color: Colors.amber[900],
-                  ),
-                  half: Icon(
-                    Icons.star_half,
-                    color: Colors.amber[900],
-                  ),
-                  empty: Icon(
-                    Icons.star_border,
+            Row(
+              children: [
+                Text(
+                  '\$$price',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.italic,
                     color: Colors.amber[900],
                   ),
                 ),
-                itemPadding: const EdgeInsets.symmetric(horizontal: 0.5),
-                onRatingUpdate: (rating) {
-                  print(rating);
-                },
-              ),
-              Text(
-                '($rating)',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.amber[900],
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Text(
-                '\$$price',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.amber[900],
-                ),
-              ),
-              // texto de estimacion en sitio o no
+                // texto de estimacion en sitio o no
 
-              onSiteStimation
-                  ? Text(
-                      ' / On site estimate',
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.amber[900],
-                      ),
-                    )
-                  : Container(),
-            ],
-          )
-        ],
+                onSiteStimation
+                    ? Text(
+                        ' / On site estimate',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.amber[900],
+                        ),
+                      )
+                    : Container(),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -281,121 +288,109 @@ class HomeWidgets {
   Widget categoryCard(int id, String title, String image) {
     return GestureDetector(
       onTap: () {
-        print(id);
+        Get.toNamed('/register_task', arguments: {'id': id, 'name': title});
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-          border: Border.all(
-            color: const Color(0xFF170591),
-            width: 2,
+      child: Tooltip(
+        message: "Book Now $title",
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
+            border: Border.all(
+              color: const Color(0xFF170591),
+              width: 2,
+            ),
           ),
-        ),
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          //añado un espacio entre la imagen y el texto
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            //añado un espacio entre la imagen y el texto
 
-          children: [
-            Image.network(
-              image,
-              width: 50,
-              height: 50,
-            ),
-
-            // añado un espacio entre la imagen y el texto
-
-            const SizedBox(height: 10),
-
-            Text(
-              title,
-              //centro el texto
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 15,
-                color: Color(0xFF170591),
+            children: [
+              Image.network(
+                image,
+                width: 50,
+                height: 50,
               ),
-            ),
-            // una imagen de prueba y un texto
-          ],
+
+              // añado un espacio entre la imagen y el texto
+
+              const SizedBox(height: 10),
+
+              Text(
+                title,
+                //centro el texto
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: Color(0xFF170591),
+                ),
+              ),
+              // una imagen de prueba y un texto
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // retorno con obx un listado de categoryCard recorriendo la variable _controllerlistCategory
-
+  // retorno con obx un listado de categoryCard recorriendo la variable _controllerlistCategor
   Widget listCategory(List<HomeCategory> items) {
     return Obx(() => Expanded(
-          child: PagewiseGridView.count(
-            pageSize: 6, // Número de elementos por página
+          child: GridView.count(
+            scrollDirection: Axis.horizontal,
             crossAxisCount: 2,
             childAspectRatio: 1.3,
             crossAxisSpacing: 20,
             mainAxisSpacing: 30,
             physics: const ClampingScrollPhysics(),
-            itemBuilder: (BuildContext context, dynamic item, int index) {
-              return categoryCard(
-                  item["attributes"]["id"],
-                  item["attributes"]["title"],
-                  ConexionCommon.hostBase +
-                      item["attributes"]["image"]["data"]["attributes"]["url"]);
-            },
-            pageFuture: (pageIndex) => _controller.findCategory(
-                pageIndex!, 7), // Método para obtener los datos de la página
+            children: List.generate(
+                items.length,
+                (index) => categoryCard(
+                      items[index].categoryId,
+                      items[index].title,
+                      items[index].image,
+                    )),
           ),
         ));
   }
 
-  Widget listTasks() {
+  Widget listTasks(List<HomeCategory> items) {
     return Obx(() => Expanded(
-          child: PagewiseGridView.count(
-            pageSize: 10, // Número de elementos por página
-            crossAxisCount: 3,
-            childAspectRatio: 0.6,
-            crossAxisSpacing: 5,
-            mainAxisSpacing: 10,
+          child: GridView.count(
+            scrollDirection: Axis.horizontal,
+            crossAxisCount: 2,
+            childAspectRatio: 1.6,
+            crossAxisSpacing: 1,
+            mainAxisSpacing: 15,
             physics: const ClampingScrollPhysics(),
-            itemBuilder: (BuildContext context, dynamic item, int index) {
-              return homeNeedHelpServicesCard(
-                item["attributes"]["categoria"]["id"],
-                double.parse(item["attributes"]["rating"]),
-                item["attributes"]["title"],
-                item["attributes"]["costaverage"].toString(),
-                item["attributes"]["image"],
-                false,
-              );
-            },
-            pageFuture: (pageIndex) => _controller.findTask(
-                pageIndex!), // Función para obtener los datos de la página
+            children: List.generate(
+                _controller.listTask.length,
+                (index) => homeNeedHelpServicesCard(
+                      items[index].categoryId,
+                      items[index].rating!,
+                      items[index].title,
+                      items[index].costAverage,
+                      items[index].image,
+                      false,
+                    )),
           ),
         ));
   }
 
   Widget listPopularTasks() {
     return GridView.count(
-      // scrollDirection: Axis.horizontal,
+      scrollDirection: Axis.horizontal,
       crossAxisCount: 2,
       childAspectRatio: 1,
       crossAxisSpacing: 5,
       mainAxisSpacing: 20,
       physics: const ClampingScrollPhysics(),
       children: List.generate(
-          _controller.popularTask.length,
-          (index) => InkWell(
-                onTap: () {
-                  Get.toNamed('/task/${_controller.popularTask[index]["id"]}');
-                },
-                child: homeTopPicksCard(
-                    _controller.popularTask[index]["attributes"]["image"]
-                        ["data"]["attributes"]["url"],
-                    _controller.popularTask[index]["attributes"]["name"],
-                    _controller.popularTask[index]["attributes"]["averageScore"]
-                        .toString(),
-                    '3 Km',
-                    'Book Now '),
-              )),
+          5,
+          (index) => homeTopPicksCard('https://picsum.photos/200/300', 'prueba',
+              '4.5', '3 Km', 'Book Now ')),
     );
   }
 
@@ -421,7 +416,7 @@ class HomeWidgets {
 
   // barra de busqueda de tareas
 
-  Widget searchTask() {
+  /*Widget searchTask() {
     return Container(
       //padding: const EdgeInsets.symmetric(horizontal: 20),
       height: 47,
@@ -430,16 +425,14 @@ class HomeWidgets {
         decoration: InputDecoration(
           hintText: 'Try "moving" or "air repair"',
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(90),
-            // añado color a la linea de borde A0A0A0
-
+            borderRadius: BorderRadius.circular(90),         
             borderSide: const BorderSide(color: Color(0xFFA0A0A0)),
           ),
           prefixIcon: const Icon(Icons.search),
         ),
       ),
     );
-  }
+  }*/
 
   generateWidgets(items) {
     List<Widget> widgets = [];

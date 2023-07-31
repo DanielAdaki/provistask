@@ -31,7 +31,6 @@ module.exports = createCoreController(
 
 	
 				
-				console.log("createType",ctx.request.body.data);
 
 				if (!provider) {
 console.log("El campo provider es obligatorio", { error: 'El campo provider es obligatorio' });
@@ -39,7 +38,6 @@ console.log("El campo provider es obligatorio", { error: 'El campo provider es o
 
 				}
 
-				console.log("provider",provider);
 
 				const providerx = await strapi.db.query('plugin::users-permissions.user').findOne({
 
@@ -400,7 +398,7 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 				delete proveedor.password;
 				delete proveedor.resetPasswordToken;
 				delete proveedor.confirmationToken;
-				delete proveedor.location.id;
+			
 	
 				proveedor.avatar_image = proveedor.avatar_image ? proveedor.avatar_image.url : null;
 			

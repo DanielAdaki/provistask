@@ -5,7 +5,9 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
+import 'package:provitask_app/common/constans.dart';
 import 'package:provitask_app/controllers/location/location_controller.dart';
+import 'package:provitask_app/models/provider/provider_model.dart';
 import 'package:provitask_app/services/task_services.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:provitask_app/services/provider_services.dart';
@@ -15,6 +17,7 @@ class RegisterTaskController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+
     await getSkills();
 
     final datetime = DateTime.now().add(const Duration(days: 7));
@@ -22,8 +25,6 @@ class RegisterTaskController extends GetxController {
     // añado en filters["day"].value solo el dia y no la hora
 
     filters["day"].value = datetime.toString().substring(0, 10);
-
-    Logger().d(filters["day"]);
   }
 
   final currentState = GlobalKey<FormState>();
@@ -176,15 +177,6 @@ class RegisterTaskController extends GetxController {
 
   final listSkills = [].obs;
 
-  final reviews = [].obs;
-  final currentPage = RxInt(1);
-  final lastPage = RxInt(0);
-  final totalPage = RxInt(0);
-  final limit = RxInt(10);
-  final isLoadingReviews = false.obs;
-
-  final count = RxInt(0);
-
   final keyDialogSelect = GlobalKey<ScaffoldState>();
 
   registerTask([paymentId, monto]) async {
@@ -205,12 +197,6 @@ class RegisterTaskController extends GetxController {
     final time = selectedHour.value;
 
     final description = descriptionTask.value.text;
-
-    // verifico que los campos no esten vacios
-
-    // si estan llenos, creo el objeto
-
-    //  convierto location en un map de lat y lng
 
     final locationMap = {
       "lat": location!.latitude,
@@ -389,7 +375,7 @@ class RegisterTaskController extends GetxController {
     final response = await _task.getProviders(
         _locationController.selectedLocation?.latitude,
         _locationController.selectedLocation?.longitude,
-        5000,
+        Constants.distance,
         filters);
 
     // si el status es 500 muestro un mensaje de error
@@ -436,7 +422,7 @@ class RegisterTaskController extends GetxController {
         closeDisponibility: json['close_disponibility'],
         avatarImage: json['avatar_image'],
         skillSelect: json['skill_select'],
-        allSkills: ProviderSkill.fromJson(json['online']),
+        allSkills: ProviderSkill.map(json['provider_skills']),
         distanceLineal: json['distanceLineal'].toDouble(),
         online: OnlineStatus.fromJson(json['online']),
       ));
@@ -551,6 +537,13 @@ class RegisterTaskController extends GetxController {
 
     if (response['status'] == 200) {
       prepareSkills(response['data'].data["data"]);
+      final args = Get.arguments;
+
+      if (args != null) {
+        if (args["id"] != null) {
+          filters["skill"].value = args["id"].toString();
+        }
+      }
       return true;
     } else {
       return false;
@@ -605,7 +598,6 @@ class RegisterTaskController extends GetxController {
       if (location != null &&
           locationGeo != "" &&
           length != "" &&
-          date != "" &&
           time != "" &&
           description != "") {
         final locationMap = {
@@ -622,9 +614,12 @@ class RegisterTaskController extends GetxController {
           "time": time.toString(),
           "car": car,
           "description": description,
-          "category": category,
-          "price":
+          "skill": category,
+          "netoPrice":
               formatFinalMount(perfilProvider.value["skill_select"], length),
+          "brutePrice":
+              formatFinalMount(perfilProvider.value["skill_select"], length, 0),
+          "createType": "client"
         };
 
         //añado task a un objeto data
@@ -755,8 +750,6 @@ class RegisterTaskController extends GetxController {
               child: const Text('Aceptar'))
         ],
       ));
-
-      Logger().e("ERROR DE PAGO", e);
     }
   }
 
@@ -765,44 +758,6 @@ class RegisterTaskController extends GetxController {
       await Stripe.instance.presentPaymentSheet();
     } catch (e) {
       print('$e');
-    }
-  }
-
-  Future<void> getComments(int id) async {
-    try {
-      isLoadingReviews.value = true;
-      // Realiza la llamada al servidor para obtener los datos de las revisiones
-      // Puedes utilizar paquetes como http o dio para realizar la solicitud HTTP
-      // y obtener la respuesta del servidor
-
-      // Por ejemplo, utilizando el paquete dio:
-      final response = await _services.getComments(id,
-          int.parse(filters["skill"].value), currentPage.value, limit.value);
-
-      if (response['status'] == 200) {
-        final data = response['data'].data["data"];
-
-        reviews.value = data;
-
-        final metadata = response['data'].data["metadata"];
-
-        count.value = metadata['count'];
-
-        currentPage.value = metadata['page'];
-
-        // calculo el lastPage
-
-        lastPage.value = metadata['pages'] % limit.value;
-
-        totalPage.value = metadata['pages'];
-
-        isLoadingReviews.value = false;
-      } else {
-        throw Exception('Failed to fetch reviews');
-      }
-    } catch (error) {
-      isLoadingReviews.value = false;
-      throw Exception('Failed to fetch reviews: $error');
     }
   }
 }
@@ -828,91 +783,4 @@ class Event {
   String get getStatus => status;
 
   TimeOfDay get getTime => time;
-}
-
-class Provider {
-  int id;
-  bool isProvider;
-  String name;
-  String? lastname;
-  double? averageScore;
-  int? averageCount;
-  String? typeProvider;
-  String? description;
-  bool? motorcycle;
-  bool? car;
-  bool? truck;
-  String openDisponibility;
-  String closeDisponibility;
-  String? avatarImage;
-  Map? skillSelect;
-  double distanceLineal;
-  ProviderSkill? allSkills;
-  OnlineStatus? online;
-  Provider({
-    required this.id,
-    required this.isProvider,
-    required this.name,
-    this.lastname,
-    this.averageScore,
-    this.averageCount,
-    this.typeProvider,
-    this.description,
-    this.motorcycle,
-    this.car,
-    this.truck,
-    required this.openDisponibility,
-    required this.closeDisponibility,
-    this.avatarImage,
-    this.skillSelect,
-    required this.distanceLineal,
-    this.allSkills,
-    this.online,
-  });
-}
-
-class ProviderSkill {
-  String? typePrice;
-  double? cost;
-  List<String>? media;
-  String categoriasSkill;
-  int categoriasSkillId;
-  String? description;
-  ProviderSkill({
-    this.typePrice,
-    this.cost,
-    this.media,
-    required this.categoriasSkill,
-    required this.categoriasSkillId,
-    this.description,
-  });
-  factory ProviderSkill.fromJson(Map<String, dynamic> json) {
-    return ProviderSkill(
-      typePrice: json['type_price'],
-      // ignore: prefer_null_aware_operators
-      cost: json['cost'] != null ? json['cost'].toDouble() : null,
-      media: json['media'] != null ? List<String>.from(json['media']) : [],
-      categoriasSkill: json['categorias_skill'] ?? "",
-      categoriasSkillId: json['categorias_skill_id'] ?? 0,
-      description: json['description'] ?? "",
-    );
-  }
-}
-
-class OnlineStatus {
-  String? socketId;
-  String? lastConnection;
-  String? status;
-  OnlineStatus({
-    this.socketId,
-    this.lastConnection,
-    this.status,
-  });
-  factory OnlineStatus.fromJson(Map<String, dynamic> json) {
-    return OnlineStatus(
-      socketId: json['socket_id'],
-      lastConnection: json['lastConnection'],
-      status: json['status'],
-    );
-  }
 }

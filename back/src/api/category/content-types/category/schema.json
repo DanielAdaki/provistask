@@ -65,7 +65,7 @@
         }
       },
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "rating": {
       "pluginOptions": {

@@ -8,8 +8,6 @@ import 'package:provitask_app/components/main_app_bar.dart';
 class FreelancersPage extends GetView<FreelancersController> {
   final _widgets = FreelancersWidgets();
 
-  final _controller = Get.put<FreelancersController>(FreelancersController());
-
   FreelancersPage({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -32,7 +30,15 @@ class FreelancersPage extends GetView<FreelancersController> {
                   const SizedBox(
                     height: 20,
                   ),
-                  _widgets.freelancersPreviously(),
+                  if (controller.freelancers.isNotEmpty &&
+                      controller.isLoading.value == false) ...[
+                    _widgets.freelancersPreviously(),
+                  ] else if (controller.freelancers.isEmpty &&
+                      controller.isLoading.value == false) ...[
+                    _widgets.freelancersEmpty()
+                  ] else ...[
+                    _widgets.freelancersLoading()
+                  ]
                 ],
               ),
             ),

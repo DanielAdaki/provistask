@@ -39,8 +39,8 @@ class ProviderRegisterServices {
     return respuesta;
   }
 
-  Future<Map> getComments(
-      int provider, int skill, int currentPage, int limit) async {
+  Future<Map> getComments(int provider, int currentPage, int limit,
+      [int? skill]) async {
     Map respuesta;
 
     try {

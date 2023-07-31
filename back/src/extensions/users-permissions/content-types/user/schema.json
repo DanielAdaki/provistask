@@ -161,6 +161,9 @@
       "relation": "oneToMany",
       "target": "api::provider-skill.provider-skill",
       "mappedBy": "provider"
+    },
+    "skillAndExperience": {
+      "type": "text"
     }
   }
 }

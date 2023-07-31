@@ -44,12 +44,13 @@ class TaskServices extends GetxController {
     return respuesta;
   }
 
-  Future<Map> getPopularItems() async {
+  Future<Map> getPopularItems(
+      [double lat = 0, double lng = 0, int distance = 0]) async {
     Map respuesta;
 
     try {
       final response = await dio.get(
-          "/tasks?sort=countPurchase:desc&pagination[pageSize]=4&fields[0]=location&fields[1]=name&fields[2]=countPurchase&fields[3]=averageScore&populate[0]=image");
+          "/users-permissions/proveedores/destacados?lat=$lat&lng=$lng&distance=$distance");
 
       // reviso el status de la respuesta si es distinto a 200 lanzo error
 

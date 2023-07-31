@@ -114,7 +114,27 @@ class RegisterTaskPage extends GetView<RegisterTaskController> {
                                       ),
                                     )
                                   ],
-                                  _widgets.registerTaskSelectLocation(),
+                                  if (controller.listSkills.isNotEmpty) ...[
+                                    _widgets.registerTaskSelectLocation(),
+                                  ] else ...[
+                                    // si no hay skills muestro un mensaje indicando que se estan cargando
+
+                                    Container(
+                                      alignment: Alignment.center,
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 20),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 30),
+                                      child: const Text(
+                                        "Loading skills...",
+                                        style: TextStyle(
+                                          color: Color(0xFFDD7813),
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                    )
+                                  ],
                                   const SizedBox(width: 50),
                                   if (_controllerLocation.selectedAddress !=
                                           "" &&

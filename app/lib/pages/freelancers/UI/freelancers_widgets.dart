@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 import 'package:provitask_app/common/conexion_common.dart';
+import 'package:provitask_app/models/provider/provider_model.dart';
 import 'package:provitask_app/pages/freelancers/UI/freelancers_controller.dart';
+import 'package:provitask_app/widget/provider/provider_perfil_dialog.dart';
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 class FreelancersWidgets {
-  final _controller = Get.put<FreelancersController>(FreelancersController());
+  final _controller = Get.find<FreelancersController>();
 
   Widget freelancersFloatingButton() {
     return Material(
@@ -273,188 +275,290 @@ class FreelancersWidgets {
     ]);
   }
 
-  Widget taskProCard(Map<String, dynamic> freelancer) {
-    return Container(
-      width: Get.width * 9,
-      height: 150,
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-      child: Center(
-        child: Stack(
-          children: [
-            Container(
-              width: Get.width * 1,
-              height: 120,
-              padding: const EdgeInsets.only(top: 10, bottom: 15, right: 10),
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.grey,
-                      blurRadius: 10,
-                      offset: Offset(0, 5),
-                    ),
-                  ]),
-              child: Row(
-                children: [
-                  Flexible(
-                    flex: 2,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: Get.width * 0.3,
-                          height: Get.width * 0.2,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              // si item.avatar es null, se usa el avatar por defecto
+  Widget taskProCard(Provider freelancer) {
+    return GestureDetector(
+      onTap: () async {
+        ProgressDialog pd = ProgressDialog(context: Get.context);
+        try {
+          pd.show(
+            max: 100,
+            msg: 'Please wait...',
+            progressBgColor: Colors.transparent,
+          );
 
-                              image: freelancer["avatar_image"] != false
-                                  ? NetworkImage(ConexionCommon.hostBase +
-                                      freelancer["avatar_image"])
-                                  : const AssetImage(
-                                      "assets/images/REGISTER TASK/avatar.jpg",
-                                    ) as ImageProvider,
+          List<Future> futures = [
+            _controller.getPerfilProvider(freelancer.id, true)
+            // controller.getComments(item.id),
+          ];
 
-                              fit: BoxFit.cover,
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Flexible(
-                    flex: 4,
-                    child: Column(
-                      children: [
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          transformAlignment: Alignment.topLeft,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              //las primeras 10 letras de la descripcion item["attributes"]["description"] capitalizando la primera letra
-                              Column(
-                                children: [
-                                  Text(
-                                    freelancer["name"] +
-                                        ' ' +
-                                        freelancer["lastname"],
+          // Ejecutar las funciones en paralelo
+          await Future.wait(futures);
 
-                                    // meto overflow para que no se salga del contenedor
-                                    overflow: TextOverflow.clip,
-                                    style: TextStyle(
-                                      color: Colors.indigo[800],
-                                      fontWeight: FontWeight.w800,
-                                      fontStyle: FontStyle.italic,
-                                      fontSize: 22,
-                                    ),
-                                  ),
-                                  Container(
-                                    //margin: const EdgeInsets.only(left: 10),
-                                    alignment: Alignment.topLeft,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        RatingBar(
-                                          initialRating:
-                                              freelancer["scoreAverage"]
-                                                  .toDouble(),
-                                          direction: Axis.horizontal,
-                                          allowHalfRating: true,
-                                          itemCount: 5,
-                                          itemSize: 12,
-                                          ratingWidget: RatingWidget(
-                                            full: Icon(
-                                              Icons.star,
-                                              color: Colors.amber[900],
-                                            ),
-                                            half: Icon(
-                                              Icons.star_half,
-                                              color: Colors.amber[900],
-                                            ),
-                                            empty: Icon(
-                                              Icons.star_border,
-                                              color: Colors.amber[900],
-                                            ),
-                                          ),
-                                          itemPadding:
-                                              const EdgeInsets.symmetric(
-                                                  horizontal: 0.5),
-                                          onRatingUpdate: (rating) {
-                                            print(rating);
-                                          },
-                                        ),
-                                        Text(
-                                          '(${freelancer["scoreAverage"]})',
-                                          style: TextStyle(
-                                              color: Colors.amber[900],
-                                              fontSize: 10),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              freelancer["description"] ?? '',
-                              maxLines: 3,
-                              textAlign: TextAlign.left,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
-                              ),
-                            )),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+          pd.close();
+          Get.dialog(
+            Dialog(
+              insetPadding: const EdgeInsets.all(0),
+              child: ProfileDialog(
+                perfilProvider: _controller.perfilProvider.value,
+                general: true,
               ),
             ),
-            Container(
-              alignment: Alignment.bottomCenter,
-              margin: const EdgeInsets.only(top: 100),
-              child: ElevatedButton(
-                onPressed: () async {
-                  final idChat =
-                      await _controller.getConversation(freelancer["id"]);
-
-                  Get.toNamed("/chat/$idChat/");
-                },
-                style: ButtonStyle(
-                  elevation: MaterialStateProperty.all(0),
-                  backgroundColor: MaterialStateProperty.all(Colors.amber[800]),
-                  padding: MaterialStateProperty.all(
-                      const EdgeInsets.symmetric(vertical: 0, horizontal: 30)),
-                  shape: MaterialStateProperty.all(
-                    RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(90),
-                        side: const BorderSide(color: Colors.transparent)),
-                  ),
-                ),
-                child: const Text(
-                  'Contact',
-                  style: TextStyle(
+          );
+        } catch (e) {
+          pd.close();
+        }
+      },
+      child: Container(
+        width: Get.width * 9,
+        height: 150,
+        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        child: Center(
+          child: Stack(
+            children: [
+              Container(
+                width: Get.width * 1,
+                height: 120,
+                padding: const EdgeInsets.only(top: 10, bottom: 15, right: 10),
+                decoration: BoxDecoration(
                     color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.grey,
+                        blurRadius: 10,
+                        offset: Offset(0, 5),
+                      ),
+                    ]),
+                child: Row(
+                  children: [
+                    Flexible(
+                      flex: 2,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: Get.width * 0.3,
+                            height: Get.width * 0.2,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                // si item.avatar es null, se usa el avatar por defecto
+
+                                image: NetworkImage(freelancer.avatarImage!),
+
+                                fit: BoxFit.cover,
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Flexible(
+                      flex: 4,
+                      child: Column(
+                        children: [
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            transformAlignment: Alignment.topLeft,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                //las primeras 10 letras de la descripcion item["attributes"]["description"] capitalizando la primera letra
+                                Column(
+                                  children: [
+                                    Text(
+                                      '${freelancer.name} ${freelancer.lastname}',
+
+                                      // meto overflow para que no se salga del contenedor
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: Colors.indigo[800],
+                                        fontWeight: FontWeight.w800,
+                                        fontStyle: FontStyle.italic,
+                                        fontSize: 22,
+                                      ),
+                                    ),
+                                    Container(
+                                      //margin: const EdgeInsets.only(left: 10),
+                                      alignment: Alignment.topLeft,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          RatingBar(
+                                            initialRating:
+                                                freelancer.averageScore!,
+                                            direction: Axis.horizontal,
+                                            allowHalfRating: true,
+                                            itemCount: 5,
+                                            itemSize: 12,
+                                            ratingWidget: RatingWidget(
+                                              full: Icon(
+                                                Icons.star,
+                                                color: Colors.amber[900],
+                                              ),
+                                              half: Icon(
+                                                Icons.star_half,
+                                                color: Colors.amber[900],
+                                              ),
+                                              empty: Icon(
+                                                Icons.star_border,
+                                                color: Colors.amber[900],
+                                              ),
+                                            ),
+                                            itemPadding:
+                                                const EdgeInsets.symmetric(
+                                                    horizontal: 0.5),
+                                            onRatingUpdate: (rating) {
+                                              print(rating);
+                                            },
+                                          ),
+                                          Text(
+                                            '(${freelancer.averageScore})',
+                                            style: TextStyle(
+                                                color: Colors.amber[900],
+                                                fontSize: 10),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Container(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                freelancer.description ?? '',
+                                maxLines: 3,
+                                textAlign: TextAlign.left,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              )),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                alignment: Alignment.bottomCenter,
+                margin: const EdgeInsets.only(top: 100),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final idChat =
+                        await _controller.getConversation(freelancer.id);
+
+                    Get.toNamed("/chat/$idChat/");
+                  },
+                  style: ButtonStyle(
+                    elevation: MaterialStateProperty.all(0),
+                    backgroundColor:
+                        MaterialStateProperty.all(Colors.amber[800]),
+                    padding: MaterialStateProperty.all(
+                        const EdgeInsets.symmetric(
+                            vertical: 0, horizontal: 30)),
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(90),
+                          side: const BorderSide(color: Colors.transparent)),
+                    ),
+                  ),
+                  child: const Text(
+                    'Contact',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget freelancersEmpty() {
+    return Container(
+      width: Get.width * 0.9,
+      height: Get.height * 0.6,
+      margin: const EdgeInsets.symmetric(
+        vertical: 10,
+        horizontal: 10,
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.person_search,
+            size: 100,
+            color: Colors.grey,
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            'You have no freelancers',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 20,
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            'You can add freelancers to your favorites or book them from the search page',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget freelancersLoading() {
+    return Container(
+      width: Get.width * 0.9,
+      height: Get.height * 0.2,
+      margin: const EdgeInsets.symmetric(
+        vertical: 10,
+        horizontal: 10,
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            'Loading...',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 20,
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          CircularProgressIndicator(),
+        ],
       ),
     );
   }

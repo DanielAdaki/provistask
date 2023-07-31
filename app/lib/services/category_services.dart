@@ -23,8 +23,8 @@ class CategoryServices {
     Map respuesta;
 
     try {
-      final response =
-          await dio.get("/categories?fields[0]=title&populate=image");
+      final response = await dio.get(
+          "/skills?fields[0]=name&fields[1]=id&filters[name][\$contains]=$search");
 
       // reviso el status de la respuesta si es distinto a 200 lanzo error
 

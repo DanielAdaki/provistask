@@ -7,6 +7,8 @@ import 'package:provitask_app/widget/home/home_widget.dart';
 
 import 'package:provitask_app/components/main_app_bar.dart';
 import 'package:provitask_app/components/main_drawer.dart';
+import 'package:provitask_app/widget/home/search_task_widget.dart';
+import 'package:provitask_app/widget/provider/provider_card_widget.dart';
 
 class HomePage extends GetView<HomeController> {
   final _widgets = HomeWidgets();
@@ -23,14 +25,14 @@ class HomePage extends GetView<HomeController> {
         drawer: const HomeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),
         body: Scrollbar(
-          thickness: 2, // Ajusta el grosor de la barra de desplazamiento
+          thickness: 3, // Ajusta el grosor de la barra de desplazamiento
           radius: const Radius.circular(3),
           child: RefreshIndicator(
             onRefresh: () async {
               await Future.wait<void>([
                 controller.findCategory(),
                 controller.findTask(),
-                //controller._getPopularTask(),
+                controller.getPopularProvider(),
                 //controller._getCategoryHomeSlider(),
               ]);
             },
@@ -43,27 +45,26 @@ class HomePage extends GetView<HomeController> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       const SizedBox(
-                        height: 30,
+                        height: 10,
                       ),
                       _widgets.titleGenerate('Need help with...'),
                       //añado un spcio entre el titulo y el boton
                       const SizedBox(
-                        height: 30,
+                        height: 10,
                       ),
-                      _widgets.searchTask(),
+                      // añado el widget searchTask SearchTask
+                      SearchTask(),
                       const SizedBox(
-                        height: 30,
+                        height: 10,
                       ),
                       SizedBox(
-                        height: 450,
-                        width: Get.width * 0.9,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            //    _widgets.listTasks(),
-                          ],
-                        ),
-                      ),
+                          height: Get.height * 0.5,
+                          width: Get.width * 0.9,
+                          child: Row(
+                            children: [
+                              _widgets.listTasks(controller.listTask),
+                            ],
+                          )),
 
                       const SizedBox(
                         height: 30,
@@ -105,20 +106,28 @@ class HomePage extends GetView<HomeController> {
                       ),
 
                       // añado las
-                      _widgets.titleGenerate('Popular tasks'),
+                      _widgets.titleGenerate('Popular providers near you'),
                       const SizedBox(
                         height: 30,
                       ),
-                      SizedBox(
-                        height: Get.height * 0.5,
-                        width: Get.width * 1,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            //   _widgets.listPopularTasks(),
-                          ],
+                      if (controller.popularProvider.isEmpty) ...[
+                        // mensaje indicando que no hay proveedores cercanos
+                        const Text('No providers near you'),
+                      ] else ...[
+                        SizedBox(
+                          height: Get.height * 0.4,
+                          width: Get.width * 0.9,
+                          child: ListView.builder(
+                            // scrollDirection: Axis.horizontal,
+                            itemCount: controller.popularProvider.length,
+                            itemBuilder: (context, index) {
+                              return ProviderCard(
+                                provider: controller.popularProvider[index],
+                              );
+                            },
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),

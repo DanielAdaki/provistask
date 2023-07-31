@@ -5,6 +5,9 @@ import 'dart:convert';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:provitask_app/common/constans.dart';
+import 'package:provitask_app/models/home/home_category_model.dart';
+import 'package:provitask_app/models/provider/provider_model.dart';
 
 import 'package:provitask_app/services/category_services.dart';
 import 'package:provitask_app/services/task_services.dart';
@@ -13,42 +16,85 @@ import 'package:provitask_app/models/home/category_home_slider.dart';
 final logger = Logger();
 
 class HomeController extends GetxController {
+  // busco el controlador de localizacion
+
   final _category = CategoryServices();
 
   final _task = TaskServices();
-  Position? _currentPosition;
+  Position? currentPosition;
   final locationAddress = Rx<String>('');
 
   final isLoading = false.obs;
 
   final listCategory = <HomeCategory>[]
       .obs; // Declara listCategory como una lista vacía de objetos HomeCategory
+  final listTask = <HomeCategory>[].obs;
 
-  final listTask = [].obs;
-
-  final popularTask = [].obs;
+  final popularProvider = <Provider>[].obs;
 
   final formKey = GlobalKey<FormState>();
 
-  // saco de los widgets el widget categoryCard
+  final loadingSearch = false.obs;
 
   final searchController = Rx<TextEditingController>(TextEditingController());
 
   final categoryHomeSlider = <CategoryHomeSlider>[].obs;
 
+  var searchText = ''.obs;
+  final suggestions = <Map>[].obs;
+  void onTextChanged(String text) async {
+    await getSuggestions(text);
+  }
+
+  Future getSuggestions(String text) async {
+    loadingSearch.value = true;
+    final response = await _category.getItems(text);
+
+    // si el status es 500 muestro un mensaje de error
+
+    if (response["status"] != 200) {
+      // paso a json el body del erro
+
+      // muestro el mensaje de error en un snackbar en la parte inferior de la pantalla y fondo en rojo
+      isLoading.value = false;
+
+      print(
+          "error en la consulta de categorias en la funcion findCategory del controlador home_controller.dart");
+
+      suggestions.clear();
+
+      loadingSearch.value = false;
+
+      return;
+    }
+
+    final data = jsonDecode(response["data"].toString());
+
+    suggestions.clear();
+
+    data["data"].forEach((element) {
+      // añado nombre y id a la lista de sugerencias como un map
+
+      suggestions
+          .add({"name": element["attributes"]["name"], "id": element["id"]});
+    });
+
+    loadingSearch.value = false;
+  }
+
   @override
   void onInit() async {
     super.onInit();
-    Logger().i("HomeController");
-    _getCurrentLocation();
+
+    await _getCurrentLocation();
 
     await Future.wait<void>([
       findCategory(),
       findTask(),
-      _getPopularTask(),
       _getCategoryHomeSlider(),
     ]);
-
+    Logger().i("position", currentPosition);
+    getPopularProvider();
     // await listaCategorias();
   }
 
@@ -57,14 +103,14 @@ class HomeController extends GetxController {
             desiredAccuracy: LocationAccuracy.best,
             forceAndroidLocationManager: true)
         .then((Position position) {
-      _currentPosition = position;
+      currentPosition = position;
       _getAddressFromLatLng();
     }).catchError((e) {
       print(e);
     });
   }
 
-  findCategory([int start = 0, int limit = 6, bool featured = false]) async {
+  findCategory([int start = 0, int limit = 10, bool featured = false]) async {
     start = start * limit;
 
     final response = await _task.getItems(limit, start, false);
@@ -77,17 +123,11 @@ class HomeController extends GetxController {
       // muestro el mensaje de error en un snackbar en la parte inferior de la pantalla y fondo en rojo
       isLoading.value = false;
 
-      Get.snackbar(
-        "Error",
-        response["error"]["message"],
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      print(
+          "error en la consulta de categorias en la funcion findCategory del controlador home_controller.dart");
 
       listCategory.value = [];
     }
-
-    Logger().i(response["data"]);
 
     final data = jsonDecode(response["data"].toString());
 
@@ -95,17 +135,18 @@ class HomeController extends GetxController {
 
     data["data"].forEach((element) {
       listCategory.add(HomeCategory(
-        id: element["id"],
-        title: element["attributes"]["title"],
-        image: element["attributes"]["image"],
-        costaverage:
-            double.parse(element["attributes"]["costaverage"].toString()),
-        rating: double.parse(element["attributes"]["rating"].toString()),
-      ));
+          id: element["id"],
+          title: element["attributes"]["title"],
+          image: element["attributes"]["image"],
+          costAverage: element["attributes"]["costAverage"].toDouble(),
+          rating: element["attributes"]["rating"].toDouble(),
+          countPurchase: element["attributes"]["countPurchase"],
+          description: element["attributes"]["description"],
+          categoryId: element["attributes"]["categoria"]["id"]));
     });
   }
 
-  findTask([int start = 0, int limit = 6, bool featured = false]) async {
+  findTask([int start = 0, int limit = 20, bool featured = true]) async {
     start = start * limit;
 
     final response = await _task.getItems(limit, start, featured);
@@ -117,32 +158,33 @@ class HomeController extends GetxController {
 
       // muestro el mensaje de error en un snackbar en la parte inferior de la pantalla y fondo en rojo
       // isLoading.value = false;
-
-      Get.snackbar(
-        "Error",
-        response["error"]["message"],
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-
+      print(
+          "error en la consulta de tareas en la funcion findTask del controlador home_controller.dart");
       // lleno el listado de categorias con el resultado de la consulta
 
       listTask.value = [];
     }
 
-    // imprimo el tipo de dato que devuelve la consulta
-
-    // chago cast a json el body de la respuesta
-
     final data = jsonDecode(response["data"].toString());
 
-    //imprimo tipo de dato de data
+    listTask.clear();
 
-    listTask.value = data["data"];
+    data["data"].forEach((element) {
+      listTask.add(HomeCategory(
+          id: element["id"],
+          title: element["attributes"]["title"],
+          image: element["attributes"]["image"],
+          costAverage: element["attributes"]["costAverage"].toDouble(),
+          rating: element["attributes"]["rating"].toDouble(),
+          countPurchase: element["attributes"]["countPurchase"],
+          description: element["attributes"]["description"],
+          categoryId: element["attributes"]["categoria"]["id"]));
+    });
   }
 
-  _getPopularTask() async {
-    final response = await _task.getPopularItems();
+  getPopularProvider() async {
+    final response = await _task.getPopularItems(currentPosition!.latitude,
+        currentPosition!.longitude, Constants.distance);
 
     // si el status es 500 muestro un mensaje de error
 
@@ -161,24 +203,41 @@ class HomeController extends GetxController {
 
       // lleno el listado de categorias con el resultado de la consulta
 
-      popularTask.value = [];
+      popularProvider.clear();
     }
-
-    // imprimo el tipo de dato que devuelve la consulta
-
-    // chago cast a json el body de la respuesta
 
     final data = jsonDecode(response["data"].toString());
 
-    //imprimo tipo de dato de data
+    popularProvider.clear();
 
-    popularTask.value = data["data"];
+    data["data"].forEach((json) {
+      popularProvider.add(Provider(
+        id: json['id'],
+        isProvider: json['isProvider'],
+        name: json['name'],
+        lastname: json['lastname'],
+        averageScore: json['averageScore'].toDouble(),
+        averageCount: json['averageCount'],
+        typeProvider: json['type_provider'],
+        description: json['description'],
+        motorcycle: json['motorcycle'],
+        car: json['car'],
+        truck: json['truck'],
+        openDisponibility: json['open_disponibility'],
+        closeDisponibility: json['close_disponibility'],
+        avatarImage: json['avatar_image'],
+        skillSelect: json['skill_select'],
+        allSkills: ProviderSkill.map(json['provider_skills']),
+        distanceLineal: json['distanceLineal'].toDouble(),
+        online: OnlineStatus.fromJson(json['online']),
+      ));
+    });
   }
 
   _getAddressFromLatLng() async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(
-          _currentPosition!.latitude, _currentPosition!.longitude);
+          currentPosition!.latitude, currentPosition!.longitude);
 
       Placemark place = placemarks[0];
 
@@ -214,22 +273,4 @@ class HomeController extends GetxController {
       print(e);
     }
   }
-}
-
-class HomeCategory {
-  final int id;
-  final String slug;
-  final String title;
-  final String image;
-  final double? costaverage;
-  final double? rating;
-
-  HomeCategory({
-    required this.id,
-    this.slug = '',
-    required this.title,
-    required this.image,
-    this.costaverage = 0.0,
-    this.rating = 0.0,
-  });
 }
