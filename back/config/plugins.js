@@ -44,7 +44,8 @@ module.exports = ({ env }) => ({
       contentTypes: [
         "api::category.category",
         "api::task.task",
-        "plugin::users-permissions.user" 
+        "plugin::users-permissions.user",
+        "api::task-assigned.task-assigned",
       ],
     },
   },
