@@ -2,7 +2,7 @@
 let bcrypt = require("bcryptjs");
 let geolib = require("geolib");
 const { Client } = require("@googlemaps/google-maps-services-js");
-const {
+let {
 	STRIPE_PUBLIC_KEY,
 	STRIPE_SECRET_KEY,
 	STRIPE_URL,
@@ -1909,13 +1909,19 @@ LIMIT ?;
 			console.log("brutePrice", brutePrice);
 
 
-	
+			// verifico si brutePrice es tipo string lo paso a numero
+
+			if (typeof brutePrice == "string") {
+
+				brutePrice = parseFloat(brutePrice);
+
+			}
 
 
 
 			brutePrice = brutePrice * 100; // lo paso a centimos
 
-			brutePrice = parseInt(brutePrice); // lo paso a entero
+			//brutePrice = parseInt(brutePrice); // lo paso a entero
 
  
 
