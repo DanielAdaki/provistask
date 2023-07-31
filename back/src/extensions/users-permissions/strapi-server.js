@@ -1906,6 +1906,12 @@ LIMIT ?;
 			} = ctx.request.body.data;
 
 
+			console.log("brutePrice", brutePrice);
+
+
+			return	ctx.send({	data: { brutePrice: brutePrice } });
+
+
 
 			brutePrice = brutePrice * 100; // lo paso a centimos
 
@@ -2056,7 +2062,7 @@ LIMIT ?;
 			return ctx.badRequest(`Webhook Error: ${err.message}`);
 		}
 
-var response = [];
+let response = [];
 
 
   switch (event.type) {
@@ -2099,6 +2105,15 @@ var response = [];
 
 							populate: { usuario: true },
 						});
+
+
+						if(!order){
+
+							console.log("No se encontro la orden", { error: 'No se encontro la orden con el paymentIntentId'+ paymentIntentSucceeded.id });
+
+							return ctx.badRequest("No se encontro la orden", { error: 'No se encontro la orden con el paymentIntentId' + paymentIntentSucceeded.id });
+
+						}
 
 
 						// actualizo el estado de la orden
