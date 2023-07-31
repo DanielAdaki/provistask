@@ -4,6 +4,7 @@
 	* task-assigned controller
 	*/
 const moment = require('moment');
+const conversation = require('../../conversation/controllers/conversation');
 const { createCoreController } = require('@strapi/strapi').factories;
 const { STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY, STRIPE_URL, STRIPE_ID_CLIENT, STRIPE_WEBHOOK_SECRET, URL } = process.env;
 const stripe = require('stripe')(STRIPE_SECRET_KEY);
@@ -315,7 +316,70 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 
 
 		},
+		async	taskByPaymentIntent(ctx) {
 
+
+			const user = ctx.state.user;
+
+			if (!user) {
+
+				return ctx.unauthorized("No tienes permiso", { error: 'No autorizado' });
+			}
+
+			// recibo el id del paymentIntent por params
+
+			const { paymentIntentId } = ctx.params;
+
+
+			if (!paymentIntentId) {
+
+				return ctx.badRequest("No existe el paymentIntentId", { error: 'No existe el paymentIntentId' });
+
+			}
+
+
+			// busco la tarea filtrando por el paymentIntentId que recibo por params
+
+
+			let tarea = await strapi.db.query("api::task-assigned.task-assigned").findOne({
+
+				where: { paymentIntentId: paymentIntentId },
+
+				populate: { location: true, skill : true , provider: true, client: true, conversation: true }
+
+			});
+
+
+			if (!tarea) {
+
+				return ctx.notFound("No existe la tarea", { error: 'No existe la tarea' });
+
+			}
+
+
+			// verifico que el usuario logueado sea el cliente de la tarea o el proveedor de la tarea
+
+
+			if (tarea.client.id != user.id && tarea.provider.id != user.id) {
+
+				return ctx.unauthorized("No tienes permiso", { error: 'No autorizado' });
+
+			}
+
+
+
+
+
+			return ctx.send({data: tarea.conversation.id});
+
+
+
+
+
+
+
+
+		},
 		async find(ctx) {
 
 

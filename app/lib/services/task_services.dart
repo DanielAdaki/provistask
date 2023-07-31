@@ -312,6 +312,31 @@ class TaskServices extends GetxController {
     return respuesta;
   }
 
+  Future getTaskByPaymentIntentId(String paimentInt) async {
+    Map respuesta;
+
+    try {
+      final response =
+          await dio.get("/task-assigneds/by-payment-intent/$paimentInt");
+
+      // reviso el status de la respuesta si es distinto a 200 lanzo error
+
+      if (response.statusCode != 200) {
+        throw response.data;
+      }
+
+      // mando al modelo
+
+      var aux = response.data;
+
+      respuesta = {"status": 200, "data": aux};
+    } catch (e) {
+      respuesta = {"status": 500, "error": e};
+    }
+
+    return respuesta;
+  }
+
 // importo conexion_common.dart
 }
 

@@ -704,10 +704,12 @@ class RegisterTaskController extends GetxController {
 
       await Stripe.instance.presentPaymentSheet();
 
-      final conversartion = await registerTask(
-          info['paymentIntentId'],
-          formatFinalMount(perfilProvider.value["skill_select"],
-              filters["long_task"].value));
+      // busco tarea por paymentIntentId
+
+      final response =
+          await _task.getTaskByPaymentIntentId(info['paymentIntentId']);
+
+      final conversartion = response["data"]["data"];
 
       Get.dialog(
         AlertDialog(
@@ -720,11 +722,11 @@ class RegisterTaskController extends GetxController {
           actions: [
             TextButton(
                 onPressed: () {
-                  /* Get.offAllNamed(
+                  Get.offAllNamed(
                     '/chat/$conversartion',
-                  );*/
+                  );
 
-                  Get.back();
+                  //Get.back();
                 },
                 child: const Text('Aceptar'))
           ],

@@ -4,6 +4,12 @@ module.exports = {
 	routes: [
 		{
 			method: "GET",
+			path: "/task-assigneds/by-payment-intent/:paymentIntentId",
+			handler: "task-assigned.taskByPaymentIntent",
+			
+		},
+		{
+			method: "GET",
 			path: "/task-assigneds/completed/:id",
 			handler: "task-assigned.taskCompleted",
 			

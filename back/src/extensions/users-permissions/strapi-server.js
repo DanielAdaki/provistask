@@ -1906,7 +1906,7 @@ LIMIT ?;
 			} = ctx.request.body.data;
 
 
-			console.log("brutePrice", brutePrice);
+
 
 
 			// verifico si brutePrice es tipo string lo paso a numero
@@ -2068,7 +2068,7 @@ LIMIT ?;
 			return ctx.badRequest(`Webhook Error: ${err.message}`);
 		}
 
-let response = [];
+
 
 
   switch (event.type) {
@@ -2134,11 +2134,11 @@ let response = [];
 
 							// creo la tarea 
 
-					response =	await	crearTarea(order.usuario, order.datosTarea,ctx);
+					let response =	await	crearTarea(order.usuario, order.datosTarea,ctx);
 
-	
+							console.log("payment_intent.succeeded", response);
 
-
+					return ctx.send({ data : response });
 
 					break;
 			// ... handle other event types
@@ -2146,9 +2146,9 @@ let response = [];
 					console.log(`Unhandled event type ${event.type}`);
 	}
 
-		// Return a response to acknowledge receipt of the event
-console.log("response", response);
-		return ctx.send({ data : response });
+
+
+		return ctx.send({ data : "ok" });
 
 	};
 
@@ -2165,11 +2165,11 @@ console.log("response", response);
 
 
 
-			let { provider, location, location_geo, length, car, date, time, description,status,descriptionProvis ,conversation,addDetails,addFinalPrice,finalPrice,skill,createType, brutePrice, netoPrice,paymentIntentId } = data;
+			let {location, taskLength,date,time,transportation,description,skill,client,paymentIntentId,provider,brutePrice,netoPrice,idCreador,createType,addDetails} = data;
 
 
-
-			
+			console.log("========================CREANDO TAREA=============");
+			console.log("data", data);
 
 			if (!provider) {
 console.log("El campo provider es obligatorio", { error: 'El campo provider es obligatorio' });
@@ -2193,7 +2193,6 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 
 			}
 
-			console.log(providerx);
 			if (!providerx.isProvider) {
 
 				console.log("El provider no es un proveedor", { error: 'El provider no es un proveedor' });
@@ -2207,6 +2206,8 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 
 			if (provider == user.id) {
 
+				console.log("El provider no puede ser el mismo que el cliente", { error: 'El provider no puede ser el mismo que el cliente' });
+
 				return ctx.badRequest("El provider no puede ser el mismo que el cliente", { error: 'El provider no puede ser el mismo que el cliente' });
 
 
@@ -2214,23 +2215,16 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 
 
 
-			// car solo puede ser "motorcycle"  "car"  "truck"  "not_necessary"
+			// transportation solo puede ser "motorcycle"  "transportation"  "truck"  "not_necessary"
 
-			if (car != "motorcycle" && car != "car" && car != "truck" && car != "not_necessary") {
-
-				return ctx.badRequest("El campo car solo puede ser motorcycle, car, truck o not_necessary", { error: 'El campo car solo puede ser motorcycle, car, truck o not_necessary' });
-
-			}
-
-
-
-
-			let locat = {
-				latitud: location.lat,
-				longitud: location.lng,
-				name: location_geo,
+			if (transportation != "motorcycle" && transportation != "transportation" && transportation != "truck" && transportation != "not_necessary") {
+				console.log("El campo transportation solo puede ser motorcycle, transportation, truck o not_necessary", { error: 'El campo transportation solo puede ser motorcycle, transportation, truck o not_necessary' });
+				return ctx.badRequest("El campo transportation solo puede ser motorcycle, transportation, truck o not_necessary", { error: 'El campo transportation solo puede ser motorcycle, transportation, truck o not_necessary' });
 
 			}
+
+
+
 
 
 
@@ -2254,20 +2248,13 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 
 				combinedDateTime	= moment(combinedDateTime).format('YYYY-MM-DD HH:mm:ss');
 
-				console.log("combinedDateTime",combinedDateTime);
 			}	else {
 
 					combinedDateTime = moment(date).format('YYYY-MM-DD') + ' ' + "00:00:00.000";
 					combinedDateTime	= moment(combinedDateTime).format('YYYY-MM-DD HH:mm:ss');
 			}
 
-			let taskEntity = [];
 
-			let chatEntity = [];
-
-
-
-			if(!conversation){
 
 	
 				// creo una conversacion con el proveedor y el cliente. Las conversaciones se crean recibiendo un nombre  y un array de usuarios
@@ -2294,20 +2281,23 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 							provider,
 	
 							client: user.id,
-							transportation: car,
+							transportation: transportation,
 							description: description,
-							taskLength: length,
-							location: locat,
+							taskLength: taskLength,
+							location: location,
 							datetime: combinedDateTime,
 							time:  moment(combinedDateTime).format('HH:mm:ss'),
-							status :  status ? status : "request",
+							status :  "acepted",
 							timeFlexible : time == "I'm Flexible" ? true : false,
-							idCreador : user.id,
-							paymentIntentId	:  paymentIntentId ? paymentIntentId : ""  ,
+							idCreador : idCreador,
+							paymentIntentId	:  paymentIntentId  ,
 							skill : skill,
 							createType	: 'client',
 							conversation : conversation.id,
 							netoPrice	: netoPrice.toString(),
+							brutePrice	: brutePrice.toString(),
+							addDetails	: false,
+					
 						},
 				});
 
@@ -2325,145 +2315,22 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 	
 				});
 	
-				let [taskEntity1, chatEntity1] = await Promise.all([taskp, chatP]);
+				 let [taskEntity, chatEntity] = await Promise.all([taskp, chatP]);
 
-				taskEntity = taskEntity1;
-				chatEntity = chatEntity1;
+			
 
-			}else{
 
-				// busco la conversacion por el id que recibo por params
+				console.log("taskEntity", taskEntity);
 
-				conversation = await strapi.entityService.findOne('api::conversation.conversation', conversation, {
-
-					populate: { users: true }
-
-				});
-
-
-				if(createType == "provider"){
-
-					provider = conversation.users.find(u => u.id == user.id);
-
-					provider = provider.id;
-
-					var userx = conversation.users.find(u => u.id != user.id);
-
-					userx = userx.id;
-
-				}else{
-
-				var	userx = conversation.users.find(u => u.id == user.id);
-
-					userx = userx.id;
-
-					provider = conversation.users.find(u => u.id != user.id);
-
-					provider = provider.id;
-
-				}
-
-
-				// filtro las skills por el nombre que recibo por params
-
-
-				skill = await strapi.db.query('api::skill.skill').findOne({
-
-					where: { name: skill },
-
-					select: ['id'],
-
-				});
-
-
-				let dataInsert= {
-
-					provider,
-
-					client: userx,
-	
-					transportation: car,
-
-					description: description,
-
-					taskLength: length,
-
-					location: locat,
-
-					datetime: combinedDateTime,
-
-					time:  moment(combinedDateTime).format('HH:mm:ss'),
-
-					status :  status ? status : "request",
-
-					timeFlexible : time == "I'm Flexible" ? true : false,
-
-					skill : skill.id,
-
-					createType : createType,
-
-					conversation : conversation.id,
-
-					idCreador : user.id,
-
-				}
-
-				if(createType	== "provider"){
-
-					dataInsert.descriptionProvis = descriptionProvis;
-					dataInsert.brutePrice = brutePrice;
-					dataInsert.netoPrice = netoPrice;
-					dataInsert.addDetails = addDetails;
-
-
-				}
-
-
-	let taskp =		await strapi.entityService.create('api::task-assigned.task-assigned', {
-
-					data: dataInsert
-
-			});
-					
-
-
-			let chatP =	await strapi.entityService.create('api::chat-message.chat-message', {
-
-					data:{
-
-						conversation: conversation.id,
-
-						bot: true,
-
-						message: "Task request created"	,
-
-						emit	:provider ,
-
-						type:	"system"
-
-					}});
-
-
-				let	[taskEntity1, chatEntit1] = await Promise.all([taskp, chatP]);
-
-
-
-				taskEntity = taskEntity1;
-				chatEntity = chatEntit1;
-
-			}
-
-
-
-
+				console.log("chatEntity", chatEntity);
 
 			//await super.create(ctx);
 
-			return ctx.send( {
+			return  {
 				taskEntity,
 				chatEntity,
 				conversation
-			} );
+			} ;
 		} catch (error) {
 			console.error("Error al crear tarea:", error);
 			throw new	Error(error);
