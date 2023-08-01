@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -85,7 +86,9 @@ class LocationController extends GetxController {
       }
     } catch (e) {
       // Manejar errores al obtener la ubicación del usuario
-      print('Error obteniendo ubicación: $e');
+      if (kDebugMode) {
+        print('Error obteniendo ubicación: $e');
+      }
       _isError.value = true;
     }
   }
@@ -146,11 +149,15 @@ class LocationController extends GetxController {
 
       if (searchResults.isNotEmpty) {
         // Imprimir los resultados de la búsqueda
-        print('Resultados de la búsqueda: $searchResults');
+        if (kDebugMode) {
+          print('Resultados de la búsqueda: $searchResults');
+        }
       }
     } catch (e) {
       // Manejar errores al realizar la búsqueda de ubicaciones
-      print('Error al buscar ubicaciones: $e');
+      if (kDebugMode) {
+        print('Error al buscar ubicaciones: $e');
+      }
       _isError.value = true;
     }
   }
@@ -260,16 +267,8 @@ class LocationController extends GetxController {
         update();
       }
     } catch (e) {
-      print('Error obteniendo la dirección: $e');
-    }
-  }
-
-  Future<void> searchPlaces(String searchTerm) async {
-    if (searchTerm.isNotEmpty) {
-      try {
-        List<Location> locations = await locationFromAddress(searchTerm);
-      } catch (e) {
-        print('Error al buscar lugares: $e');
+      if (kDebugMode) {
+        print('Error obteniendo la dirección: $e');
       }
     }
   }

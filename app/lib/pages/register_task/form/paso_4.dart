@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:provitask_app/common/conexion_common.dart';
 import 'package:provitask_app/controllers/location/location_controller.dart';
 import 'package:provitask_app/pages/register_task/UI/register_task_controller.dart';
 
 import 'package:provitask_app/components/main_app_bar.dart';
 import 'package:provitask_app/components/provitask_bottom_bar.dart';
 import 'package:provitask_app/pages/register_task/UI/register_task_widgets.dart';
-import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 class RegisterTaskPage4 extends GetView<RegisterTaskController> {
   final _widgets = RegisterTaskWidget();

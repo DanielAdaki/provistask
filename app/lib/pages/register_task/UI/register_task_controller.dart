@@ -18,6 +18,8 @@ class RegisterTaskController extends GetxController {
   void onInit() async {
     super.onInit();
 
+    Logger().d("RegisterTaskController", Get.arguments);
+
     await getSkills();
 
     final datetime = DateTime.now().add(const Duration(days: 7));
@@ -538,6 +540,8 @@ class RegisterTaskController extends GetxController {
     if (response['status'] == 200) {
       prepareSkills(response['data'].data["data"]);
       final args = Get.arguments;
+
+      Logger().d(args);
 
       if (args != null) {
         if (args["id"] != null) {

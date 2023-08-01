@@ -25,7 +25,7 @@ class Register extends GetView<RegisterController> {
           onPressed: () => Get.back(),
         ),
       ),
-      body: SafeArea(
+      body: const SafeArea(
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.max,

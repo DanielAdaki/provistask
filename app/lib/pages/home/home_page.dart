@@ -3,17 +3,20 @@ import 'package:get/get.dart';
 import 'package:provitask_app/components/provitask_bottom_bar.dart';
 
 import 'package:provitask_app/controllers/home/home_controller.dart';
+import 'package:provitask_app/pages/freelancers/UI/freelancers_controller.dart';
 import 'package:provitask_app/widget/home/home_widget.dart';
 
 import 'package:provitask_app/components/main_app_bar.dart';
 import 'package:provitask_app/components/main_drawer.dart';
 import 'package:provitask_app/widget/home/search_task_widget.dart';
 import 'package:provitask_app/widget/provider/provider_card_widget.dart';
+import 'package:provitask_app/widget/provider/provider_perfil_dialog.dart';
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 class HomePage extends GetView<HomeController> {
   final _widgets = HomeWidgets();
 
-  //saco listCategory de la clase HomeController
+  final _controller = Get.find<FreelancersController>();
 
   HomePage({Key? key}) : super(key: key);
 
@@ -121,8 +124,47 @@ class HomePage extends GetView<HomeController> {
                             // scrollDirection: Axis.horizontal,
                             itemCount: controller.popularProvider.length,
                             itemBuilder: (context, index) {
-                              return ProviderCard(
-                                provider: controller.popularProvider[index],
+                              return GestureDetector(
+                                onTap: () async {
+                                  ProgressDialog pd =
+                                      ProgressDialog(context: Get.context);
+                                  try {
+                                    pd.show(
+                                      max: 100,
+                                      msg: 'Please wait...',
+                                      progressBgColor: Colors.transparent,
+                                    );
+
+                                    List<Future> futures = [
+                                      _controller.getPerfilProvider(
+                                          controller.popularProvider[index].id,
+                                          true,
+                                          null),
+                                      // controller.getComments(item.id),
+                                    ];
+
+                                    // Ejecutar las funciones en paralelo
+                                    await Future.wait(futures);
+
+                                    pd.close();
+                                    Get.dialog(
+                                      Dialog(
+                                        insetPadding: const EdgeInsets.all(0),
+                                        child: ProfileDialog(
+                                          perfilProvider:
+                                              _controller.perfilProvider.value,
+                                          idSkill: null,
+                                          general: true,
+                                        ),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    pd.close();
+                                  }
+                                },
+                                child: ProviderCard(
+                                  provider: controller.popularProvider[index],
+                                ),
                               );
                             },
                           ),

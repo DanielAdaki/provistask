@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:galleryimage/galleryimage.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:provitask_app/models/provider/provider_model.dart';
 import 'package:provitask_app/pages/register_task/UI/register_task_controller.dart';
 import 'package:provitask_app/widget/provider/provider_perfil_dialog.dart';
-import 'package:readmore/readmore.dart';
 import 'package:provitask_app/components/main_app_bar.dart';
 import 'package:provitask_app/components/provitask_bottom_bar.dart';
 import 'package:provitask_app/pages/register_task/UI/register_task_widgets.dart';

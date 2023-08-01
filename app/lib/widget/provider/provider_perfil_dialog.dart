@@ -6,8 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:provitask_app/services/provider_services.dart';
 import 'package:readmore/readmore.dart';
+import 'package:accordion/accordion.dart';
 
-class ProfileDialog extends StatelessWidget {
+class ProfileDialog extends GetWidget {
   final Map<String, dynamic> perfilProvider;
 
   final int? idSkill;
@@ -32,6 +33,7 @@ class ProfileDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Logger().i(perfilProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -59,11 +61,48 @@ class ProfileDialog extends StatelessWidget {
                   const SizedBox(
                     height: 10,
                   ),
-                  Text(
+                  /* nombre del provider con Text(
                     "${perfilProvider["name"]} ${perfilProvider["lastname"]}",
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
+                    ),
+                  ) 
+                  mas un boton a la derecha que diga book now
+                  */
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          width: Get.width * 0.6,
+                          child: Text(
+                            "${perfilProvider["name"]} ${perfilProvider["lastname"]}",
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0XFFe68320),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            "Book now",
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(
@@ -75,27 +114,43 @@ class ProfileDialog extends StatelessWidget {
                       perfilProvider["skill_select"]["cost"].toString(),
                       perfilProvider["skill_select"]["type_price"],
                     ),
+                    proviData(
+                      perfilProvider["type_provider"],
+                      perfilProvider["skill_select"] != null
+                          ? perfilProvider["skill_select"]["cost"].toString()
+                          : '0',
+                      perfilProvider["distanceLineal"].toString(),
+                      perfilProvider["skill_select"] != null
+                          ? perfilProvider["skill_select"]["scoreAverage"]
+                              .toString()
+                          : '0',
+                      perfilProvider["open_disponibility"].toString(),
+                      perfilProvider["close_disponibility"].toString(),
+                      perfilProvider["provider_skills"],
+                      perfilProvider["car"],
+                      perfilProvider["truck"],
+                      perfilProvider["motorcycle"],
+                      perfilProvider["skill_select"] != null
+                          ? perfilProvider["skill_select"]["count"].toString()
+                          : '0',
+                    ),
+                  ] else ...[
+                    proviData(
+                      perfilProvider["type_provider"],
+                      perfilProvider["skill_select"] != null
+                          ? perfilProvider["skill_select"]["cost"].toString()
+                          : '0',
+                      perfilProvider["distanceLineal"].toString(),
+                      perfilProvider["averageScore"].toString(),
+                      perfilProvider["open_disponibility"].toString(),
+                      perfilProvider["close_disponibility"].toString(),
+                      perfilProvider["provider_skills"],
+                      perfilProvider["car"],
+                      perfilProvider["truck"],
+                      perfilProvider["motorcycle"],
+                      perfilProvider["averageCount"].toString(),
+                    ),
                   ],
-                  proviData(
-                    perfilProvider["type_provider"],
-                    perfilProvider["skill_select"] != null
-                        ? perfilProvider["skill_select"]["cost"].toString()
-                        : '0',
-                    perfilProvider["distanceLineal"].toString(),
-                    perfilProvider["skill_select"] != null
-                        ? perfilProvider["skill_select"]["scoreAverage"]
-                            .toString()
-                        : '0',
-                    perfilProvider["open_disponibility"].toString(),
-                    perfilProvider["close_disponibility"].toString(),
-                    perfilProvider["provider_skills"],
-                    perfilProvider["car"],
-                    perfilProvider["truck"],
-                    perfilProvider["motorcycle"],
-                    perfilProvider["skill_select"] != null
-                        ? perfilProvider["skill_select"]["count"].toString()
-                        : '0',
-                  ),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10),
                     child: Divider(
@@ -113,50 +168,195 @@ class ProfileDialog extends StatelessWidget {
                       thickness: 1,
                     ),
                   ),
+                  const SizedBox(
+                    height: 10,
+                  ),
                   if (general! == false) ...[
                     descriptionPro(
                       "Skills and Experience",
                       perfilProvider["skill_select"]["description"],
                     ),
-                  ] else ...[
-                    descriptionPro(
-                      "Skills and Experience",
-                      perfilProvider["skillAndExperience"] ?? 'No description',
-                    ),
-                  ],
-                  Container(
-                    margin: const EdgeInsets.only(top: 20),
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Photos",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                    Container(
+                      margin: const EdgeInsets.only(top: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Photos",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.left,
                           ),
-                          textAlign: TextAlign.left,
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        if (general == false) ...[
-                          GalleryImage(
-                            numOfShowImages: 3,
-                            imageUrls: formatImages(
-                                perfilProvider["skill_select"], false),
+                          const SizedBox(
+                            height: 20,
                           ),
-                        ] else ...[
+                          if (general == false) ...[
+                            GalleryImage(
+                              numOfShowImages: 3,
+                              imageUrls: formatImages(
+                                  perfilProvider["skill_select"], false),
+                            ),
+                          ] /*else ...[
                           GalleryImage(
                             numOfShowImages: 3,
                             imageUrls: formatImages(
                                 perfilProvider["provider_skills"], true),
                           ),
-                        ]
+                        ]*/
+                        ],
+                      ),
+                    ),
+                  ] else ...[
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text("Skills",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.left),
+                      ),
+                    ),
+                    Accordion(
+                      maxOpenSections: 1,
+                      headerBackgroundColor: Colors.white,
+                      headerPadding: const EdgeInsets.all(10),
+                      children: [
+                        for (var i = 0;
+                            i < perfilProvider["provider_skills"].length;
+                            i++) ...[
+                          AccordionSection(
+                            headerBackgroundColor: const Color(0XFF170591),
+                            contentBorderColor: const Color(0XFF170591),
+                            isOpen: false,
+                            header: Text(
+                              perfilProvider["provider_skills"][i]
+                                  ["categorias_skill"],
+                              style: const TextStyle(
+                                fontSize: 18,
+                                //   fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.left,
+                            ),
+                            content: Container(
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // muestro la info de hour minimun, cost y type price usando iconos uno debajo del otro
+
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.access_time,
+                                        color: Color.fromARGB(255, 0, 0, 0),
+                                      ),
+                                      const SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        formatMinimalHour(
+                                            perfilProvider["provider_skills"][i]
+                                                ["hour_minimun"]),
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+
+                                      /* un toottip`                                      const Tooltip(
+                                        waitDuration: Duration(seconds: 1),
+                                        message:
+                                            "Minimum number of hours to complete the task",
+                                        child: Icon(
+                                          Icons.info_outline,
+                                          color: Color.fromARGB(255, 0, 0, 0),
+                                        ),
+                                      ),
+                                        Qu esté pegado a la derecha la border del container
+                                      */
+                                    ],
+                                  ),
+
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.attach_money,
+                                        color: Color.fromARGB(255, 0, 0, 0),
+                                      ),
+                                      const SizedBox(
+                                        width: 5,
+                                      ),
+                                      Text(
+                                        '${perfilProvider["provider_skills"][i]["cost"]} /${perfilProvider["provider_skills"][i]["type_price"] == 'per_hour' ? 'hr' : perfilProvider["provider_skills"][i]["type_price"] == 'by_project_flat_rate' ? 'bpfr' : 'ft'}',
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+
+                                  const Text(
+                                    'Experience',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  ReadMoreText(
+                                    perfilProvider["provider_skills"][i]
+                                            ["description"] ??
+                                        'No description',
+                                    trimLines: 2,
+                                    textAlign: TextAlign.justify,
+                                    colorClickableText: const Color(0xFF2B1B99),
+                                    trimMode: TrimMode.Line,
+                                    trimCollapsedText: 'Show more',
+                                    trimExpandedText: 'Show less',
+                                    moreStyle: const TextStyle(
+                                        fontSize: 15, color: Color(0xFF2B1B99)),
+                                  ),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  GalleryImage(
+                                    numOfShowImages: calculeImageMininal(
+                                        perfilProvider["provider_skills"][i]
+                                            ["media"]),
+                                    imageUrls: formatImages(
+                                        perfilProvider["provider_skills"][i],
+                                        true),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
-                  ),
+                  ],
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10),
                     child: Divider(
@@ -196,48 +396,90 @@ class ProfileDialog extends StatelessWidget {
                         const SizedBox(
                           height: 20,
                         ),
-                        Container(
-                          width: Get.width * 1,
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: FutureBuilder(
-                            future: getComments(
-                              perfilProvider["id"],
-                              perfilProvider["skill_select"] != null
-                                  ? perfilProvider["skill_select"]
-                                      ["categorias_skill_id"]
-                                  : null,
+                        if (general == false) ...[
+                          Container(
+                            width: Get.width * 1,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: FutureBuilder(
+                              future: getComments(
+                                perfilProvider["id"],
+                                perfilProvider["skill_select"] != null
+                                    ? perfilProvider["skill_select"]
+                                        ["categorias_skill_id"]
+                                    : null,
+                              ),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<void> snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return Center(
+                                    child: Text('Error: ${snapshot.error}'),
+                                  );
+                                } else {
+                                  return ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: count.value,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      final review = reviews[index];
+                                      return ReviewWidget(
+                                        avatarUrl: review["avatar"],
+                                        username: review["client"],
+                                        rating: review["valoration"],
+                                        review: review["comment"],
+                                        date: formatFecha(review["date"]),
+                                      );
+                                    },
+                                  );
+                                }
+                              },
                             ),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<void> snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              } else if (snapshot.hasError) {
-                                return Center(
-                                  child: Text('Error: ${snapshot.error}'),
-                                );
-                              } else {
-                                return ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: count.value,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    final review = reviews[index];
-                                    return ReviewWidget(
-                                      avatarUrl: review["avatar"],
-                                      username: review["client"],
-                                      rating: review["valoration"],
-                                      review: review["comment"],
-                                      date: formatFecha(review["date"]),
-                                    );
-                                  },
-                                );
-                              }
-                            },
                           ),
-                        ),
+                        ] else ...[
+                          Container(
+                            width: Get.width * 1,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: FutureBuilder(
+                              future: getComments(
+                                perfilProvider["id"],
+                                null,
+                              ),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<void> snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return Center(
+                                    child: Text('Error: ${snapshot.error}'),
+                                  );
+                                } else {
+                                  return ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: count.value,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      final review = reviews[index];
+                                      return ReviewWidget(
+                                        avatarUrl: review["avatar"],
+                                        username: review["client"],
+                                        rating: review["valoration"],
+                                        review: review["comment"],
+                                        date: formatFecha(review["date"]),
+                                      );
+                                    },
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ]
                       ],
                     ),
                   ),
@@ -250,16 +492,12 @@ class ProfileDialog extends StatelessWidget {
     );
   }
 
-  Future<void> getComments(int id, int? skill) async {
+  Future<void> getComments(int id, [int? skill]) async {
     try {
       isLoadingReviews.value = true;
-      // Realiza la llamada al servidor para obtener los datos de las revisiones
-      // Puedes utilizar paquetes como http o dio para realizar la solicitud HTTP
-      // y obtener la respuesta del servidor
-
-      // Por ejemplo, utilizando el paquete dio:
+      Logger().i("id: $id");
       final response = await _services.getComments(
-          id, currentPage.value, limit.value, idSkill!);
+          id, currentPage.value, limit.value, idSkill);
 
       if (response['status'] == 200) {
         final data = response['data'].data["data"];
@@ -636,13 +874,16 @@ class ProfileDialog extends StatelessWidget {
   formatImages(perfilProvider, [bool? general = false]) {
     final List<String> images = [];
 
+    logger.i(perfilProvider);
+
     if (general == true) {
       Logger().i("hola");
-      for (var i = 0; i < perfilProvider.length; i++) {
-        for (var j = 0; j < perfilProvider[i]["media"].length; j++) {
-          images.add(perfilProvider[i]["media"][j]);
-        }
+      //  for (var i = 0; i < perfilProvider.length; i++) {
+      for (var j = 0; j < perfilProvider["media"].length; j++) {
+        Logger().i(perfilProvider["media"][j]);
+        images.add(perfilProvider["media"][j]);
       }
+      //}
     } else {
       /*
       Media posee esta forma
@@ -667,6 +908,26 @@ class ProfileDialog extends StatelessWidget {
     }
 
     return images;
+  }
+
+  calculeImageMininal(image) {
+    if (image.length > 3) {
+      return 3;
+    } else {
+      return image.length;
+    }
+  }
+
+  String formatMinimalHour(String? minimalHour) {
+    if (minimalHour == null) {
+      return '1 hour minimum ';
+    } else {
+      // minimalHour tiene esta forma hour_1
+
+      minimalHour = minimalHour.substring(5);
+
+      return '$minimalHour hour minimum';
+    }
   }
 }
 
@@ -719,7 +980,7 @@ class ReviewWidget extends StatelessWidget {
                   ),
                 ),
                 ReadMoreText(
-                  review ?? 'No description',
+                  review,
                   trimLines: 2,
                   textAlign: TextAlign.justify,
                   colorClickableText: const Color(0xFF2B1B99),

@@ -663,7 +663,7 @@ class ChatConversationWidgets {
     // Formatea la fecha y hora en el formato "MMM dd, HH:mm"
     String formattedDateTime = DateFormat('MMM dd').format(dateTime);
 
-    return "${formattedDateTime} $hourSelected";
+    return "$formattedDateTime $hourSelected";
   }
 
   Widget registerContinueButton(

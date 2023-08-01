@@ -91,6 +91,7 @@ dependencies:
   cached_network_image: ^3.2.3
   flutter_pagewise: ^2.0.4
   flutter_typeahead: ^4.6.2
+  accordion: ^2.5.1
 
 
 dependency_overrides:

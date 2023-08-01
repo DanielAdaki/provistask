@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 import 'package:provitask_app/models/data/countries_data.dart';
 import 'package:provitask_app/services/auth_services.dart';
 
