@@ -20,6 +20,7 @@ import 'package:provitask_app/pages/splash/UI/splash_controller.dart';
 import 'package:provitask_app/pages/tasks/UI/tasks_controller.dart';
 import 'package:provitask_app/pages/verification_provider/UI/verification_provider_controller.dart';
 import 'package:provitask_app/pages/welcome/UI/welcome_controller.dart';
+import 'package:provitask_app/pages/chat/chat_conversation/UI/chat_conversation_controller.dart';
 
 class SplashBinding implements Bindings {
   @override
@@ -57,6 +58,9 @@ class SplashBinding implements Bindings {
 
     //Get.put(LocationController(), permanent: true);
     Get.lazyPut<LocationController>(() => LocationController(), fenix: true);
+
+    Get.lazyPut<ChatConversationController>(() => ChatConversationController(),
+        fenix: true);
 
     // aplico el find a LocationController
 

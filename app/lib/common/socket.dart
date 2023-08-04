@@ -55,7 +55,7 @@ class SocketController extends GetxController {
     socket.emit('getChat', id);
 
     // Escuchar el evento 'getChat' y obtener los mensajes
-    socket.on('getChat', (data) {
+    socket.on('', (data) {
       Map<String, dynamic> chatData = data;
       if (!completer.isCompleted) {
         completer.complete(chatData);

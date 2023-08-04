@@ -1,5 +1,6 @@
 'use strict';
-
+const {URL} = process.env;
+const { v4: uuid } = require('uuid');
 module.exports = {
   /**
    * An asynchronous register function that runs before
@@ -41,29 +42,62 @@ module.exports = {
           ].services.jwt.verify(socket.handshake.query.token);
 
 
-          // buscamos el usuario en la base de datos
+          console.log(result)
+
+          if (!result) {
+
+            throw new Error('Invalid Token');
+
+          }
 
           const user = await strapi.entityService.findOne('plugin::users-permissions.user', result.id, {
-            populate: { avatar_image: true }
+            populate: { avatar_image: true },
+
+            fields: ['id', "name", "lastname"],
           });
 
-          delete user.createdAt;
-          delete user.updatedAt;
-          delete user.provider;
-          delete user.password;
-          delete user.resetPasswordToken;
-          delete user.confirmationToken;
 
 
-          user.avatar_image = user.avatar_image ? user.avatar_image.url : false;
+          user.avatar_image =  user.avatar_image ? URL + user.avatar_image.url :  URL+'/uploads/user_147dd8408e.png';
+
+          let onlineUser = await strapi.db.query('api::online-user.online-user').findOne({ user: user.id });
+
+          if (!onlineUser) {
+
+             await strapi.entityService.create('api::online-user.online-user', {
+
+              data: {
+
+                user: user.id,
+
+                socket_id: socket.id,
+                lastConnection: new Date().getTime(),
+                status: 'online'
+
+              }
+
+            });
+
+          } else {
+
+             await strapi.entityService.update('api::online-user.online-user', onlineUser.id,
 
 
-          // actualizo el usuario como online
 
-          await strapi.entityService.update('plugin::users-permissions.user', result.id,
+              {
+                data: {
+                  socket_id: socket.id,
+                  lastConnection: new Date().getTime(),
+                  status: 'online'
+                }
+              });
 
-            { data: {  socket_id: socket.id } });
+          }
 
+
+          user["socket_id"] = socket.id;
+          user["lastConnection"] = new Date().getTime();
+          user["status"] = 'online';
 
 
           socket.user = user;
@@ -92,21 +126,142 @@ module.exports = {
         }, 1000);
 
 
+        socket.on('join', async (data) => {
 
-        socket.on('getChat', async (id) => {
+          try {
+
+            let { id } = data;
+
+
+            if (!id) {
+
+              socket.emit('error', { error: 'Id de conversacion no encontrado' , id: id , type: 'join' , user: socket.user.id , datetime: new Date().getTime() , status: 'error' , message: 'Id de conversacion no encontrado' });
+
+              throw new Error('Id de conversacion no encontrado');
+
+            }
+
+            // verifico el isiario pertece a la conversacion
+
+            let conversacion = await strapi.entityService.findOne('api::conversation.conversation', id, {
+
+              populate: { users: true }
+
+            })
+
+
+
+            if (!conversacion) {
+
+
+              // respondo con el webhook para error
+
+              socket.emit('error', { error: 'Conversacion no encontrada' , id: id , type: 'join' , user: socket.user.id , datetime: new Date().getTime() , status: 'error' , message: 'Conversacion no encontrada' });
+
+              
+
+              throw new Error('Conversacion no encontrada');
+
+            }
+
+            let user = conversacion.users.filter(us => us.id == socket.user.id);
+
+            if (user.length == 0) {
+
+              socket.emit('error', { error: 'No pertenece a la conversación' , id: id , type: 'join' , user: socket.user.id , datetime: new Date().getTime() , status: 'error' , message: 'No pertenece a la conversación' });
+
+              throw new Error('No pertenece a la conversacion');
+
+
+            }
+
+            // verifico el tipo de de dato de id de conversacion si es number lo paso a string
+
+
+            if (typeof id == 'number') {
+
+              id = id.toString();
+
+            }
+
+
+
+
+            socket.join(`sala_${id}`);
+
+            
+
+            console.log(`Cliente ${socket.id} se ha unido a la sala ${id}`);
+
+            // notifico a los demas usuarios que se unio a la conversacion
+
+            
+
+           let otherUser = conversacion.users.filter(us => us.id != socket.user.id);
+
+            otherUser = otherUser[0];
+
+            // busco el usuario que envio el mensaje
+
+
+         /*   otherUser = await strapi.entityService.findOne('plugin::users-permissions.user', otherUser.id, {
+
+              fields: ['id', "name", "lastname"],
+
+              populate: { avatar_image: true }
+
+            });
+
+
+            otherUser.avatar_image = otherUser.avatar_image ? URL + otherUser.avatar_image.url : URL+'/uploads/user_147dd8408e.png';*/
+
+            socket.broadcast.to(`sala_${id}`).emit('joinResponse', { otherUser: otherUser.id });
+
+            //socket.emit('joinResponse', { otherUser });
+
+          } catch (error) {
+
+            console.log(error)
+
+            throw error;
+
+          }
+
+        });
+
+
+
+        socket.on('getChat', async (data) => {
 
           try {
             let otherUser = [];
 
-            const chat = await strapi.entityService.findMany('api::chat-message.chat-message', {
+            console.log(data)
 
-              filters: { conversation: id },
+            const { id, page, limit } = data;
+           
+
+            page ? parseInt(page) : 1;
+
+            limit ? parseInt(limit) : 10;
 
 
-              populate: { emit: true }
+            const start = (page - 1) * limit;
+
+           let mensajes =  await strapi.db.query('api::chat-message.chat-message').findMany({
+
+              where: { conversation: id.toString() },
+
+              orderBy :{ createdAt: 'DESC' } ,
+
+              limit : limit,
+
+              offset : start,
+
+              populate: [ "emit", "emit.avatar_image"]
+
             });
 
-            // busco al otro usuario integrante del chat buscando a los usuarios de la conversacion que no sean el usuario logueado
 
 
             let conversacion = await strapi.entityService.findOne('api::conversation.conversation', id, {
@@ -115,7 +270,7 @@ module.exports = {
 
             })
 
-            socket.join(id);
+          ///  socket.join(id);
 
 
 
@@ -133,7 +288,7 @@ module.exports = {
 
             });
 
-            otherUser.avatar_image = otherUser.avatar_image ? otherUser.avatar_image.url : false;
+            otherUser.avatar_image = otherUser.avatar_image ? URL + otherUser.avatar_image.url : URL+'/uploads/user_147dd8408e.png';
 
 
 
@@ -144,9 +299,9 @@ module.exports = {
   
             */
 
-            for (let i = 0; i < chat.length; i++) {
+            for (let i = 0; i < mensajes.length; i++) {
 
-              let mensaje = chat[i];
+              let mensaje = mensajes[i];
 
 
               delete mensaje.updatedAt;
@@ -184,7 +339,7 @@ module.exports = {
                   sort: 'createdAt:DESC'
 
                 });
-                user.avatar_image = user.avatar_image ? process.env.URL + user.avatar_image.url : false;
+                user.avatar_image = user.avatar_image ? process.env.URL + user.avatar_image.url : process.env.URL+'/uploads/user_147dd8408e.png';
 
 
               } else {
@@ -193,11 +348,11 @@ module.exports = {
 
               }
 
-
+              mensaje.datetime = mensaje.datetime ? mensaje.datetime : mensaje.createdAt;
 
               let fechaUnix = new Date(mensaje.datetime).getTime();
 
-              chat[i] = {
+              mensajes[i] = {
 
                 'author': {
                   'firstName': user.name,
@@ -206,7 +361,8 @@ module.exports = {
                   'lastName': user.lastname
                 },
                 'createdAt': fechaUnix,//paso hora en formato unix  ,
-                'id': mensaje.id.toString(),
+                'remoteId': mensaje.id.toString(),
+                'id': uuid(),
                 'status': mensaje.status ?? 'seen',
                 'text': mensaje.message ?? '',
                 'type': mensaje.type ?? 'text',
@@ -226,45 +382,35 @@ module.exports = {
             // busco si la conversacion con id = id tiene una tarea asiugnada api::task-assigned.task-assigned
 
 
-            //ordeno por datetime
+            //ordeno por datetime de manera descendente
 
-            chat.sort((a, b) => (a.datetime > b.datetime) ? 1 : -1);
+            mensajes.sort((a, b) => b.createdAt - a.createdAt);
 
 
+            console.log(otherUser)
 
-            socket.emit('getChat', { chat: chat, user: otherUser });
+            socket.emit('getChatResponse', { mensajes, otherUser});
           } catch (error) {
 
             console.log(error)
 
             throw error;
           }
-
-
-
-
-        })
+        
+        });
 
         // send mensaje
 
         socket.on('sendMessage', async (data) => {
-
-
-          console.log(data)
-
-
 
           const mensaje = await strapi.entityService.create('api::chat-message.chat-message', {
 
             data: {
 
               conversation: data.roomId,
-
               emit: socket.user.id,
-
               message: data.text,
               datetime: data.createdAt,
-
               status: 'sent',
               type: data.type
 
@@ -272,10 +418,32 @@ module.exports = {
 
           });
 
+          console.log(data)
 
-          socket.emit('sendMessageResponse', { status: 'sent', message: mensaje });
 
-          io.to(data.conversation).emit('sendMessageResponse', { status: 'sent', message: mensaje });
+        
+
+          console.log(io.sockets.adapter.rooms)
+
+
+          io.to(`sala_${data.roomId.toString()}`).emit('sendMessageResponse', {
+
+            'author': {
+              'firstName': socket.user.name,
+              'id': socket.user.id.toString(),
+              'imageUrl': socket.user.avatar_image,
+              'lastName': socket.user.lastname
+            },
+
+            'createdAt': data.createdAt,
+            'id': data.id.toString(),
+            'remoteId': mensaje.id.toString(), //id del mensaje en la base de datos
+            'status': 'sent',
+            'text': data.text,
+            'type': data.type,
+            'roomId': data.roomId.toString(),
+          });
+          
 
 
 
@@ -285,14 +453,35 @@ module.exports = {
         socket.on('disconnect', async () => {
 
 
-          // actualizo el usuario como offline
+          await strapi.db.query('api::online-user.online-user').update({
+            where: { socket_id: socket.id },
+            data: {
+              status: 'offline', 
+              lastConnection: new Date().getTime()
+            },
+          });
 
-          await strapi.entityService.update('plugin::users-permissions.user', socket.user.id,
+          // lo saco de todas las salas
 
-            { data: { online: false, socket_id: null } });
+          let rooms = Object.keys(socket.rooms);
+
+          for (let i = 0; i < rooms.length; i++) {
+
+            if (rooms[i] != socket.id) {
+
+              socket.leave(rooms[i]);
+
+            }
+
+          }
 
 
         });
+
+
+        //socekt para obterner mensajes de lo
+
+
 
 
 

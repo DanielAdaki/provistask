@@ -14,8 +14,13 @@ import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 
 class ChatConversationWidgets {
-  final _controller = Get.put(ChatConversationController());
-  final _controllerP = Get.put(ChatPropuestaController());
+  final _controller = Get.put<ChatConversationController>(
+    ChatConversationController(),
+  );
+
+  final _controllerP = Get.put<ChatPropuestaController>(
+    ChatPropuestaController(),
+  );
 
   Widget messagesAppBar() {
     return AppBar(
@@ -31,7 +36,7 @@ class ChatConversationWidgets {
         children: [
           Center(
             child: Text(
-              _controller.user["name"] + ' ' + _controller.user["lastname"],
+              '${_controller.user["name"]}  ${_controller.user["lastname"] ?? ""}',
               style: TextStyle(
                 color: Colors.indigo[800],
                 fontSize: 25,
@@ -213,8 +218,7 @@ class ChatConversationWidgets {
               shape: BoxShape.circle,
               image: DecorationImage(
                 image: _controller.user["avatar_image"] != null
-                    ? NetworkImage(ConexionCommon.hostBase +
-                        _controller.user["avatar_image"])
+                    ? NetworkImage(_controller.user["avatar_image"])
                     : const AssetImage("assets/images/REGISTER TASK/avatar.jpg")
                         as ImageProvider,
                 fit: BoxFit.cover,
@@ -1253,91 +1257,7 @@ class ChatConversationWidgets {
     );
   }
 
-  Widget messagesInput() {
-    ScrollController scrollController = ScrollController();
-
-    return Container(
-      alignment: Alignment.bottomCenter,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      margin: const EdgeInsets.symmetric(horizontal: 10),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.amber[800],
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 20,
-                maxHeight: 50,
-              ),
-              child: Scrollbar(
-                controller: scrollController,
-                child: ListView(
-                  reverse: true,
-                  controller:
-                      scrollController, // Asignar el ScrollController al ListView
-                  children: [
-                    TextField(
-                      controller: _controller.messageController.value,
-                      cursorHeight: 10,
-                      maxLines: null,
-                      keyboardType: TextInputType.multiline,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.zero,
-                          hintText: 'Type a message...',
-                          hintStyle: TextStyle(color: Colors.black54),
-                          border: InputBorder.none),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Container(
-            height: 60,
-            margin: const EdgeInsets.only(left: 15),
-            child: IconButton(
-              onPressed: () async => {
-                // si el mensaje no esta vacio
-
-                if (_controller.messageController.value.text != '')
-                  {
-                    // envio el mensaje
-                    //await _controller.sendMessage(),
-                    // bajo al final de la lista de mensajes usando el scroll controller
-
-                    /*_controller.chatScroll.jumpTo(
-                        _controller.chatScroll.position.maxScrollExtent),*/
-                    // limpio el campo de texto
-                    _controller.messageController.value.clear(),
-                    FocusScope.of(Get.context!).unfocus(),
-                    // cierro el teclado
-                  },
-
-                // await _controller.sendMessage(),
-                //FocusScope.of(Get.context!).unfocus(),
-                /*_controller.chatScroll
-                    .jumpTo(_controller.chatScroll.position.maxScrollExtent),*/
-              },
-              icon: const Icon(
-                Icons.send,
-                color: Colors.white,
-                size: 35,
-              ),
-              color: Colors.transparent,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget bodyChat() {
+  /*Widget bodyChat() {
     return SizedBox(
       height: Get.height * 1,
       width: Get.width * 1,
@@ -1347,14 +1267,14 @@ class ChatConversationWidgets {
         onMessageTap: _controller.handleMessageTap,
         onPreviewDataFetched: _controller.handlePreviewDataFetched,
         onSendPressed: _controller.handleSendPressed,
-        showUserAvatars: false,
+        showUserAvatars: true,
         showUserNames: true,
         user: types.User(
           id: _controller.prefs.user!["id"].toString(),
         ),
       ),
     );
-  }
+  }*/
 
   handleAttachmentPressed() {
     showModalBottomSheet<void>(

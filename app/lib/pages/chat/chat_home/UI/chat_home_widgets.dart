@@ -105,7 +105,7 @@ class ChatHomeWidgets {
                       shape: BoxShape.circle,
                       image: DecorationImage(
                         image: item["attributes"]["contact"]["avatar_image"] !=
-                                null
+                                false
                             ? NetworkImage(ConexionCommon.hostBase +
                                 item["attributes"]["contact"]["avatar_image"])
                             : const AssetImage(

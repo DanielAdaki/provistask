@@ -58,7 +58,7 @@ class TaskController extends GetxController {
 
     taskDetail.value = data["data"];
 
-    provider.value = taskDetail.value["attributes"]["provider"];
+    provider.value = taskDetail["attributes"]["provider"];
   }
 
   @override
@@ -78,7 +78,7 @@ class TaskController extends GetxController {
     }
 
     await _getTask();
-    logger.i(provider.value);
+    logger.i(provider);
     isLoading.value = false;
   }
 

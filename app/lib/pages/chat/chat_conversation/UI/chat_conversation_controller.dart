@@ -24,10 +24,6 @@ import 'package:uuid/uuid.dart';
 class ChatConversationController extends GetxController {
   final prefs = Preferences();
 
-  final chatScroll = ScrollController();
-  final messageController = Rx<TextEditingController>(TextEditingController());
-  final listMessages = [].obs;
-
   final _services = MessageServices();
 
   final id = "".obs;
@@ -40,7 +36,7 @@ class ChatConversationController extends GetxController {
 
   //final messages = <types.Message>[].obs;
 
-  RxList<types.Message> messages = <types.Message>[].obs;
+  final messages = <types.Message>[].obs;
 
   final user = {}.obs;
 
@@ -56,15 +52,39 @@ class ChatConversationController extends GetxController {
 
     id.value = Get.parameters['id'] ?? '';
 
-    await getMessages();
+    _socketController.socket.emit('join', {
+      "id": id.value
+    }); // me uno a la sala de chat con el id de la conversacion
+
+    _socketController.socket.emit(
+        'getChat', {"id": id.value, "limit": 10, "page": 1, "init": true});
+
+    // espero dos segundos
 
     await getTaskConversation();
 
-    _socketController.socket.on('sendMessageResponse', (data) async {
-      await getMessages();
-    });
+    _socketController.socket.once('getChatResponse', (data) async {
+      user.value = data["otherUser"];
 
-    Logger().i(task, "tarea");
+      // recorro los mensajes y voy asignaod una a una
+
+      for (var i = 0; i < data["mensajes"].length; i++) {
+        final mess = types.Message.fromJson(data["mensajes"][i]);
+
+        messages.add(mess);
+      }
+
+      Logger().i("MENSAJES", messages);
+    });
+    _socketController.socket.on('sendMessageResponse', (data) async {
+      Logger().i("MENSAJE REcibido antes formato", data);
+
+      final mess = types.Message.fromJson(data as Map<String, dynamic>);
+
+      messages.insert(0, mess);
+
+      Logger().i("MENSAJE recibido luego formato", mess);
+    });
 
     isLoading.value = false;
     super.onInit();
@@ -88,28 +108,11 @@ class ChatConversationController extends GetxController {
 
     task.value = datos["data"];
 
-    Logger().i(task);
-
     if (datos["data"].isNotEmpty) {
       if (datos["data"]["skill"] != null) {
         selectedSkill.value = datos["data"]["skill"]["name"];
       }
     }
-  }
-
-  getMessages() async {
-    // tomo el id de la conversacion que viene en la ruta como parametros
-
-    Map<String, dynamic> datos =
-        await _socketController.getChat(Get.parameters['id']);
-
-    final mess = (datos["chat"] as List)
-        .map((e) => types.Message.fromJson(e as Map<String, dynamic>))
-        .toList();
-
-    user.value = datos["user"];
-
-    messages.value = mess;
   }
 
   handleImageSelection() async {
@@ -138,9 +141,10 @@ class ChatConversationController extends GetxController {
     }
   }
 
-  _addMessage(types.Message message) async {
+  _addMessage(types.Message message) {
     // messages.insert(0, message);
-    await _socketController.sendMessage(message);
+
+    _socketController.socket.emit('sendMessage', message);
   }
 
   handleFileSelection() async {
@@ -217,7 +221,7 @@ class ChatConversationController extends GetxController {
     messages[index] = updatedMessage;
   }
 
-  void handleSendPressed(types.PartialText message) {
+  handleSendPressed(types.PartialText message) {
     final textMessage = types.TextMessage(
       author: types.User(id: prefs.user!["id"].toString()),
       createdAt: DateTime.now().millisecondsSinceEpoch,
