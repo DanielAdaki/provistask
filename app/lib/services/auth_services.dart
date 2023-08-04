@@ -56,6 +56,7 @@ class AuthService {
 
       respuesta = {"status": 200, "token": token};
     } catch (e) {
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
     return respuesta;
@@ -103,6 +104,7 @@ class AuthService {
 
       respuesta = {"status": 200, "data": response};
     } catch (e) {
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 
@@ -136,8 +138,7 @@ class AuthService {
 
       respuesta = aux;
     } catch (e) {
-      // e es un string lo vuelvo a convertir en json y lo guardo en el map _respuesta y lo retorno con status 500
-
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 
@@ -174,8 +175,7 @@ class AuthService {
 
       respuesta = aux;
     } catch (e) {
-      // e es un string lo vuelvo a convertir en json y lo guardo en el map _respuesta y lo retorno con status 500
-
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 
@@ -218,8 +218,7 @@ class AuthService {
 
       // hago la peticion get a la api a la ruta /users/me
     } catch (e) {
-      // e es un string lo vuelvo a convertir en json y lo guardo en el map _respuesta y lo retorno con status 500
-
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 
@@ -246,8 +245,7 @@ class AuthService {
 
       respuesta = {"status": 200, "data": response.data};
     } catch (e) {
-      // e es un string lo vuelvo a convertir en json y lo guardo en el map _respuesta y lo retorno con status 500
-
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
     return respuesta;
@@ -275,6 +273,7 @@ class AuthService {
 
       respuesta = {"status": 200, "data": response.data};
     } catch (e) {
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 
@@ -291,8 +290,6 @@ class AuthService {
       }
 
       if (password != confirmation) {
-        print("password: $password");
-        print("confirmation: $confirmation");
         throw "The passwords do not match";
       }
 
@@ -306,6 +303,7 @@ class AuthService {
 
       respuesta = {"status": 200, "data": response.data};
     } catch (e) {
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 
@@ -324,11 +322,9 @@ class AuthService {
         "email": text,
       });
 
-      logger.i(response.headers);
-
       respuesta = {"status": 200, "data": response.data};
     } catch (e) {
-      logger.e(e);
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 
@@ -346,8 +342,7 @@ class AuthService {
 
       respuesta = {"status": 200, "data": response.data};
     } catch (e) {
-      logger.e(e);
-      logger.e(e.toString());
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 
@@ -370,6 +365,7 @@ class AuthService {
 
       respuesta = {"status": 200, "data": response.data};
     } catch (e) {
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 
@@ -425,6 +421,7 @@ class AuthService {
 
       respuesta = {"status": 200, "data": response.data};
     } catch (e) {
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 
@@ -446,6 +443,38 @@ class AuthService {
 
       respuesta = {"status": 200, "data": response.data};
     } catch (e) {
+      Logger().e(e);
+      respuesta = {"status": 500, "error": e};
+    }
+
+    return respuesta;
+  }
+
+  Future<Map> postSkill(Map datos) async {
+    Map respuesta;
+
+    dio.interceptors.add(LogInterceptor(
+        requestBody: true,
+        requestHeader: true,
+        responseBody: true,
+        responseHeader: true,
+        error: true));
+
+    // configuro encabezados para que acepte json
+
+    dio.options.headers["content-type"] = "application/json";
+
+    final datax = {
+      "data": datos,
+    };
+
+    try {
+      final response = await dio.post("/provider-skills", data: datax);
+      // configuro dio para que use el token en el header
+
+      respuesta = {"status": 200, "data": response.data};
+    } catch (e) {
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 
@@ -467,7 +496,7 @@ class AuthService {
 
       respuesta = {"status": 200, "data": response.data};
     } catch (e) {
-      print(e);
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 

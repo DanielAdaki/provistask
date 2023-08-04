@@ -60,7 +60,10 @@ module.exports = {
 
           user.avatar_image =  user.avatar_image ? URL + user.avatar_image.url :  URL+'/uploads/user_147dd8408e.png';
 
-          let onlineUser = await strapi.db.query('api::online-user.online-user').findOne({ user: user.id });
+          let onlineUser = await strapi.db.query('api::online-user.online-user').findOne({
+            where: {user: user.id },});
+
+
 
           if (!onlineUser) {
 
@@ -77,6 +80,8 @@ module.exports = {
               }
 
             });
+
+      
 
           } else {
 
@@ -101,6 +106,7 @@ module.exports = {
 
 
           socket.user = user;
+          console.log('user', user)
           next();
         } catch (error) {
 
@@ -120,10 +126,10 @@ module.exports = {
         }
 
 
-        interval = setInterval(() => {
+      /*  interval = setInterval(() => {
           io.emit('serverTime', { time: new Date().getTime() }); // This will emit the event to all connected sockets
 
-        }, 1000);
+        }, 1000);*/
 
 
         socket.on('join', async (data) => {
@@ -403,6 +409,13 @@ module.exports = {
 
         socket.on('sendMessage', async (data) => {
 
+
+
+
+          console.log(data)
+
+       
+
           const mensaje = await strapi.entityService.create('api::chat-message.chat-message', {
 
             data: {
@@ -423,7 +436,9 @@ module.exports = {
 
         
 
-          console.log(io.sockets.adapter.rooms)
+          if (!data.id){
+            data.id = uuid();
+          }
 
 
           io.to(`sala_${data.roomId.toString()}`).emit('sendMessageResponse', {

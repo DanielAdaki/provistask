@@ -21,6 +21,7 @@ import 'package:provitask_app/services/preferences.dart';
 // importo servicio de payment
 
 import 'package:provitask_app/services/payment_services.dart';
+import 'package:provitask_app/services/upload/upload_controller.dart';
 
 class RegisterProviderController extends GetxController {
   final _services = ProviderRegisterServices();
@@ -28,6 +29,8 @@ class RegisterProviderController extends GetxController {
   final _paymentServices = PaymentServices();
 
   final _auth = AuthService();
+
+  final _upload = UploadServices();
 
   final formKey5 = GlobalKey<FormState>();
 
@@ -38,6 +41,12 @@ class RegisterProviderController extends GetxController {
   final idPhoto = RxInt(0);
 
   /// Inputs
+  ///
+  final skillSelect = ''.obs;
+  final costSkill = Rx<TextEditingController>(TextEditingController());
+  final descriptionSkill = Rx<TextEditingController>(TextEditingController());
+  final typeCost = 'per_hour'.obs;
+
   final socialSecNumber = Rx<TextEditingController>(TextEditingController());
   final address = Rx<TextEditingController>(TextEditingController());
   final aptSuite = Rx<TextEditingController>(TextEditingController());
@@ -51,7 +60,7 @@ class RegisterProviderController extends GetxController {
   final accountNumberPay = Rx<TextEditingController>(TextEditingController());
 
   /// Selections
-  final skillsList = RxList<int>();
+  final skillsList = <Skill>[].obs;
 
   /// Data
   // veo si el usuario tiene skills basandome en el _prefs.user
@@ -61,6 +70,10 @@ class RegisterProviderController extends GetxController {
   final skills = RxList();
 
   final meta = RxMap();
+
+  final formKey = GlobalKey<FormState>();
+
+  RxList<File?> images = RxList<File?>([]);
 
   @override
   void onInit() {
@@ -325,11 +338,13 @@ class RegisterProviderController extends GetxController {
 
     final skills = _prefs.user?["skills"];
 
+    Logger().i(skills);
+
     if (skills != null) {
-      // lo recoorro y añado los ["id"] a la lista de skills
+      // las recorro y añado a list skills skillsList
 
       skills.forEach((element) {
-        skillsList.add(element["id"]);
+        skillsList.add(Skill.fromJson(element));
       });
     }
   }
@@ -422,5 +437,53 @@ class RegisterProviderController extends GetxController {
     } catch (e) {
       print('$e');
     }
+  }
+
+  createSkill(idSkill, String cost, String typeCost, String descripcion) async {
+    try {
+      // creo la data
+
+      // llamo al servicio de auth
+
+      final response = await _auth.postSkill({
+        "skill_id": idSkill,
+        "cost": cost,
+        "type_cost": typeCost,
+        "description": descripcion
+      });
+
+      // si el status es 500 lanzo error
+
+      if (response['status'] == 500) {
+        throw response['error'];
+      }
+
+      Logger().i(response['data']);
+    } catch (e) {
+      Logger().e(e);
+    }
+  }
+}
+
+class Skill {
+  double costo;
+  String? tipoCosto;
+  String? descripcion;
+  List? images = [];
+
+  Skill({
+    required this.costo,
+    this.tipoCosto = 'per_hour',
+    this.descripcion = '',
+    this.images,
+  });
+
+  factory Skill.fromJson(Map<String, dynamic> json) {
+    return Skill(
+      costo: double.parse(json['cost']),
+      tipoCosto: json['type_cost'],
+      descripcion: json['description'],
+      images: json['images'],
+    );
   }
 }

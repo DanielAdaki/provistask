@@ -6,4 +6,110 @@
 
 const { createCoreController } = require('@strapi/strapi').factories;
 
-module.exports = createCoreController('api::provider-skill.provider-skill');
+module.exports = createCoreController('api::provider-skill.provider-skill' ,({ strapi }) => ({
+
+
+
+
+ async created (ctx) {
+
+
+	const user = ctx.state.user;
+
+	if (!user) {
+
+		return ctx.unauthorized("No tienes permiso", { error: 'No autorizado' });
+
+	}
+
+
+	const {  skill_id, cost , type_cost, description } = ctx.request.body.data;
+
+
+console.log(ctx.request.body);
+
+	const skill = await strapi.query('api::skill.skill').findOne({where:{ id: skill_id }});
+
+
+	if (!skill) {
+
+		return ctx.unauthorized("No existe el skill", { error: 'No existe el skill' });
+
+	}
+
+
+	// verifico se hayan mandado los demas datos
+
+	if (!cost || !type_cost || !description) {
+
+
+		return ctx.unauthorized("Faltan datos", { error: 'Faltan datos' });
+
+	}
+
+
+
+
+
+	//	verifico si existe el provider_skill
+
+
+
+
+
+
+
+
+	let provider_skill = await strapi.query('api::provider-skill.provider-skill').findOne({
+		
+		
+		where:{ provider: user.id, categorias_skill: skill_id }
+	
+	
+	});
+	
+	
+	if (provider_skill) {
+
+		// si existe la actualizo
+
+
+		 await strapi.query('api::provider-skill.provider-skill').update(
+
+			{ id: provider_skill.id },
+
+			{ cost: cost, type_price: type_cost, description: description }
+
+		);
+
+
+	}else{
+
+
+		// si no existe la creo
+
+		 provider_skill = await strapi.query('api::provider-skill.provider-skill').create({
+
+			provider: user.id,
+			categorias_skill: skill_id,
+			cost: cost,
+			type_price: type_cost,
+			description: description
+
+		});
+
+	}
+
+
+	console.log(provider_skill);
+
+	return provider_skill;
+
+
+
+
+	}
+
+
+
+}));

@@ -44,7 +44,7 @@ class ChatConversationPage extends GetView<ChatConversationController> {
                           _widgets.stickerMessage(),
                         ],
                         Container(
-                            height: Get.height * 0.1,
+                            height: Get.height * 0.0,
                             child: ListView.builder(
                               itemCount: controller.messages.length,
                               itemBuilder: (context, index) {
@@ -69,6 +69,7 @@ class ChatConversationPage extends GetView<ChatConversationController> {
                           height: Get.height * 1,
                           width: Get.width * 1,
                           child: Chat(
+                            key: controller.chatKey,
                             messages: controller.messages,
                             onAttachmentPressed:
                                 _widgets.handleAttachmentPressed,
@@ -76,6 +77,7 @@ class ChatConversationPage extends GetView<ChatConversationController> {
                             onPreviewDataFetched:
                                 controller.handlePreviewDataFetched,
                             onSendPressed: controller.handleSendPressed,
+                            onEndReached: controller.handleEndReached,
                             showUserAvatars: true,
                             showUserNames: true,
                             user: types.User(

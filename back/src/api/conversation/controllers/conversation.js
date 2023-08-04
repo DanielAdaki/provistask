@@ -34,7 +34,7 @@ module.exports = createCoreController('api::conversation.conversation', ({ strap
 
 			}
 
-			console.log(user)
+
 
 			// añado progrmaaticamente el filtro de users para que solo me traiga las conversaciones del usuario logueado
 
@@ -103,10 +103,10 @@ module.exports = createCoreController('api::conversation.conversation', ({ strap
 
 					const online =	await strapi.db.query('api::online-user.online-user').findOne({
 							select: ['lastConnection', 'status'],
-							where: { user: userp.id }
+							where: { user: users[j].id }
 					});
 
-						if(online.length > 0){
+						if(online){
 
 							userp.online = online;
 
@@ -228,7 +228,7 @@ module.exports = createCoreController('api::conversation.conversation', ({ strap
 
 
 			}
-
+console.log(conversation.data[0].attributes.contact)
 
 			return conversation;
 

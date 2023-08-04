@@ -1,7 +1,9 @@
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:logger/logger.dart';
 import 'package:provitask_app/controllers/user/profile_controller.dart';
 
 import 'package:provitask_app/pages/register_provider/UI/register_provider_controller.dart';
@@ -186,12 +188,174 @@ class RegisterProviderWidgets {
                             value: _controller.skillsList.contains(e['id']),
                             shape: const CircleBorder(),
                             onChanged: (a) {
-                              if (a!) {
-                                _controller.skillsList.add(e["id"]);
-                              } else {
-                                _controller.skillsList.removeWhere(
-                                    (element) => element == e["id"]);
-                              }
+                              Logger().i(e);
+
+                              Get.dialog(
+                                AlertDialog(
+                                  insetPadding: const EdgeInsets.all(2),
+                                  contentPadding: const EdgeInsets.all(2),
+                                  title: Text(
+                                    'Cost of service by: ${e["attributes"]["name"]}',
+                                    overflow: TextOverflow.clip,
+                                  ),
+                                  content: SafeArea(
+                                    child: SingleChildScrollView(
+                                      child: Container(
+                                        width: Get.width * 1,
+                                        padding: const EdgeInsets.all(10),
+                                        child: Obx(
+                                          () => Form(
+                                            key: _controller.formKey,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                TextFormField(
+                                                  controller: _controller
+                                                      .costSkill.value,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    labelText: 'Cost \$',
+                                                  ),
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return 'Please enter a cost';
+                                                    }
+                                                    return null;
+                                                  },
+                                                ),
+                                                const SizedBox(height: 20),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Text(
+                                                      'Type of cost',
+                                                      textAlign: TextAlign.left,
+                                                      style: TextStyle(
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 20),
+                                                    Row(
+                                                      children: [
+                                                        Radio(
+                                                          value: 'per_hour',
+                                                          groupValue:
+                                                              _controller
+                                                                  .typeCost
+                                                                  .value,
+                                                          onChanged: (value) {
+                                                            _controller.typeCost
+                                                                    .value =
+                                                                value as String;
+                                                          },
+                                                        ),
+                                                        const Text('Per hour'),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Radio(
+                                                          value:
+                                                              'by_project_flat_rate',
+                                                          groupValue:
+                                                              _controller
+                                                                  .typeCost
+                                                                  .value,
+                                                          onChanged: (value) {
+                                                            _controller.typeCost
+                                                                    .value =
+                                                                value as String;
+                                                          },
+                                                        ),
+                                                        const Text(
+                                                            'Per project'),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Radio(
+                                                          value: 'free_trading',
+                                                          groupValue:
+                                                              _controller
+                                                                  .typeCost
+                                                                  .value,
+                                                          onChanged: (value) {
+                                                            _controller.typeCost
+                                                                    .value =
+                                                                value as String;
+                                                          },
+                                                        ),
+                                                        const Text(
+                                                            'Free trading'),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                                TextFormField(
+                                                  controller: _controller
+                                                      .descriptionSkill.value,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    labelText:
+                                                        'Tell us your experience',
+                                                  ),
+                                                  maxLines: 4,
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return 'Please enter a description';
+                                                    }
+                                                    return null;
+                                                  },
+                                                ),
+                                                const SizedBox(height: 20),
+                                                registerTaskImageZone(),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        if (_controller.formKey.currentState!
+                                            .validate()) {
+                                          _controller.skillsList.removeWhere(
+                                              (element) => element == e["id"]);
+                                          Get.back();
+                                        }
+                                      },
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        if (_controller.formKey.currentState!
+                                            .validate()) {
+                                          try {
+                                            await _controller.createSkill(
+                                                e["id"],
+                                                _controller
+                                                    .costSkill.value.text,
+                                                _controller.typeCost.value,
+                                                _controller.descriptionSkill
+                                                    .value.text);
+                                          } catch (e) {
+                                            Logger().e(e);
+                                          }
+
+                                          // Get.back();
+                                        }
+                                      },
+                                      child: const Text('Save'),
+                                    ),
+                                  ],
+                                ),
+                                barrierDismissible: false,
+                              );
                             },
                             activeColor: Colors.indigo[800],
                             checkColor: Colors.indigo[800],
@@ -1429,6 +1593,147 @@ class RegisterProviderWidgets {
           style: const TextStyle(
             color: Colors.white,
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget registerTaskImageZone() {
+    return Obx(
+      () => Container(
+        // height: Get.height * 0.2,
+        width: Get.width * 0.9,
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        child: Column(
+          children: [
+            if (_controller.images.isNotEmpty) ...[
+              Container(
+                margin: const EdgeInsets.only(top: 30),
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  itemCount: _controller.images.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    var img = _controller.images[index];
+                    return Stack(
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: FileImage(img!),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _controller.images.remove(img),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              )
+            ],
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              width: double.infinity, // Hace que el botón ocupe todo el ancho
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.add_a_photo), // Añade un icono al botón
+                label: Text(
+                  'Add images',
+                  style: TextStyle(
+                    color: Colors.indigo[800],
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                onPressed: () {
+                  showDialog(
+                    context: Get.context!,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Select an option'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.camera_alt),
+                            title: const Text('Take a photo'),
+                            onTap: () async {
+                              Navigator.pop(context);
+                              final picker = ImagePicker();
+                              final pickedFile = await picker.pickImage(
+                                source: ImageSource.camera,
+                                maxWidth: 800,
+                                maxHeight: 800,
+                                imageQuality: 80,
+                              );
+                              if (pickedFile == null) return;
+                              _controller.images.clear();
+                              int length = await pickedFile.length();
+                              if (length <= 20000000 &&
+                                  _controller.images.length < 10) {
+                                _controller.images.add(File(pickedFile.path));
+                              }
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.photo),
+                            title: const Text('Select from gallery'),
+                            onTap: () async {
+                              Navigator.pop(context);
+                              final picker = ImagePicker();
+                              final List<XFile> pickedFile =
+                                  await picker.pickMultiImage(
+                                maxWidth: 800,
+                                maxHeight: 800,
+                                imageQuality: 80,
+                              );
+
+                              if (pickedFile.isEmpty) return;
+
+                              //vacio el array de imagenes
+
+                              _controller.images.clear();
+                              for (var img in pickedFile) {
+                                int length = await img.length();
+                                print("añadiendo");
+                                if (length <= 20000000 &&
+                                    _controller.images.length < 10) {
+                                  _controller.images.add(File(img.path));
+                                }
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.white),
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(90),
+                  )),
+                ),
+              ),
+            ),
+            const Text(
+              'Máximo 20MB por imagen, máximo 10 imágenes',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+              ),
+            ),
+          ],
         ),
       ),
     );

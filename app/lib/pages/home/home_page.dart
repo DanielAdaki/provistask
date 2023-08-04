@@ -16,7 +16,7 @@ import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 class HomePage extends GetView<HomeController> {
   final _widgets = HomeWidgets();
 
-  final _controller = Get.find<FreelancersController>();
+  final _controller = Get.put(FreelancersController());
 
   HomePage({Key? key}) : super(key: key);
 

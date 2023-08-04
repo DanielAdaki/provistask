@@ -122,13 +122,17 @@ class ChatHomeWidgets {
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: item["attributes"]["contact"]["online"] == true
+                        color: item["attributes"]["contact"]["online"]
+                                    ["status"] ==
+                                'online'
                             ? Colors.green
                             : Colors.red,
                       ),
                       child: Icon(
                         Icons.circle,
-                        color: item["attributes"]["contact"]["online"] == true
+                        color: item["attributes"]["contact"]["online"]
+                                    ["status"] ==
+                                'online'
                             ? Colors.green
                             : Colors.red,
                         size: 15,
