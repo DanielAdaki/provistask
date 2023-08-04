@@ -7,6 +7,8 @@
 
 const { createCoreController } = require('@strapi/strapi').factories;
 
+let { URL} = process.env;
+
 module.exports = createCoreController('api::conversation.conversation', ({ strapi }) => ({
 
 	async find(ctx) {
@@ -73,8 +75,6 @@ module.exports = createCoreController('api::conversation.conversation', ({ strap
 
 			for (let i = 0; i < conversation.data.length; i++) {
 
-				console.log(conversation.data[i].users)
-
 				let users = conversation.data[i].attributes.users.data;
 
 				delete conversation.data[i].attributes.users;
@@ -95,7 +95,31 @@ module.exports = createCoreController('api::conversation.conversation', ({ strap
 
 
 
-						userp.avatar_image = userp.avatar_image ? userp.avatar_image.url : false;
+						userp.avatar_image = userp.avatar_image ? userp.avatar_image.url : URL + "/uploads/user_147dd8408e.png";
+
+
+						// busco si es está	online de api::online-user.online-user
+
+
+					const online =	await strapi.db.query('api::online-user.online-user').findOne({
+							select: ['lastConnection', 'status'],
+							where: { user: userp.id }
+					});
+
+						if(online.length > 0){
+
+							userp.online = online;
+
+						}else{
+
+							userp.online = {
+								lastConnection: null,
+								status: 'offline'
+							};
+
+						}
+
+
 
 						conversation.data[i].attributes.contact = userp;
 
