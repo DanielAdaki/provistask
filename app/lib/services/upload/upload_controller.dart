@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:logger/logger.dart';
+import 'package:provitask_app/pages/register_provider/UI/register_provider_controller.dart';
 
 import 'package:provitask_app/services/preferences.dart';
 
@@ -21,9 +22,10 @@ BaseOptions options = BaseOptions(headers: {
 Dio dio = Dio(options);
 
 class UploadServices {
-  Future<Map> upload(String ref, String refId, String field, file) async {
+  Future<Map> upload(String ref, int refId, String field, file) async {
     Map respuesta;
     try {
+      dio.interceptors.add(LogInterceptor(error: true));
       List<int> imageBytes = await file.readAsBytes();
       FormData formData = FormData.fromMap({
         "ref": ref,
@@ -34,6 +36,30 @@ class UploadServices {
       });
 
       final response = await dio.post("/upload", data: formData);
+
+      if (response.statusCode != 200) {
+        throw jsonDecode(response.data);
+      }
+
+      respuesta = {"status": 200, "data": response.data};
+    } catch (e) {
+      // e es un string lo vuelvo a convertir en json y lo guardo en el map _respuesta y lo retorno con status 500
+
+      respuesta = {"status": 500, "error": e};
+    }
+    return respuesta;
+  }
+
+  Future<Map> deleteByPath(String ruta, String s, int skill) async {
+    Map respuesta;
+    try {
+      dio.interceptors.add(LogInterceptor(error: true));
+
+      final response = await dio.post("/upload/delete-by-path", data: {
+        "ref": s,
+        "refId": skill,
+        "path": ruta,
+      });
 
       if (response.statusCode != 200) {
         throw jsonDecode(response.data);

@@ -55,12 +55,13 @@ class ChatConversationController extends GetxController {
 
   @override
   void onInit() async {
+    super.onInit();
     isLoading.value = true;
 
     // tomo el id de la conversacion que viene en la ruta como parametros
 
     id.value = Get.parameters['id'] ?? '';
-
+    await getTaskConversation();
     _socketController.socket.emit('join', {
       "id": id.value
     }); // me uno a la sala de chat con el id de la conversacion
@@ -69,8 +70,6 @@ class ChatConversationController extends GetxController {
         'getChat', {"id": id.value, "limit": 10, "page": 1, "init": true});
 
     // espero dos segundos
-
-    await getTaskConversation();
 
     _socketController.socket.once('getChatResponse', (data) async {
       user.value = data["otherUser"];
@@ -82,21 +81,13 @@ class ChatConversationController extends GetxController {
 
         messages.add(mess);
       }
-
-      Logger().i("MENSAJES", messages);
+      isLoading.value = false;
     });
     _socketController.socket.on('sendMessageResponse', (data) async {
-      Logger().i("MENSAJE REcibido antes formato", data);
-
       final mess = types.Message.fromJson(data as Map<String, dynamic>);
 
       messages.insert(0, mess);
-
-      Logger().i("MENSAJE recibido luego formato", mess);
     });
-
-    isLoading.value = false;
-    super.onInit();
   }
 
   getTaskConversation() async {

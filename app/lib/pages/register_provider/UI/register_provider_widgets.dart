@@ -1,13 +1,16 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:galleryimage/galleryimage.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
+import 'package:provitask_app/common/conexion_common.dart';
 import 'package:provitask_app/controllers/user/profile_controller.dart';
 
 import 'package:provitask_app/pages/register_provider/UI/register_provider_controller.dart';
 import 'package:provitask_app/services/preferences.dart';
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 class RegisterProviderWidgets {
   final _controller =
@@ -185,10 +188,41 @@ class RegisterProviderWidgets {
                         (e) => ListTile(
                           contentPadding: const EdgeInsets.all(0),
                           leading: Checkbox(
-                            value: _controller.skillsList.contains(e['id']),
+                            value: _controller.skillsList
+                                .any((skill) => skill.idCategory == e['id']),
                             shape: const CircleBorder(),
                             onChanged: (a) {
-                              Logger().i(e);
+                              // de controller.skillsList busco si existe el id de la categoria
+
+                              if (_controller.skillsList.any(
+                                  (skill) => skill.idCategory == e['id'])) {
+                                // obetngo el elemento coincidente
+
+                                final skill = _controller.skillsList.firstWhere(
+                                    (skill) => skill.idCategory == e['id']);
+
+                                //lleno los campos del formulario con los datos del elemento
+
+                                _controller.costSkill.value.text =
+                                    skill.cost.toString();
+                                _controller.descriptionSkill.value.text =
+                                    skill.description ?? '';
+                                _controller.typeCost.value =
+                                    skill.typePrice ?? 'per_hour';
+                                _controller.minimalHours.value =
+                                    skill.minimalHour ?? 'hour_1';
+
+                                // lleno el listado de imagenes
+
+                                _controller.images.clear();
+
+                                if (skill.media != null) {
+                                  for (var image in skill.media!) {
+                                    _controller.mediaBySkill
+                                        .add(ConexionCommon.hostBase + image);
+                                  }
+                                }
+                              }
 
                               Get.dialog(
                                 AlertDialog(
@@ -223,6 +257,73 @@ class RegisterProviderWidgets {
                                                     }
                                                     return null;
                                                   },
+                                                ),
+                                                const SizedBox(height: 20),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    // un texto que diga horas minimas de trabajo
+                                                    const Text(
+                                                      'Minimum hours of work',
+                                                      textAlign: TextAlign.left,
+                                                      style: TextStyle(
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 20),
+                                                    SizedBox(
+                                                      width: Get.width * 0.8,
+                                                      child: DropdownButton<
+                                                          String>(
+                                                        value: _controller
+                                                            .minimalHours.value,
+                                                        onChanged:
+                                                            (String? newValue) {
+                                                          if (newValue !=
+                                                              null) {
+                                                            _controller
+                                                                    .minimalHours
+                                                                    .value =
+                                                                newValue;
+                                                          }
+                                                        },
+                                                        items: const <DropdownMenuItem<
+                                                            String>>[
+                                                          DropdownMenuItem<
+                                                              String>(
+                                                            value: 'hour_1',
+                                                            child:
+                                                                Text('1 hora'),
+                                                          ),
+                                                          DropdownMenuItem<
+                                                              String>(
+                                                            value: 'hour_2',
+                                                            child:
+                                                                Text('2 horas'),
+                                                          ),
+                                                          DropdownMenuItem<
+                                                              String>(
+                                                            value: 'hour_3',
+                                                            child:
+                                                                Text('3 horas'),
+                                                          ),
+                                                          DropdownMenuItem<
+                                                              String>(
+                                                            value: 'hour_4',
+                                                            child:
+                                                                Text('4 horas'),
+                                                          ),
+                                                          DropdownMenuItem<
+                                                              String>(
+                                                            value: 'hour_5',
+                                                            child:
+                                                                Text('5 horas'),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                                 const SizedBox(height: 20),
                                                 Column(
@@ -311,6 +412,119 @@ class RegisterProviderWidgets {
                                                   },
                                                 ),
                                                 const SizedBox(height: 20),
+                                                if (_controller.mediaBySkill
+                                                    .isNotEmpty) ...[
+                                                  Container(
+                                                    margin:
+                                                        const EdgeInsets.only(
+                                                            top: 30),
+                                                    height: 100,
+                                                    child: ListView.builder(
+                                                      scrollDirection:
+                                                          Axis.horizontal,
+                                                      shrinkWrap: true,
+                                                      itemCount: _controller
+                                                          .mediaBySkill.length,
+                                                      itemBuilder:
+                                                          (BuildContext context,
+                                                              int index) {
+                                                        var img = _controller
+                                                                .mediaBySkill[
+                                                            index];
+                                                        return GestureDetector(
+                                                          onTap: () {
+                                                            // Aquí puedes agregar la lógica para abrir la imagen en una vista ampliada
+                                                            showDialog(
+                                                              context: context,
+                                                              builder:
+                                                                  (BuildContext
+                                                                      context) {
+                                                                return Dialog(
+                                                                  child: Stack(
+                                                                    children: [
+                                                                      Image.network(
+                                                                          img),
+                                                                      Positioned(
+                                                                        top: 0,
+                                                                        right:
+                                                                            0,
+                                                                        child:
+                                                                            IconButton(
+                                                                          icon:
+                                                                              const Icon(
+                                                                            Icons.close,
+                                                                            color:
+                                                                                Colors.white,
+                                                                          ),
+                                                                          onPressed:
+                                                                              () {
+                                                                            Navigator.of(context).pop();
+                                                                          },
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                );
+                                                              },
+                                                            );
+                                                          },
+                                                          child: Stack(
+                                                            children: [
+                                                              Container(
+                                                                width: 100,
+                                                                height: 100,
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  shape: BoxShape
+                                                                      .circle,
+                                                                  image:
+                                                                      DecorationImage(
+                                                                    fit: BoxFit
+                                                                        .cover,
+                                                                    image:
+                                                                        NetworkImage(
+                                                                            img),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              Positioned(
+                                                                top: 0,
+                                                                right: 0,
+                                                                child:
+                                                                    IconButton(
+                                                                  icon: const Icon(
+                                                                      Icons
+                                                                          .delete,
+                                                                      color: Colors
+                                                                          .red),
+                                                                  onPressed:
+                                                                      () async {
+                                                                    // obtengo la imagen que quiero eliminar
+
+                                                                    var imageToDelete =
+                                                                        _controller
+                                                                            .mediaBySkill[index];
+
+                                                                    await _controller.deleteImage(
+                                                                        imageToDelete,
+                                                                        e['id']);
+
+                                                                    // elimino la imagen de la lista de imagenes
+
+                                                                    /* _controller
+                                                                        .mediaBySkill
+                                                                        .removeAt(
+                                                                            index);*/
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
                                                 registerTaskImageZone(),
                                               ],
                                             ),
@@ -322,12 +536,18 @@ class RegisterProviderWidgets {
                                   actions: [
                                     TextButton(
                                       onPressed: () {
-                                        if (_controller.formKey.currentState!
-                                            .validate()) {
-                                          _controller.skillsList.removeWhere(
-                                              (element) => element == e["id"]);
-                                          Get.back();
-                                        }
+                                        _controller.formKey.currentState!
+                                            .reset();
+                                        _controller.costSkill.value.clear();
+                                        _controller.descriptionSkill.value
+                                            .clear();
+                                        _controller.typeCost.value = 'per_hour';
+                                        _controller.images.clear();
+
+                                        _controller.minimalHours.value =
+                                            'hour_1';
+
+                                        Get.back();
                                       },
                                       child: const Text('Cancel'),
                                     ),
@@ -335,7 +555,16 @@ class RegisterProviderWidgets {
                                       onPressed: () async {
                                         if (_controller.formKey.currentState!
                                             .validate()) {
+                                          ProgressDialog pd = ProgressDialog(
+                                              context: Get.context);
                                           try {
+                                            pd.show(
+                                              max: 100,
+                                              msg: 'Please wait...',
+                                              progressBgColor:
+                                                  Colors.transparent,
+                                            );
+
                                             await _controller.createSkill(
                                                 e["id"],
                                                 _controller
@@ -343,11 +572,40 @@ class RegisterProviderWidgets {
                                                 _controller.typeCost.value,
                                                 _controller.descriptionSkill
                                                     .value.text);
+                                            _controller.formKey.currentState!
+                                                .reset();
+                                            _controller.costSkill.value.clear();
+                                            _controller.descriptionSkill.value
+                                                .clear();
+                                            _controller.typeCost.value =
+                                                'per_hour';
+                                            _controller.images.clear();
+                                            _controller.minimalHours.value =
+                                                'hour_1';
+                                            pd.close();
+                                            Get.back();
+                                            Get.snackbar(
+                                              'Success!',
+                                              'Skill created',
+                                              backgroundColor: Colors.green,
+                                              colorText: Colors.white,
+                                              snackPosition:
+                                                  SnackPosition.BOTTOM,
+                                            );
                                           } catch (e) {
                                             Logger().e(e);
-                                          }
+                                            // muestro un diaglog con el error
 
-                                          // Get.back();
+                                            pd.close();
+                                            Get.snackbar(
+                                              'Error!',
+                                              'Not possible create skill',
+                                              backgroundColor: Colors.red,
+                                              colorText: Colors.white,
+                                              snackPosition:
+                                                  SnackPosition.BOTTOM,
+                                            );
+                                          }
                                         }
                                       },
                                       child: const Text('Save'),
@@ -1705,7 +1963,6 @@ class RegisterProviderWidgets {
                               _controller.images.clear();
                               for (var img in pickedFile) {
                                 int length = await img.length();
-                                print("añadiendo");
                                 if (length <= 20000000 &&
                                     _controller.images.length < 10) {
                                   _controller.images.add(File(img.path));
@@ -1737,5 +1994,23 @@ class RegisterProviderWidgets {
         ),
       ),
     );
+  }
+}
+
+formatImages(image, [bool? general = false]) {
+  final List<String> images = [];
+
+  for (var img in image) {
+    images.add(img);
+  }
+
+  return images;
+}
+
+calculeImageMininal(image) {
+  if (image.length > 3) {
+    return 3;
+  } else {
+    return image.length;
   }
 }

@@ -75,6 +75,10 @@ class RegisterProviderController extends GetxController {
 
   RxList<File?> images = RxList<File?>([]);
 
+  final minimalHours = 'hour_1'.obs;
+
+  final mediaBySkill = [].obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -336,15 +340,31 @@ class RegisterProviderController extends GetxController {
   void prepareSkills() {
     // saco las skills del usuario
 
-    final skills = _prefs.user?["skills"];
-
-    Logger().i(skills);
+    final skills = _prefs.user?["provider_skills"];
 
     if (skills != null) {
       // las recorro y añado a list skills skillsList
 
       skills.forEach((element) {
-        skillsList.add(Skill.fromJson(element));
+        // recorro element['media'] las urls de las imagenes
+
+        List? media = [];
+
+        if (element['media'] != null) {
+          element['media'].forEach((element) {
+            media.add(element['url']);
+          });
+        }
+
+        skillsList.add(Skill(
+          id: element['id'],
+          idCategory: element['categorias_skill']['id'],
+          cost: element['cost'].toDouble(),
+          typePrice: element['type_price'],
+          description: element['description'],
+          media: media,
+          minimalHour: element['hourMinimum'],
+        ));
       });
     }
   }
@@ -452,38 +472,74 @@ class RegisterProviderController extends GetxController {
         "description": descripcion
       });
 
-      // si el status es 500 lanzo error
-
       if (response['status'] == 500) {
         throw response['error'];
       }
 
-      Logger().i(response['data']);
+      // verifico si hay imagenes para subir
+
+      if (images.isNotEmpty) {
+        Logger().i(response['data']['id']);
+
+        for (var i = 0; i < images.length; i++) {
+          final responseUpload = await _upload.upload(
+              'api::provider-skill.provider-skill',
+              response['data']['id'],
+              'media',
+              images[i]!);
+
+          if (responseUpload['status'] == 500) {
+            throw responseUpload['error'];
+          }
+        }
+      }
+      await _auth.me();
     } catch (e) {
       Logger().e(e);
+      rethrow;
+    }
+  }
+
+  deleteImage(imageToDelete, id) async {
+    try {
+      final skill = skillsList.firstWhere((skill) => skill.idCategory == id);
+
+      final responseUpload = await _upload.deleteByPath(
+          imageToDelete, 'api::provider-skill.provider-skill', skill.id);
+    } catch (e) {
+      Logger().e(e);
+      rethrow;
     }
   }
 }
 
 class Skill {
-  double costo;
-  String? tipoCosto;
-  String? descripcion;
-  List? images = [];
+  int id;
+  int idCategory;
+  double cost;
+  String? typePrice;
+  String? description;
+  String? minimalHour = 'hour_1';
+  List? media = [];
 
   Skill({
-    required this.costo,
-    this.tipoCosto = 'per_hour',
-    this.descripcion = '',
-    this.images,
+    required this.id,
+    required this.idCategory,
+    required this.cost,
+    this.typePrice = 'per_hour',
+    this.description = '',
+    this.minimalHour,
+    this.media,
   });
 
   factory Skill.fromJson(Map<String, dynamic> json) {
     return Skill(
-      costo: double.parse(json['cost']),
-      tipoCosto: json['type_cost'],
-      descripcion: json['description'],
-      images: json['images'],
+      id: json['id'],
+      idCategory: json['id'],
+      cost: double.parse(json['cost']),
+      typePrice: json['type_price'],
+      description: json['description'],
+      media: json['images'],
     );
   }
 }

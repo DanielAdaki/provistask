@@ -8,7 +8,7 @@ import 'package:provitask_app/widget/provider/provider_perfil_dialog.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 class FreelancersWidgets {
-  final _controller = Get.find<FreelancersController>();
+  final _controller = Get.put(FreelancersController());
 
   Widget freelancersFloatingButton() {
     return Material(

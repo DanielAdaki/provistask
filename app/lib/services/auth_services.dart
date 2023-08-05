@@ -194,7 +194,7 @@ class AuthService {
 
       // hago la peticion get a la api a la ruta /users/me
 
-      final response = await dio.get("/users/me?populate=*");
+      final response = await dio.get("/users/me?populate=deep,3");
 
       if (response.statusCode != 200) {
         throw jsonDecode(response.data);
@@ -452,17 +452,6 @@ class AuthService {
 
   Future<Map> postSkill(Map datos) async {
     Map respuesta;
-
-    dio.interceptors.add(LogInterceptor(
-        requestBody: true,
-        requestHeader: true,
-        responseBody: true,
-        responseHeader: true,
-        error: true));
-
-    // configuro encabezados para que acepte json
-
-    dio.options.headers["content-type"] = "application/json";
 
     final datax = {
       "data": datos,

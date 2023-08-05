@@ -195,7 +195,8 @@ class ProfileDialog extends GetWidget {
                           ),
                           if (general == false) ...[
                             GalleryImage(
-                              numOfShowImages: 3,
+                              numOfShowImages: calculeImageMininal(
+                                  perfilProvider["skill_select"]["media"]),
                               imageUrls: formatImages(
                                   perfilProvider["skill_select"], false),
                             ),

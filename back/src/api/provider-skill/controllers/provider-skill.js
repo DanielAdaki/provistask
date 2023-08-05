@@ -11,7 +11,7 @@ module.exports = createCoreController('api::provider-skill.provider-skill' ,({ s
 
 
 
- async created (ctx) {
+ async create(ctx) {
 
 
 	const user = ctx.state.user;
@@ -76,9 +76,9 @@ console.log(ctx.request.body);
 
 		 await strapi.query('api::provider-skill.provider-skill').update(
 
-			{ id: provider_skill.id },
+{			where:{ id: provider_skill.id },
 
-			{ cost: cost, type_price: type_cost, description: description }
+			data:{ cost: cost, type_price: type_cost, description: description }}
 
 		);
 
@@ -90,11 +90,11 @@ console.log(ctx.request.body);
 
 		 provider_skill = await strapi.query('api::provider-skill.provider-skill').create({
 
-			provider: user.id,
+			data:{provider: user.id,
 			categorias_skill: skill_id,
 			cost: cost,
 			type_price: type_cost,
-			description: description
+			description: description}
 
 		});
 
@@ -108,6 +108,50 @@ console.log(ctx.request.body);
 
 
 
+	},
+
+
+	async deleteImageByPath(ctx) {
+		console.log(ctx.request.body);
+
+		let {	ref, refId, path } = ctx.request.body;
+
+
+
+		const user = ctx.state.user;
+
+
+		if (!user) {
+
+			return ctx.unauthorized("No tienes permiso", { error: 'No autorizado' });
+
+		}
+
+
+		if (!ref || !refId || !path) {
+
+				return ctx.badRequest("Faltan datos", { error: 'Faltan datos' });
+
+		}
+
+
+		// elimino la url base para quedarme con la relativa
+
+
+		path = path.replace(process.env.URL, "");
+
+
+		console.log(path);
+
+
+		 let archivo = await strapi.db.connection.raw(`SELECT * FROM files WHERE url = '${path}'`);
+
+
+			console.log(archivo[0]);
+
+
+
+			return ctx.send ({message: "hola"});
 	}
 
 
