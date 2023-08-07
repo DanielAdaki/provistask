@@ -44,6 +44,8 @@ class ProfileController extends GetxController {
 
   final isProvider = false.obs;
 
+  final isStripeConnect = false.obs;
+
   final car = RxBool(false);
   final truck = RxBool(false);
   final moto = RxBool(false);
@@ -55,6 +57,10 @@ class ProfileController extends GetxController {
 
   final skills = RxList();
 
+  final lat = 90.0.obs;
+
+  final lng = 180.0.obs;
+
   /// Selections
   final skillsList = RxList<int>();
 
@@ -63,7 +69,41 @@ class ProfileController extends GetxController {
     'sugerencia 2',
     'sugerencia 3'
   ];
+
   TextEditingController textEditingController = TextEditingController();
+
+  final open_hour = "8:00am".obs;
+  final close_hour = "9:00pm".obs;
+  final disponibilityHour = [
+    "8:00am",
+    "8:30am",
+    "9:00am",
+    "9:30am",
+    "10:00am",
+    "10:30am",
+    "11:00am",
+    "11:30am",
+    "12:00pm",
+    "12:30pm",
+    "1:00pm",
+    "1:30pm",
+    "2:00pm",
+    "2:30pm",
+    "3:00pm",
+    "3:30pm",
+    "4:00pm",
+    "4:30pm",
+    "5:00pm",
+    "5:30pm",
+    "6:00pm",
+    "6:30pm",
+    "7:00pm",
+    "7:30pm",
+    "8:00pm",
+    "8:30pm",
+    "9:00pm",
+    "9:30pm"
+  ].obs;
 
   final aboutMeController = Rx<TextEditingController>(TextEditingController());
   @override
@@ -150,14 +190,28 @@ class ProfileController extends GetxController {
 
     isProvider.value = user['isProvider'] ?? false;
 
+    isStripeConnect.value = user['is_stripe_connect'] ?? false;
+
     car.value = user['car'] ?? false;
 
     truck.value = user['truck'] ?? false;
 
     moto.value = user['motorcycle'] ?? false;
 
-    if (user['skills'] != null) {
-      user['skills'].forEach((element) {
+    lat.value = user['lat'] ?? 90.0;
+
+    lng.value = user['lng'] ?? 180.0;
+
+    open_hour.value = user['open_disponibility'] != null
+        ? formatTimeFromFormattedString(user['open_disponibility'])
+        : "8:00am";
+
+    close_hour.value = user['close_disponibility'] != null
+        ? formatTimeFromFormattedString(user['close_disponibility'])
+        : "9:00pm";
+
+    if (user['provider_skills'] != null) {
+      user['provider_skills'].forEach((element) {
         skillsList.add(element['id']);
       });
     }
@@ -384,8 +438,6 @@ class ProfileController extends GetxController {
 
     Get.offAllNamed('/login');
 
-    // HAGO GET pu LOGIN CONTROLLER
-
     Get.lazyPut<LoginController>(() => LoginController());
   }
 
@@ -412,6 +464,7 @@ class ProfileController extends GetxController {
       return response['data'];
     } catch (e) {
       logger.e(e);
+      rethrow;
     }
   }
 
@@ -461,22 +514,17 @@ class ProfileController extends GetxController {
     }
   }
 
-  Future<bool> saveUbicationServices(
-      Placemark? placemark, LatLng? location) async {
+  Future<bool> saveUbicationServices(LatLng? location) async {
+    // preparo la hora de apertura y cierre
+
     final data = {
-      'location': {
-        'latitud': location!.latitude,
-        'longitud': location.longitude,
-        'name': placemark!.name,
-        'thoroughfare': placemark.thoroughfare,
-        'locality': placemark.locality,
-        'country': placemark.country,
-        'administrativeArea': placemark.administrativeArea,
-        'placeId': placemark.name
-      },
-      'lat': location.latitude,
+      'lat': location!.latitude,
       'lng': location.longitude,
+      'open_disponibility': parseTimeToFormattedString(open_hour.value),
+      'close_disponibility': parseTimeToFormattedString(close_hour.value),
     };
+
+    Logger().i(data);
 
     dynamic response = await _auth.updateUser(data);
 
@@ -491,5 +539,48 @@ class ProfileController extends GetxController {
     } else {
       return false;
     }
+  }
+
+  String parseTimeToFormattedString(String timeString) {
+    final regex = RegExp(r'(\d+):(\d+)([ap]m)', caseSensitive: false);
+    final match = regex.firstMatch(timeString);
+
+    if (match == null) {
+      throw ArgumentError("Invalid time format: $timeString");
+    }
+
+    var hours = int.parse(match.group(1)!);
+    final minutes = int.parse(match.group(2)!);
+    final isAM = match.group(3)!.toLowerCase() == 'am';
+
+    if (!isAM && hours < 12) {
+      hours += 12;
+    }
+
+    final formattedTime =
+        "${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:00.000";
+    return formattedTime;
+  }
+
+  String formatTimeFromFormattedString(String formattedTimeString) {
+    final components = formattedTimeString.split(':');
+
+    if (components.length != 3) {
+      throw ArgumentError(
+          "Invalid formatted time format: $formattedTimeString");
+    }
+
+    var hours = int.parse(components[0]);
+    final minutes = int.parse(components[1]);
+
+    String period = hours >= 12 ? 'pm' : 'am';
+    if (hours > 12) {
+      hours -= 12;
+    } else if (hours == 0) {
+      hours = 12;
+    }
+
+    final formattedTime = '$hours:${minutes.toString().padLeft(2, '0')}$period';
+    return formattedTime;
   }
 }

@@ -7,12 +7,13 @@ import 'package:provitask_app/pages/profile_client/UI/profile_client_widgets.dar
 class PaymentPerfil extends GetView<ProfileController> {
   final _widgets = ProfileClientWidgets();
 
-  final _controller = Get.put(ProfileController());
+  //final controller = Get.put(ProfileController());
 
   PaymentPerfil({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    controller.getProfileData();
     return Obx(
       () => Scaffold(
         // paso elñ titulo edit perfil
@@ -24,7 +25,7 @@ class PaymentPerfil extends GetView<ProfileController> {
           child: Column(
             children: [
               Visibility(
-                visible: _controller.isLoading.value,
+                visible: controller.isLoading.value,
                 child: const Center(
                     child: Column(
                   children: [
@@ -37,7 +38,7 @@ class PaymentPerfil extends GetView<ProfileController> {
               ),
               Expanded(
                 child: Visibility(
-                  visible: !_controller.isLoading.value,
+                  visible: !controller.isLoading.value,
                   child: SingleChildScrollView(
                     child: Column(
                       children: [

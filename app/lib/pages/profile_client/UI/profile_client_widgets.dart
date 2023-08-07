@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 
 import 'package:provitask_app/common/conexion_common.dart';
 import 'package:provitask_app/models/data/client_information.dart';
@@ -13,6 +15,7 @@ import 'package:provitask_app/pages/chat/chat_home/UI/chat_home_controller.dart'
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provitask_app/controllers/auth/login_controller.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:provitask_app/widget/provider/webview_stripe_conect.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -280,7 +283,7 @@ class ProfileClientWidgets {
           //   indent: 20,
           //   endIndent: 20,
           // ),
-          ListTile(
+          /*ListTile(
             trailing: Icon(
               Icons.arrow_forward_ios,
               color: Colors.amber[900],
@@ -294,7 +297,7 @@ class ProfileClientWidgets {
             onTap: () {
               Get.toNamed('/notifications');
             },
-          )
+          )*/
         ],
       ),
     );
@@ -400,13 +403,13 @@ class ProfileClientWidgets {
               color: Colors.amber[900],
             ),
             title: const Text(
-              'Location Services',
+              'Service time and location',
               style: TextStyle(
                 color: Colors.grey,
               ),
             ),
             onTap: () {
-              Get.toNamed('/profile_client//edit-services-location');
+              Get.toNamed('/profile_client/edit-services-location');
             },
           ),
           const Divider(
@@ -456,7 +459,7 @@ class ProfileClientWidgets {
                   'assets/images/stripe.png',
                   width: 100,
                 ),
-                _controller.prefs.user!["is_stripe_connect"] != true
+                _controller.isStripeConnect.value != true
                     ? ElevatedButton(
                         onPressed: () async {
                           ProgressDialog pd =
@@ -473,18 +476,18 @@ class ProfileClientWidgets {
                             pd.close();
 
                             final uriUrl = Uri.parse(response);
+                            // verifico se puede lanzar la url
+                            //
+
                             await canLaunchUrl(uriUrl)
-                                ? await launchUrl(
-                                    uriUrl,
-                                    webViewConfiguration:
-                                        const WebViewConfiguration(
-                                      enableJavaScript: true,
-                                    ),
-                                    mode: LaunchMode.inAppWebView,
-                                  )
+                                ? await Get.to(() => InAppWebViewWidget(
+                                    initialUrl: response,
+                                    urlReturn: '/return-app.html',
+                                    pageCallback:
+                                        '/profile_client/payments_methods'))
                                 : throw 'Could not launch URL';
                           } catch (e) {
-                            // log(e.toString());
+                            Logger().e(e);
                             pd.close();
                           }
                         },
@@ -1991,7 +1994,7 @@ class ProfileClientWidgets {
                   Text(
                     'Bicycle/Scooter/Motorcycle',
                     style: TextStyle(
-                      color: _controller.moto.value
+                      color: _controller.moto.value == true
                           ? const Color(0xffD06605)
                           : const Color(0xff170591),
                       fontSize: 17,

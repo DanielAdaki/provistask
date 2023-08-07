@@ -187,8 +187,7 @@ class LocationController extends GetxController {
   // Definición de la variable selectedLocation
 
   // Definición del método updateSelectedLocation
-  void updateSelectedLocation(LatLng location,
-      [bool buildMarket = false]) async {
+  updateSelectedLocation(LatLng location, [bool buildMarket = false]) async {
     _selectedLocation.value = location;
 
     if (buildMarket) {

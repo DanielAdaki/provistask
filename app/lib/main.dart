@@ -23,6 +23,9 @@ void main() async {
   //   ..init(path)
   //   ..registerAdapter();
 
+  SystemChannels.platform.invokeMethod(
+      'SystemChrome.setEnabledSystemUIOverlays', [SystemUiOverlay.values]);
+
   localNotificationsPlugin.initialize(initSetttings);
 
   //await initHiveForFlutter();

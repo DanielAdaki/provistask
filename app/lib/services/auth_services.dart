@@ -426,6 +426,7 @@ class AuthService {
     Map respuesta;
 
     try {
+      dio.interceptors.add(LogInterceptor(responseBody: true));
       final id = _prefs.user?["id"];
 
       if (id == null) {
