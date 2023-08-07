@@ -55,7 +55,14 @@ class ProfileClientWidgets {
               // limpio los campos
               _controller.stateClear();
             } else if (Get.currentRoute == '/profile_client') {
-              Get.toNamed('/home');
+              // si le usuario es isProvider mando a home de proveedores /home-proveedor
+
+              if (_controller.isProvider.value) {
+                Get.toNamed('/home-proveedor');
+              } else {
+                Get.toNamed('/home');
+              }
+
               // limpio los campos
               _controller.stateClear();
             } else {
