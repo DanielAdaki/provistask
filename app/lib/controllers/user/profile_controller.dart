@@ -344,8 +344,6 @@ class ProfileController extends GetxController {
 
     var response = await auth.verifyOtp(value);
 
-    logger.i(response);
-
     if (response['status'] == 500) {
       Get.snackbar(
         'Error!',

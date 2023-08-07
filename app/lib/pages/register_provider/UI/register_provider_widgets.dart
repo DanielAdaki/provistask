@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:galleryimage/galleryimage.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -216,6 +217,8 @@ class RegisterProviderWidgets {
 
                                 _controller.images.clear();
 
+                                _controller.mediaBySkill.clear();
+
                                 if (skill.media != null) {
                                   for (var image in skill.media!) {
                                     _controller.mediaBySkill
@@ -244,6 +247,13 @@ class RegisterProviderWidgets {
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 TextFormField(
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  inputFormatters: <TextInputFormatter>[
+                                                    FilteringTextInputFormatter
+                                                        .allow(
+                                                            RegExp(r'[0-9]')),
+                                                  ],
                                                   controller: _controller
                                                       .costSkill.value,
                                                   decoration:
@@ -509,12 +519,10 @@ class RegisterProviderWidgets {
                                                                         imageToDelete,
                                                                         e['id']);
 
-                                                                    // elimino la imagen de la lista de imagenes
-
-                                                                    /* _controller
+                                                                    _controller
                                                                         .mediaBySkill
                                                                         .removeAt(
-                                                                            index);*/
+                                                                            index);
                                                                   },
                                                                 ),
                                                               ),
@@ -585,26 +593,30 @@ class RegisterProviderWidgets {
                                             pd.close();
                                             Get.back();
                                             Get.snackbar(
-                                              'Success!',
-                                              'Skill created',
-                                              backgroundColor: Colors.green,
-                                              colorText: Colors.white,
-                                              snackPosition:
-                                                  SnackPosition.BOTTOM,
-                                            );
+                                                'Success!', 'Skill created',
+                                                backgroundColor: Colors.green,
+                                                colorText: Colors.white,
+                                                snackPosition:
+                                                    SnackPosition.BOTTOM,
+                                                margin: const EdgeInsets.only(
+                                                    bottom: 20,
+                                                    left: 20,
+                                                    right: 20));
                                           } catch (e) {
                                             Logger().e(e);
                                             // muestro un diaglog con el error
 
                                             pd.close();
-                                            Get.snackbar(
-                                              'Error!',
-                                              'Not possible create skill',
-                                              backgroundColor: Colors.red,
-                                              colorText: Colors.white,
-                                              snackPosition:
-                                                  SnackPosition.BOTTOM,
-                                            );
+                                            Get.snackbar('Error!',
+                                                'Not possible create skill',
+                                                backgroundColor: Colors.red,
+                                                colorText: Colors.white,
+                                                snackPosition:
+                                                    SnackPosition.BOTTOM,
+                                                margin: const EdgeInsets.only(
+                                                    bottom: 20,
+                                                    left: 20,
+                                                    right: 20));
                                           }
                                         }
                                       },
@@ -618,11 +630,71 @@ class RegisterProviderWidgets {
                             activeColor: Colors.indigo[800],
                             checkColor: Colors.indigo[800],
                           ),
-                          title: Text(e["attributes"]["name"],
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                              style: TextStyle(color: Colors.grey[400]),
-                              textAlign: TextAlign.left),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(e["attributes"]["name"],
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                  style: TextStyle(color: Colors.grey[400]),
+                                  textAlign: TextAlign.left),
+
+                              // icono boton para eliminar
+                              // condicional, solo se muestra si el usuario ya tiene la categoria
+                              if (_controller.skillsList.any(
+                                  (skill) => skill.idCategory == e['id'])) ...[
+                                IconButton(
+                                  onPressed: () async {
+                                    // lanoz un dialogo de confirmacion
+
+                                    final respuesta = await Get.dialog<bool>(
+                                      AlertDialog(
+                                        title: const Text('Confirm'),
+                                        content: const Text(
+                                            'Are you sure you want to delete this skill?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Get.back(result: false);
+                                            },
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () async {
+                                              await _controller
+                                                  .deleteSkill(e['id']);
+                                              Get.back(result: true);
+                                            },
+                                            child: const Text('Delete'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    // si es true muestro un mensaje que diga skill eliminada
+
+                                    if (respuesta != null && respuesta) {
+                                      if (respuesta) {
+                                        Get.snackbar(
+                                            'Success!', 'Skill deleted',
+                                            backgroundColor: Colors.green,
+                                            colorText: Colors.white,
+                                            snackPosition: SnackPosition.BOTTOM,
+                                            margin: const EdgeInsets.only(
+                                                bottom: 20,
+                                                left: 20,
+                                                right: 20));
+                                      }
+                                    }
+                                  },
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ]
+                            ],
+                          ),
                         ),
                       )
                       .toList(),
@@ -632,38 +704,13 @@ class RegisterProviderWidgets {
             InkWell(
               onTap: () async {
                 if (_controller.skillsList.isNotEmpty) {
-                  final respuesta = await _controller.saveSkills();
-
-                  if (respuesta) {
-                    /* Get.snackbar(
-                      'Success!',
-                      'Skills updated',
-                      backgroundColor: Colors.green,
-                      colorText: Colors.white,
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-
-                    // demora de 1 segundo para que se vea el snackbar
-
-                    await Future.delayed(const Duration(seconds: 2));*/
-
-                    Get.toNamed('/register_provider/step2');
-                  } else {
-                    Get.snackbar(
-                      'Error!',
-                      'Not possible update skills',
-                      backgroundColor: Colors.red,
-                      colorText: Colors.white,
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  }
+                  Get.toNamed('/register_provider/step2');
                 } else {
-                  Get.snackbar(
-                    'Information!',
-                    "Pease select one o more skills",
-                    backgroundColor: Colors.yellow,
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
+                  Get.snackbar('Information!', "Pease select one o more skills",
+                      backgroundColor: Colors.yellow,
+                      snackPosition: SnackPosition.BOTTOM,
+                      margin: const EdgeInsets.only(
+                          bottom: 20, left: 20, right: 20));
                 }
               },
               child: Container(
@@ -1123,7 +1170,11 @@ class RegisterProviderWidgets {
                             Get.toNamed('/register_provider/step4');
                           } else {
                             Get.snackbar(
-                                'Error', 'No se seleccionó ninguna imagen');
+                                'Error', 'No se seleccionó ninguna imagen',
+                                backgroundColor: Colors.red,
+                                snackPosition: SnackPosition.BOTTOM,
+                                margin: const EdgeInsets.only(
+                                    bottom: 20, left: 20, right: 20));
                           }
                         },
                       ),
@@ -1146,7 +1197,11 @@ class RegisterProviderWidgets {
                             Get.toNamed('/register_provider/step4');
                           } else {
                             Get.snackbar(
-                                'Error', 'No se seleccionó ninguna imagen');
+                                'Error', 'No se seleccionó ninguna imagen',
+                                backgroundColor: Colors.red,
+                                snackPosition: SnackPosition.BOTTOM,
+                                margin: const EdgeInsets.only(
+                                    bottom: 20, left: 20, right: 20));
                           }
                         },
                       ),
@@ -1239,7 +1294,11 @@ class RegisterProviderWidgets {
                               //Get.toNamed('/register_provider/step4');
                             } else {
                               Get.snackbar(
-                                  'Error', 'No se seleccionó ninguna imagen');
+                                  'Error', 'No se seleccionó ninguna imagen',
+                                  backgroundColor: Colors.red,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  margin: const EdgeInsets.only(
+                                      bottom: 20, left: 20, right: 20));
                             }
                           },
                         ),
@@ -1262,7 +1321,11 @@ class RegisterProviderWidgets {
                               //Get.toNamed('/register_provider/step4');
                             } else {
                               Get.snackbar(
-                                  'Error', 'No se seleccionó ninguna imagen');
+                                  'Error', 'No se seleccionó ninguna imagen',
+                                  backgroundColor: Colors.red,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  margin: const EdgeInsets.only(
+                                      bottom: 20, left: 20, right: 20));
                             }
                           },
                         ),
@@ -1433,21 +1496,20 @@ class RegisterProviderWidgets {
 
                   Get.toNamed('/register_provider/step6');
                 } else {
-                  Get.snackbar(
-                    'Error!',
-                    'Not possible update metadata',
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white,
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
+                  Get.snackbar('Error!', 'Not possible update metadata',
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                      snackPosition: SnackPosition.BOTTOM,
+                      margin: const EdgeInsets.only(
+                          bottom: 20, left: 20, right: 20));
                 }
               } else {
-                Get.snackbar(
-                  'Information!',
-                  "Pease fill all the fields",
-                  backgroundColor: Colors.yellow,
-                  snackPosition: SnackPosition.BOTTOM,
-                );
+                Get.snackbar('Information!', "Pease fill all the fields",
+                    backgroundColor: Colors.yellow,
+                    snackPosition: SnackPosition.BOTTOM,
+                    colorText: Colors.white,
+                    margin:
+                        const EdgeInsets.only(bottom: 20, left: 20, right: 20));
               }
             },
             child: Container(
@@ -1539,21 +1601,19 @@ class RegisterProviderWidgets {
 
                 Get.toNamed('/register_provider/step7');
               } else {
-                Get.snackbar(
-                  'Error!',
-                  'Not possible update metadata',
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                  snackPosition: SnackPosition.BOTTOM,
-                );
+                Get.snackbar('Error!', 'Not possible update metadata',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                    snackPosition: SnackPosition.BOTTOM,
+                    margin:
+                        const EdgeInsets.only(bottom: 20, left: 20, right: 20));
               }
             } else {
-              Get.snackbar(
-                'Information!',
-                "Pease enter your name",
-                backgroundColor: Colors.yellow,
-                snackPosition: SnackPosition.BOTTOM,
-              );
+              Get.snackbar('Information!', "Pease enter your name",
+                  backgroundColor: Colors.yellow,
+                  snackPosition: SnackPosition.BOTTOM,
+                  margin:
+                      const EdgeInsets.only(bottom: 20, left: 20, right: 20));
             }
           }, bgColor: Colors.indigo[800]!),
         ],
@@ -1620,7 +1680,9 @@ class RegisterProviderWidgets {
                   'Information!', 'You must agree to the terms and conditions.',
                   backgroundColor: Colors.yellow,
                   colorText: Colors.white,
-                  snackPosition: SnackPosition.BOTTOM);
+                  snackPosition: SnackPosition.BOTTOM,
+                  margin:
+                      const EdgeInsets.only(bottom: 20, left: 20, right: 20));
             }
           }, bgColor: Colors.indigo[800]!),
         ],

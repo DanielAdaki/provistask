@@ -7,8 +7,6 @@ import 'package:provitask_app/pages/profile_client/UI/profile_client_widgets.dar
 class ProfileClientPage extends GetView<ProfileController> {
   final _widgets = ProfileClientWidgets();
 
-  final _controller = Get.put(ProfileController());
-
   ProfileClientPage({Key? key}) : super(key: key);
 
   @override
@@ -19,19 +17,29 @@ class ProfileClientPage extends GetView<ProfileController> {
         backgroundColor: Colors.white,
         drawer: _widgets.homeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),
-        body: SafeArea(
-          child: Column(
-            children: [
-              Visibility(
-                visible: _controller.isLoading.value,
-                child: const CircularProgressIndicator(),
-              ),
-              Expanded(
-                child: Visibility(
-                  visible: !_controller.isLoading.value,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
+        body: Scrollbar(
+          thickness: 3, // Ajusta el grosor de la barra de desplazamiento
+          radius: const Radius.circular(3),
+          child: RefreshIndicator(
+            onRefresh: () async {
+              controller.isLoading.value = true;
+              await Future.wait<void>([controller.getProfileData()]);
+              controller.isLoading.value = false;
+            },
+            child: SingleChildScrollView(
+              child: SafeArea(
+                child: Container(
+                  alignment: Alignment.center,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (controller.isLoading.value == true) ...[
+                        Container(
+                          alignment: Alignment.center,
+                          child: const CircularProgressIndicator(),
+                        )
+                      ] else ...[
                         const SizedBox(
                           height: 30,
                         ),
@@ -40,7 +48,7 @@ class ProfileClientPage extends GetView<ProfileController> {
                           height: 30,
                         ),
                         Text(
-                          _controller.clientNameShow.value,
+                          controller.clientNameShow.value,
                           style: TextStyle(
                             fontSize: 25,
                             fontWeight: FontWeight.bold,
@@ -55,7 +63,7 @@ class ProfileClientPage extends GetView<ProfileController> {
                         const SizedBox(
                           height: 30,
                         ),
-                        _controller.isProvider.value == true
+                        controller.isProvider.value == true
                             ? _widgets.providerForm()
                             : Container(),
                         // botones de delsgoueo y  volverse proveedor
@@ -63,7 +71,7 @@ class ProfileClientPage extends GetView<ProfileController> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            _controller.isProvider.value == false
+                            controller.isProvider.value == false
                                 ? ElevatedButton(
                                     onPressed: () {
                                       // mando a la ruta /register_provider
@@ -94,12 +102,12 @@ class ProfileClientPage extends GetView<ProfileController> {
                         const SizedBox(
                           height: 30,
                         ),
-                      ],
-                    ),
+                      ]
+                    ],
                   ),
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),

@@ -72,10 +72,6 @@ class AuthService {
 
       final dio = Dio();
 
-      // añado interceptor para que muestre los logs de las peticiones
-
-      dio.interceptors.add(LogInterceptor(responseBody: true));
-
       // añado los headers
 
       dio.options.headers["content-type"] = "application/json";
@@ -207,8 +203,6 @@ class AuthService {
       // mando el uyser al modelo
 
       _prefs.user = user;
-
-      logger.d(_prefs.user);
 
       // imprimo el user del shared preferences par adebug
 
@@ -413,7 +407,7 @@ class AuthService {
 
       // sumo el id del usuario al map data
 
-      data["user"] = id;
+      data["user"] = id.toString();
 
       final dato = {"data": data};
 
@@ -479,8 +473,23 @@ class AuthService {
     Map respuesta;
 
     try {
-      dio.interceptors.add(LogInterceptor(responseBody: true));
       final response = await dio.get("/users-permissions/connet-stripe");
+      // configuro dio para que use el token en el header
+
+      respuesta = {"status": 200, "data": response.data};
+    } catch (e) {
+      Logger().e(e);
+      respuesta = {"status": 500, "error": e};
+    }
+
+    return respuesta;
+  }
+
+  Future deleteSkill(id) async {
+    Map respuesta;
+
+    try {
+      final response = await dio.delete("/provider-skills/$id");
       // configuro dio para que use el token en el header
 
       respuesta = {"status": 200, "data": response.data};

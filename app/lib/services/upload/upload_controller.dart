@@ -50,14 +50,14 @@ class UploadServices {
     return respuesta;
   }
 
-  Future<Map> deleteByPath(String ruta, String s, int skill) async {
+  Future<Map> deleteByPath(String ruta, String s, int id) async {
     Map respuesta;
     try {
       dio.interceptors.add(LogInterceptor(error: true));
 
       final response = await dio.post("/upload/delete-by-path", data: {
         "ref": s,
-        "refId": skill,
+        "refId": id,
         "path": ruta,
       });
 

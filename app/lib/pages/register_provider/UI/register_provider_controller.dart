@@ -65,7 +65,7 @@ class RegisterProviderController extends GetxController {
   /// Data
   // veo si el usuario tiene skills basandome en el _prefs.user
 
-  final _prefs = Preferences();
+  var _prefs = Preferences();
 
   final skills = RxList();
 
@@ -337,7 +337,7 @@ class RegisterProviderController extends GetxController {
     }
   }
 
-  void prepareSkills() {
+  prepareSkills() {
     // saco las skills del usuario
 
     final skills = _prefs.user?["provider_skills"];
@@ -345,25 +345,22 @@ class RegisterProviderController extends GetxController {
     if (skills != null) {
       // las recorro y añado a list skills skillsList
 
-      skills.forEach((element) {
+      skills.forEach((skill) {
         // recorro element['media'] las urls de las imagenes
 
-        List? media = [];
-
-        if (element['media'] != null) {
-          element['media'].forEach((element) {
-            media.add(element['url']);
-          });
-        }
+        List<String> media = [];
+        skill['media']?.forEach((element) {
+          media.add(element['url']);
+        });
 
         skillsList.add(Skill(
-          id: element['id'],
-          idCategory: element['categorias_skill']['id'],
-          cost: element['cost'].toDouble(),
-          typePrice: element['type_price'],
-          description: element['description'],
+          id: skill['id'],
+          idCategory: skill['categorias_skill']['id'],
+          cost: skill['cost'].toDouble(),
+          typePrice: skill['type_price'],
+          description: skill['description'],
           media: media,
-          minimalHour: element['hourMinimum'],
+          minimalHour: skill['hourMinimum'],
         ));
       });
     }
@@ -493,7 +490,6 @@ class RegisterProviderController extends GetxController {
           }
         }
       }
-      await _auth.me();
     } catch (e) {
       Logger().e(e);
       rethrow;
@@ -504,13 +500,30 @@ class RegisterProviderController extends GetxController {
     try {
       final skill = skillsList.firstWhere((skill) => skill.idCategory == id);
 
-      final responseUpload = await _upload.deleteByPath(
+      await _upload.deleteByPath(
           imageToDelete, 'api::provider-skill.provider-skill', skill.id);
+
+      skill.media!.remove(imageToDelete);
+
+      skillsList.refresh();
     } catch (e) {
       Logger().e(e);
       rethrow;
     }
   }
+
+  deleteSkill(id) async {
+    try {
+      await _auth.deleteSkill(id);
+    } catch (e) {
+      Logger().e(e);
+      rethrow;
+    }
+  }
+
+  // funcion auxiliar para refrescar lo campos del usuario
+
+  auxRefreshUser() {}
 }
 
 class Skill {

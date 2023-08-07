@@ -46,6 +46,11 @@ module.exports = ({ env }) => ({
         "api::task.task",
         "plugin::users-permissions.user",
         "api::task-assigned.task-assigned",
+        "api::provider-skill.provider-skill",
+        "api::meta-user.meta-user",
+        "api::slider-home.slider-home",
+        "api::skill.skill",
+        "api::valoration.valoration"
       ],
     },
   },
