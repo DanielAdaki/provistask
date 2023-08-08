@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:logger/logger.dart';
-import 'package:provitask_app/pages/register_provider/UI/register_provider_controller.dart';
 
 import 'package:provitask_app/services/preferences.dart';
 

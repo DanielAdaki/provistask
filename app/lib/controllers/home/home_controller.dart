@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:provitask_app/common/constans.dart';
 import 'package:provitask_app/models/home/home_category_model.dart';
 import 'package:provitask_app/models/provider/provider_model.dart';
+import 'package:provitask_app/models/user/provider_skill.dart';
 
 import 'package:provitask_app/services/category_services.dart';
 import 'package:provitask_app/services/task_services.dart';
@@ -85,7 +86,7 @@ class HomeController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-
+    isLoading.value = true;
     await _getCurrentLocation();
 
     await Future.wait<void>([
@@ -93,9 +94,10 @@ class HomeController extends GetxController {
       findTask(),
       _getCategoryHomeSlider(),
     ]);
-    Logger().i("position", currentPosition);
+
     getPopularProvider();
     // await listaCategorias();
+    isLoading.value = false;
   }
 
   _getCurrentLocation() {

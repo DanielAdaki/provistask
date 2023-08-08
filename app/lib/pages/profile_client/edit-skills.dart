@@ -1,3 +1,4 @@
+// ignore: file_names
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provitask_app/components/provitask_bottom_bar.dart';
@@ -7,15 +8,13 @@ import 'package:provitask_app/pages/profile_client/UI/profile_client_widgets.dar
 class EditSkills extends GetView<ProfileController> {
   final _widgets = ProfileClientWidgets();
 
-  final _controller = Get.put(ProfileController());
-
   EditSkills({Key? key}) : super(key: key);
 
   // ejecuto el metodo getSkills para obtener los skills del usuario
 
   @override
   Widget build(BuildContext context) {
-    _controller.getSkills();
+    controller.getSkills();
     return Obx(
       () => Scaffold(
         // paso elñ titulo edit perfil

@@ -14,13 +14,13 @@ import 'package:provitask_app/controllers/location/location_controller.dart';
 
 import 'package:provitask_app/controllers/user/profile_controller.dart';
 import 'package:provitask_app/pages/profile_provider/UI/profile_provider_controller.dart';
-import 'package:provitask_app/pages/register_provider/UI/register_provider_controller.dart';
+//import 'package:provitask_app/pages/register_provider/UI/register_provider_controller.dart';
 import 'package:provitask_app/pages/register_task/UI/register_task_controller.dart';
 import 'package:provitask_app/pages/splash/UI/splash_controller.dart';
 import 'package:provitask_app/pages/tasks/UI/tasks_controller.dart';
 import 'package:provitask_app/pages/verification_provider/UI/verification_provider_controller.dart';
 import 'package:provitask_app/pages/welcome/UI/welcome_controller.dart';
-import 'package:provitask_app/pages/chat/chat_conversation/UI/chat_conversation_controller.dart';
+//import 'package:provitask_app/pages/chat/chat_conversation/UI/chat_conversation_controller.dart';
 
 class SplashBinding implements Bindings {
   @override
@@ -29,7 +29,7 @@ class SplashBinding implements Bindings {
     Get.lazyPut<ProfileController>(() => ProfileController());
     Get.put<RegisterController>(RegisterController());
 
-    Get.lazyPut<RegisterProviderController>(() => RegisterProviderController());
+    //Get.lazyPut<RegisterProviderController>(() => RegisterProviderController());
     Get.lazyPut<VerificationProviderController>(
         () => VerificationProviderController());
     Get.lazyPut<ProfileProviderController>(() => ProfileProviderController());

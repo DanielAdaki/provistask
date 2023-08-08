@@ -13,7 +13,6 @@ final token = prefs.token;
 
 BaseOptions options = BaseOptions(headers: {
   'content-type': 'application/json',
-  'Authorization': 'Bearer $token',
 }, baseUrl: ConexionCommon.hostApi);
 
 Dio dio = Dio(options);
@@ -21,6 +20,10 @@ Dio dio = Dio(options);
 class MessageServices {
   Future<Map> getItems() async {
     Map<String, dynamic> respuesta;
+
+    // configuro dio
+
+    configDio();
 
     try {
       final response = await dio.get("/conversations");
@@ -40,7 +43,7 @@ class MessageServices {
 
   Future<Map> getSkills(String search) async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio.get("/skills");
 
@@ -60,7 +63,7 @@ class MessageServices {
 
   Future<Map> getPopularItems() async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio.get(
           "/tasks?sort=countPurchase:desc&pagination[pageSize]=4&fields[0]=location&fields[1]=name&fields[2]=countPurchase&fields[3]=averageScore&populate[0]=image");
@@ -83,7 +86,7 @@ class MessageServices {
 
   Future<Map> getItem(id) async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio.get("/tasks/$id?populate=*");
 
@@ -108,7 +111,7 @@ class MessageServices {
   Future<Map> getProviders(double? lat, double? lng, int? distance,
       [filters]) async {
     Map respuesta;
-
+    configDio();
     try {
       // saco los filtros date, time, price, provider_type
 
@@ -143,7 +146,7 @@ class MessageServices {
 
   Future<Map> getProvider(int id) async {
     Map respuesta;
-
+    configDio();
     try {
       // hago la peticion
 
@@ -169,7 +172,7 @@ class MessageServices {
 
   Future<Map> createTask(Map<String, dynamic> task) async {
     Map respuesta;
-
+    configDio();
     try {
       // hago la peticion
 
@@ -195,7 +198,7 @@ class MessageServices {
 
   Future<Map> meTask(status) async {
     Map respuesta;
-
+    configDio();
     try {
       // hago la peticion
 
@@ -222,7 +225,7 @@ class MessageServices {
 
   Future<Map<String, dynamic>> getTaskChat(String? id) async {
     Map<String, dynamic> respuesta;
-
+    configDio();
     try {
       // hago la peticion
 
@@ -246,7 +249,7 @@ class MessageServices {
 
   Future<Map> acceptProposal(int id) async {
     Map respuesta;
-
+    configDio();
     try {
       // agrego a dio interceptor para errores
 
@@ -271,6 +274,16 @@ class MessageServices {
 // importo conexion_common.dart
 }
 
-//getPopularItems
+Function getToken = () {
+  return prefs.token;
+};
+
+// funcion para configurar Dio
+
+Function configDio = () {
+  dio.options.headers["content-type"] = "application/json";
+  dio.options.headers["Authorization"] = "Bearer ${getToken()}";
+  Logger().d(dio.options.headers);
+};
 
 MessageServices auth = MessageServices();

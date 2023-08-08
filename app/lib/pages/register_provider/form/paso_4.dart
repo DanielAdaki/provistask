@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provitask_app/pages/register_provider/UI/register_provider_controller.dart';
+import 'package:provitask_app/controllers/user/profile_controller.dart';
 import 'package:provitask_app/pages/register_provider/UI/register_provider_widgets.dart';
 
-class RegisterProviderPage4 extends GetView<RegisterProviderController> {
+class RegisterProviderPage4 extends GetView<ProfileController> {
   final _widgets = RegisterProviderWidgets();
 
   RegisterProviderPage4({Key? key}) : super(key: key);

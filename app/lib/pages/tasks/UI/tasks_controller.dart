@@ -51,7 +51,9 @@ class TasksController extends GetxController {
 
   @override
   void onInit() async {
+    isLoading.value = true;
     await getTasks();
+    isLoading.value = false;
     super.onInit();
   }
 

@@ -170,6 +170,8 @@ module.exports = {
                 throw new Error('Conversacion no encontrada');
   
               }
+
+              console.log(socket.user)
   
               let user = conversacion.users.filter(us => us.id == socket.user.id);
   

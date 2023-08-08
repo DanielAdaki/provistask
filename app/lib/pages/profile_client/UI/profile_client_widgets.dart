@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 
 import 'package:get/get.dart';
@@ -9,7 +8,6 @@ import 'package:provitask_app/common/conexion_common.dart';
 import 'package:provitask_app/models/data/client_information.dart';
 import 'package:provitask_app/pages/payments_methods/UI/payments_metods_controller.dart';
 import 'package:provitask_app/controllers/user/profile_controller.dart';
-import 'package:provitask_app/pages/register_provider/UI/register_provider_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provitask_app/pages/chat/chat_home/UI/chat_home_controller.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -832,8 +830,7 @@ class ProfileClientWidgets {
           ),
           InkWell(
             onTap: () async {
-              final rePro = Get.put<RegisterProviderController>(
-                  RegisterProviderController());
+              final rePro = Get.put<ProfileController>(ProfileController());
               await rePro.getSkills().then((data) {
                 if (data) {
                   Get.toNamed('/verification_provider');
@@ -1911,7 +1908,7 @@ class ProfileClientWidgets {
               ),
             ),
           ),
-          InkWell(
+          /* InkWell(
             onTap: () async {
               if (_controller.skillsList.isNotEmpty) {
                 final respuesta = await _controller.saveSkills();
@@ -1959,7 +1956,7 @@ class ProfileClientWidgets {
                 ),
               ),
             ),
-          )
+          )*/
         ],
       ),
     );

@@ -2,23 +2,19 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:galleryimage/galleryimage.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
 import 'package:provitask_app/common/conexion_common.dart';
 import 'package:provitask_app/controllers/user/profile_controller.dart';
 
-import 'package:provitask_app/pages/register_provider/UI/register_provider_controller.dart';
 import 'package:provitask_app/services/preferences.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 class RegisterProviderWidgets {
-  final _controller =
-      Get.put<RegisterProviderController>(RegisterProviderController());
+  final _controller = Get.put<ProfileController>(ProfileController());
   final Preferences _preferences = Preferences();
 
-  final _controllerPerfil = Get.put<ProfileController>(ProfileController());
   AppBar registerProAppBAr([int step = 1]) {
     return AppBar(
       elevation: 0,
@@ -509,20 +505,71 @@ class RegisterProviderWidgets {
                                                                           .red),
                                                                   onPressed:
                                                                       () async {
-                                                                    // obtengo la imagen que quiero eliminar
+                                                                    // modal de confirmacion
 
-                                                                    var imageToDelete =
-                                                                        _controller
-                                                                            .mediaBySkill[index];
+                                                                    final respuesta =
+                                                                        await Get.dialog<
+                                                                            bool>(
+                                                                      AlertDialog(
+                                                                        title: const Text(
+                                                                            'Confirm'),
+                                                                        content:
+                                                                            const Text('Are you sure you want to delete this image?'),
+                                                                        actions: [
+                                                                          TextButton(
+                                                                            onPressed:
+                                                                                () {
+                                                                              Get.back(result: false);
+                                                                            },
+                                                                            child:
+                                                                                const Text('Cancel'),
+                                                                          ),
+                                                                          TextButton(
+                                                                            onPressed:
+                                                                                () async {
+                                                                              var imageToDelete = _controller.mediaBySkill[index];
 
-                                                                    await _controller.deleteImage(
-                                                                        imageToDelete,
-                                                                        e['id']);
+                                                                              await _controller.deleteImage(imageToDelete, e['id']);
 
-                                                                    _controller
-                                                                        .mediaBySkill
-                                                                        .removeAt(
-                                                                            index);
+                                                                              await _controller.getProfileData();
+
+                                                                              _controller.prepareSkills();
+
+                                                                              Logger().i(_controller.mediaBySkill, "antes");
+
+                                                                              _controller.mediaBySkill.removeAt(index);
+                                                                              _controller.skillsList.firstWhere((skill) => skill.idCategory == e['id']).media!.removeAt(index);
+                                                                              Logger().i(_controller.mediaBySkill, "antes");
+                                                                              Get.back(result: true);
+                                                                            },
+                                                                            child:
+                                                                                const Text('Delete'),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    );
+
+                                                                    // si es true muestro un mensaje que diga skill eliminada
+
+                                                                    if (respuesta !=
+                                                                            null &&
+                                                                        respuesta) {
+                                                                      if (respuesta) {
+                                                                        Get.snackbar(
+                                                                            'Success!',
+                                                                            'Image deleted',
+                                                                            backgroundColor: Colors
+                                                                                .green,
+                                                                            colorText: Colors
+                                                                                .white,
+                                                                            snackPosition: SnackPosition
+                                                                                .BOTTOM,
+                                                                            margin: const EdgeInsets.only(
+                                                                                bottom: 20,
+                                                                                left: 20,
+                                                                                right: 20));
+                                                                      }
+                                                                    }
                                                                   },
                                                                 ),
                                                               ),
@@ -590,6 +637,7 @@ class RegisterProviderWidgets {
                                             _controller.images.clear();
                                             _controller.minimalHours.value =
                                                 'hour_1';
+                                            _controller.getProfileData();
                                             pd.close();
                                             Get.back();
                                             Get.snackbar(
@@ -663,6 +711,9 @@ class RegisterProviderWidgets {
                                             onPressed: () async {
                                               await _controller
                                                   .deleteSkill(e['id']);
+                                              await _controller
+                                                  .getProfileData();
+                                              _controller.prepareSkills();
                                               Get.back(result: true);
                                             },
                                             child: const Text('Delete'),
@@ -1166,7 +1217,7 @@ class RegisterProviderWidgets {
 
                           if (pickedFile != null) {
                             // se seleccionó una imagen, la subo al servidor
-                            _controllerPerfil.uploadImage(pickedFile);
+                            _controller.uploadImage(pickedFile);
                             Get.toNamed('/register_provider/step4');
                           } else {
                             Get.snackbar(
@@ -1193,7 +1244,7 @@ class RegisterProviderWidgets {
 
                           if (pickedFile != null) {
                             // se seleccionó una imagen, la subo al servidor
-                            _controllerPerfil.uploadImage(pickedFile);
+                            _controller.uploadImage(pickedFile);
                             Get.toNamed('/register_provider/step4');
                           } else {
                             Get.snackbar(
@@ -1290,7 +1341,7 @@ class RegisterProviderWidgets {
 
                             if (pickedFile != null) {
                               // se seleccionó una imagen, la subo al servidor
-                              _controllerPerfil.uploadImage(pickedFile);
+                              _controller.uploadImage(pickedFile);
                               //Get.toNamed('/register_provider/step4');
                             } else {
                               Get.snackbar(
@@ -1317,7 +1368,7 @@ class RegisterProviderWidgets {
 
                             if (pickedFile != null) {
                               // se seleccionó una imagen, la subo al servidor
-                              _controllerPerfil.uploadImage(pickedFile);
+                              _controller.uploadImage(pickedFile);
                               //Get.toNamed('/register_provider/step4');
                             } else {
                               Get.snackbar(

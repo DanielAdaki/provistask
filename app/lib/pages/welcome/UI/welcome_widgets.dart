@@ -37,7 +37,13 @@ class WelcomeWidgets {
         Visibility(
           visible: _controller.stepWelcome.value > 1,
           child: TextButton(
-            onPressed: () => Get.off(() => LoginPage()),
+            onPressed: () {
+              // marco como que ya vio el tutorial en preferencias
+              // y lo mando a la pantalla de login
+
+              _controller.setTutorialViewed();
+              Get.off(() => LoginPage());
+            },
             child: const Text('Skip >', style: TextStyle(color: Colors.grey)),
           ),
         )
@@ -290,10 +296,11 @@ class WelcomeWidgets {
 
   Widget welcomeFloatingActionButton() {
     return FloatingActionButton.extended(
-      onPressed: () {
+      onPressed: () async {
         if (_controller.stepWelcome.value < 5) {
           _controller.stepWelcome.value++;
         } else {
+          _controller.setTutorialViewed();
           Get.offAllNamed('/login');
         }
       },

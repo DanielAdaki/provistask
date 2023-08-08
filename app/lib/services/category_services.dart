@@ -21,7 +21,7 @@ Dio dio = Dio(options);
 class CategoryServices {
   Future<Map> getItems(String search) async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio.get(
           "/skills?fields[0]=name&fields[1]=id&filters[name][\$contains]=$search");
@@ -42,7 +42,7 @@ class CategoryServices {
 
   Future<Map> getItem(int id) async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio.get("/api/categories/$id");
 
@@ -63,7 +63,7 @@ class CategoryServices {
 
   Future<Map> getItemHomeSlider() async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio.get("/slider-homes?populate=*");
 
@@ -84,8 +84,15 @@ class CategoryServices {
   }
 }
 
-// defino getItem como una funcion asincrona que retorna un Map
+Function getToken = () {
+  return prefs.token;
+};
 
-// importo conexion_common.dart
+// funcion para configurar Dio
+
+Function configDio = () {
+  dio.options.headers["content-type"] = "application/json";
+  dio.options.headers["Authorization"] = "Bearer ${getToken()}";
+};
 
 CategoryServices auth = CategoryServices();

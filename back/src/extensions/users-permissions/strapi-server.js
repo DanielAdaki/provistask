@@ -763,6 +763,7 @@ LIMIT ?;
 									});
 
 								proveedor.skill_select = {
+									id: skillP.id,
 									taskCompleted: taskCompletedSkill,
 									scoreAverage: avgAux.averageScore,
 									count: avgAux.averageCount,
@@ -783,6 +784,7 @@ LIMIT ?;
 							}
 
 							return {
+								id: skillP.id,
 								type_price: skillP.type_price,
 								cost: skillP.cost,
 								media: skillP.media ? media : null,
@@ -1043,6 +1045,7 @@ LIMIT ?;
 				if (idSkill) {
 					if (skillP.categorias_skill.id == idSkill) {
 						proveedor.skill_select = {
+							id: skillP.id,
 							taskCompleted: taskCompletedSkill,
 							scoreAverage: avgAux.averageScore,
 							count: avgAux.averageCount,
@@ -1062,6 +1065,7 @@ LIMIT ?;
 				}
 
 				return {
+					id: skillP.id,
 					type_price: skillP.type_price,
 					cost: skillP.cost,
 					media: skillP.media ? media : null,
@@ -1385,6 +1389,7 @@ LIMIT ?;
 
 
 						return {
+							id : skillP.id,
 							type_price: skillP.type_price,
 							cost: skillP.cost,
 							media: skillP.media ? media : null,
@@ -1665,6 +1670,7 @@ LIMIT ?;
 							if (idSkill) {
 								if (skillP.categorias_skill.id == idSkill) {
 									proveedor.skill_select = {
+										id: skillP.id,
 										taskCompleted: taskCompletedSkill,
 										scoreAverage: avgAux.averageScore,
 										count: avgAux.averageCount,
@@ -1686,6 +1692,7 @@ LIMIT ?;
 	
 	
 							return {
+								id : skillP.id,
 								type_price: skillP.type_price,
 								cost: skillP.cost,
 								media: skillP.media ? media : null,

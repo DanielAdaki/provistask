@@ -22,7 +22,7 @@ Dio dio = Dio(options);
 class PaymentServices extends GetxController {
   Future<Map> createIntentPaymentFeeRegister() async {
     Map respuesta;
-
+    configDio();
     try {
       final response =
           await dio.get("/users-permissions/create-payment-intent-register");
@@ -43,7 +43,7 @@ class PaymentServices extends GetxController {
 
   Future<Map> createIntentPaymentTask(data) async {
     Map respuesta;
-
+    configDio();
     try {
       final response =
           await dio.post("/users-permissions/create-payment-task", data: data);
@@ -61,6 +61,15 @@ class PaymentServices extends GetxController {
   }
 }
 
-//getPopularItems
+Function getToken = () {
+  return prefs.token;
+};
 
+// funcion para configurar Dio
+
+Function configDio = () {
+  dio.options.headers["content-type"] = "application/json";
+  dio.options.headers["Authorization"] = "Bearer ${getToken()}";
+  Logger().d(dio.options.headers);
+};
 PaymentServices auth = PaymentServices();

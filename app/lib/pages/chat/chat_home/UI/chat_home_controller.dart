@@ -31,20 +31,6 @@ class ChatHomeController extends GetxController {
     final response = await _message.getItems();
 
     if (response["status"] != 200) {
-      // paso a json el body del erro
-
-      // muestro el mensaje de error en un snackbar en la parte inferior de la pantalla y fondo en rojo
-      // isLoading.value = false;
-
-      Get.snackbar(
-        "Error",
-        "Error al obtener las conversaciones",
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-
-      // lleno el listado de categorias con el resultado de la consulta
-
       conversation.value = [];
     }
 
@@ -57,8 +43,9 @@ class ChatHomeController extends GetxController {
 
   @override
   void onInit() async {
+    isLoading.value = true;
     await getConversation();
-
+    isLoading.value = false;
     super.onInit();
   }
 }

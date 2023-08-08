@@ -25,7 +25,7 @@ Dio dio = Dio(options);
 class FreelancesServices {
   Future<Map> getItems(String status) async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio
           .get("/users-permissions/proveedores/fav-or-book?status=$status");
@@ -46,7 +46,7 @@ class FreelancesServices {
 
   Future<Map> getItem(id) async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio.get("/tasks/$id?populate=*");
 
@@ -71,7 +71,7 @@ class FreelancesServices {
   Future<Map> getProviders(double? lat, double? lng, int? distance,
       [filters]) async {
     Map respuesta;
-
+    configDio();
     try {
       // saco los filtros date, time, price, provider_type
 
@@ -106,7 +106,7 @@ class FreelancesServices {
 
   Future<Map> getProvider(int id) async {
     Map respuesta;
-
+    configDio();
     try {
       // hago la peticion
 
@@ -132,7 +132,7 @@ class FreelancesServices {
 
   Future<Map> getConversation(int id) async {
     Map respuesta;
-
+    configDio();
     try {
       // añado interceptadores de dio para saber el error
 
@@ -161,6 +161,15 @@ class FreelancesServices {
 // importo conexion_common.dart
 }
 
-//getPopularItems
+Function getToken = () {
+  return prefs.token;
+};
+
+// funcion para configurar Dio
+
+Function configDio = () {
+  dio.options.headers["content-type"] = "application/json";
+  dio.options.headers["Authorization"] = "Bearer ${getToken()}";
+};
 
 FreelancesServices auth = FreelancesServices();

@@ -228,7 +228,6 @@ module.exports = createCoreController('api::conversation.conversation', ({ strap
 
 
 			}
-console.log(conversation.data[0].attributes.contact)
 
 			return conversation;
 

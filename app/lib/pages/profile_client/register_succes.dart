@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provitask_app/controllers/user/profile_controller.dart';
-import 'package:provitask_app/pages/profile_client/UI/profile_client_widgets.dart';
 
 class RegisterSuccesPage extends GetView<ProfileController> {
-  final _widgets = ProfileClientWidgets();
-
-  final _controller = Get.put(ProfileController());
-
-  RegisterSuccesPage({Key? key}) : super(key: key);
+  const RegisterSuccesPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

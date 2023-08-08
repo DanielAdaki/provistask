@@ -1,20 +1,15 @@
 // ignore_for_file: avoid_print
-import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
-
 import 'package:provitask_app/models/data/permission_data.dart';
 import 'utility/fix_https.dart';
 import 'package:provitask_app/services/preferences.dart';
-import 'package:uni_links/uni_links.dart';
 import 'package:provitask_app/pages/pages.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-bool _initialURILinkHandled = false;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // var path = Directory.current.path;
@@ -23,9 +18,6 @@ void main() async {
   //   ..init(path)
   //   ..registerAdapter();
 
-  SystemChannels.platform.invokeMethod(
-      'SystemChrome.setEnabledSystemUIOverlays', [SystemUiOverlay.values]);
-
   localNotificationsPlugin.initialize(initSetttings);
 
   //await initHiveForFlutter();
@@ -33,7 +25,7 @@ void main() async {
   PermissionData.getPermissionUbication();
   Preferences prefs = Preferences();
 
-  prefs.init();
+  await prefs.init();
 
   HttpOverrides.global = MyHttpOverrides();
   initializeDateFormatting('en').then((_) {
@@ -45,34 +37,17 @@ class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  Uri? _initialURI;
-  Uri? _currentURI;
-  Object? _err;
-
-  StreamSubscription? _streamSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    _initURIHandler();
-    _incomingLinkHandler();
-  }
-
-  @override
-  void dispose() {
-    _streamSubscription?.cancel();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+          primaryColor: const Color(0xFF170591),
           scrollbarTheme: ScrollbarThemeData(
               thumbVisibility: MaterialStateProperty.all(true),
               thickness: MaterialStateProperty.all(10),
@@ -173,83 +148,10 @@ class _MyAppState extends State<MyApp> {
             ]),
         GetPage(
             name: '/register-payment-success',
-            page: () => RegisterSuccesPage()),
+            page: () => const RegisterSuccesPage()),
       ],
     );
   }
-
-  Future<void> _initURIHandler() async {
-    if (!_initialURILinkHandled) {
-      _initialURILinkHandled = true;
-      print("INIT URI HANDLER");
-      try {
-        final initialURI = await getInitialUri();
-        // Use the initialURI and warn the user if it is not correct,
-        // but keep in mind it could be `null`.
-        if (initialURI != null) {
-          debugPrint("Initial URI received $initialURI");
-          if (!mounted) {
-            return;
-          }
-          setState(() {
-            _initialURI = initialURI;
-          });
-        } else {
-          debugPrint("Null Initial URI received");
-        }
-      } on PlatformException {
-        // Platform messages may fail, so we use a try/catch PlatformException.
-        // Handle exception by warning the user their action did not succeed
-        debugPrint("Failed to receive initial uri");
-      } on FormatException catch (err) {
-        if (!mounted) {
-          return;
-        }
-        debugPrint('Malformed Initial URI received');
-        setState(() => _err = err);
-      }
-    }
-  }
-
-  /// Handle incoming links - the ones that the app will receive from the OS
-  /// while already started.
-  void _incomingLinkHandler() {
-    if (!kIsWeb) {
-      // It will handle app links while the app is already started - be it in
-      // the foreground or in the background.
-      _streamSubscription = uriLinkStream.listen((Uri? uri) {
-        if (!mounted) {
-          return;
-        }
-        debugPrint('Received URI: $uri');
-        setState(() {
-          _currentURI = uri;
-          _err = null;
-        });
-      }, onError: (Object err) {
-        if (!mounted) {
-          return;
-        }
-        debugPrint('Error occurred: $err');
-        setState(() {
-          _currentURI = null;
-          if (err is FormatException) {
-            _err = err;
-          } else {
-            _err = null;
-          }
-        });
-      });
-    }
-  }
-}
-
-Future<bool> initData() async {
-  bool result = false;
-  await Future.delayed(const Duration(seconds: 5), () {
-    result = true;
-  });
-  return Future.value(result);
 }
 
 FlutterLocalNotificationsPlugin localNotificationsPlugin =

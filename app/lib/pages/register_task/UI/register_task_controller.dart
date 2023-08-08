@@ -8,6 +8,7 @@ import 'package:logger/logger.dart';
 import 'package:provitask_app/common/constans.dart';
 import 'package:provitask_app/controllers/location/location_controller.dart';
 import 'package:provitask_app/models/provider/provider_model.dart';
+import 'package:provitask_app/models/user/provider_skill.dart';
 import 'package:provitask_app/services/task_services.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:provitask_app/services/provider_services.dart';

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:provitask_app/models/provider/skill_model.dart';
 // importo el servicio de provider
 
 import 'package:provitask_app/services/provider_services.dart';
@@ -128,7 +129,6 @@ class RegisterProviderController extends GetxController {
   }
 
   String subtitleController(int step) {
-    Logger().d(step);
     switch (step) {
       case 1:
         return 'Before you start giving servicesk, you\'ll be able to upgrade your expertise and set your fees.';
@@ -313,30 +313,6 @@ class RegisterProviderController extends GetxController {
 
   // guardar skils
 
-  Future<bool> saveSkills() async {
-    // llamo al servicio de provider
-
-    final data = {
-      'skills': skillsList,
-    };
-
-    dynamic response = await _auth.updateUser(data);
-
-    // llamo al servicio auth.me
-
-    await _auth.me();
-
-    // si el status es 200 retorno true
-
-    if (response['status'] == 200) {
-      return true;
-    } else {
-      Logger().e(response);
-
-      return false;
-    }
-  }
-
   prepareSkills() {
     // saco las skills del usuario
 
@@ -371,9 +347,6 @@ class RegisterProviderController extends GetxController {
 
     try {
       response = await _paymentServices.createIntentPaymentFeeRegister();
-
-      Logger().i(response);
-
       return response;
     } catch (e) {
       Logger().e(e);
@@ -524,35 +497,4 @@ class RegisterProviderController extends GetxController {
   // funcion auxiliar para refrescar lo campos del usuario
 
   auxRefreshUser() {}
-}
-
-class Skill {
-  int id;
-  int idCategory;
-  double cost;
-  String? typePrice;
-  String? description;
-  String? minimalHour = 'hour_1';
-  List? media = [];
-
-  Skill({
-    required this.id,
-    required this.idCategory,
-    required this.cost,
-    this.typePrice = 'per_hour',
-    this.description = '',
-    this.minimalHour,
-    this.media,
-  });
-
-  factory Skill.fromJson(Map<String, dynamic> json) {
-    return Skill(
-      id: json['id'],
-      idCategory: json['id'],
-      cost: double.parse(json['cost']),
-      typePrice: json['type_price'],
-      description: json['description'],
-      media: json['images'],
-    );
-  }
 }

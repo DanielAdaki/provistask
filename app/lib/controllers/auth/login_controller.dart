@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provitask_app/common/socket.dart';
 import 'package:provitask_app/controllers/location/location_controller.dart';
-
+import 'package:provitask_app/services/preferences.dart';
 // impotyo auth service
 
 import 'package:provitask_app/services/auth_services.dart';
+import 'package:provitask_app/services/provider_services.dart';
+
+final _prefs = Preferences();
 
 class LoginController extends GetxController {
   // muestro el loading
@@ -41,8 +44,6 @@ class LoginController extends GetxController {
     if (response["status"] != 200) {
       // paso a json el body del error
 
-      logger.e(response["error"]);
-
       // muestro el mensaje de error en un snackbar en la parte inferior de la pantalla y fondo en rojo
 
       if (response["error"] == "Connection timed out") {
@@ -73,6 +74,11 @@ class LoginController extends GetxController {
       }
     }
 
+    // limpio los controladores
+
+    emailController.value.clear();
+    passwordController.value.clear();
+
     var user = await auth.me();
 
     Get.find<SocketController>();
@@ -97,6 +103,29 @@ class LoginController extends GetxController {
       Get.offAllNamed("/home");
     } else {
       Get.offAllNamed("/home-proveedor");
+    }
+  }
+
+  void autoLogin() async {
+    isLoading.value = true;
+
+    if (_prefs.token == null || _prefs.token == "") {
+      Get.offAllNamed("/login");
+      return;
+    }
+
+    final response = await auth.autoLogin();
+    isLoading.value = false;
+    if (response["status"] != 200) {
+      prefs.clearUserData();
+
+      Get.offAllNamed("/home");
+    } else {
+      if (!response["data"]["isProvider"]) {
+        Get.offAllNamed("/home");
+      } else {
+        Get.offAllNamed("/home-proveedor");
+      }
     }
   }
 

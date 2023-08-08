@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
-
+import 'package:provitask_app/models/user/user_model.dart';
 import 'package:provitask_app/services/preferences.dart';
 
 // importo conexion_common.dart
@@ -181,14 +181,12 @@ class AuthService {
   Future<Map> me() async {
     Map respuesta;
 
-    // uso try catch para capturar errores
+    configDio();
 
     try {
-      //  obtengo el token del shared preferencesç
-
       // configuro dio para que use el token en el header
 
-      // hago la peticion get a la api a la ruta /users/me
+      dio.options.headers["Authorization"] = "Bearer ${_prefs.token}";
 
       final response = await dio.get("/users/me?populate=deep,3");
 
@@ -220,6 +218,7 @@ class AuthService {
   }
 
   Future<Map> updateAvatar(image) async {
+    configDio();
     Map respuesta;
     try {
       List<int> imageBytes = await image.readAsBytes();
@@ -248,6 +247,7 @@ class AuthService {
   Future<Map> updateProfile(String name, String surname, String email,
       String phone, String zipCode) async {
     Map respuesta;
+    configDio();
 
     try {
       final id = _prefs.user?["id"];
@@ -277,7 +277,7 @@ class AuthService {
   Future<Map> updatePassword(
       String otp, String password, String confirmation) async {
     Map respuesta;
-
+    configDio();
     try {
       if (password == null || confirmation == null || otp == null) {
         throw "Incomplete data, check the entered data";
@@ -306,7 +306,7 @@ class AuthService {
 
   Future<Map> requestResetPassword([String? text]) async {
     Map respuesta;
-
+    configDio();
     try {
       if (text == null) {
         throw "No se encontro el email del usuario";
@@ -327,7 +327,7 @@ class AuthService {
 
   Future<Map> verifyOtp(String value) async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio.post("/users/otp/verify", data: {
         "otp": value,
@@ -347,7 +347,7 @@ class AuthService {
 
   Future<Map> getMetadata() async {
     Map respuesta;
-
+    configDio();
     try {
       final id = _prefs.user?["id"];
 
@@ -370,7 +370,7 @@ class AuthService {
 
   Future<Map> upMeta(Map data, int id) async {
     Map respuesta;
-
+    configDio();
     try {
       if (id == null) {
         throw "No se encontro el id del usuario";
@@ -397,7 +397,7 @@ class AuthService {
 
   Future<Map> createMetadata(Map data) async {
     Map respuesta;
-
+    configDio();
     try {
       final id = _prefs.user?["id"];
 
@@ -424,7 +424,7 @@ class AuthService {
 
   Future<Map> updateUser(Map data) async {
     Map respuesta;
-
+    configDio();
     try {
       dio.interceptors.add(LogInterceptor(responseBody: true));
       final id = _prefs.user?["id"];
@@ -447,7 +447,7 @@ class AuthService {
 
   Future<Map> postSkill(Map datos) async {
     Map respuesta;
-
+    configDio();
     final datax = {
       "data": datos,
     };
@@ -466,13 +466,14 @@ class AuthService {
   }
 
   void logout() {
-    _prefs.token = "";
-    _prefs.user = {};
+    _prefs.clearUserData();
+
+    // limpio preferencias
   }
 
   Future<Map> createStripeAccountConnet() async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio.get("/users-permissions/connet-stripe");
       // configuro dio para que use el token en el header
@@ -488,7 +489,7 @@ class AuthService {
 
   Future deleteSkill(id) async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio.delete("/provider-skills/$id");
       // configuro dio para que use el token en el header
@@ -501,6 +502,57 @@ class AuthService {
 
     return respuesta;
   }
+
+  Future autoLogin() async {
+    Map respuesta;
+    configDio();
+    try {
+      if (_prefs.token == "") {
+        // si no existe retorno un map con status 500 y un mensaje de error
+
+        respuesta = {"status": 500, "error": "No existe token"};
+        return respuesta;
+      }
+
+      final response = await dio.get("/users/me?populate=deep,3");
+      // configuro dio para que use el token en el header
+
+      if (response.statusCode != 200) {
+        throw jsonDecode(response.data);
+      }
+
+      // imprimo la respuesta
+
+      final user = response.data;
+
+      // mando el uyser al modelo
+
+      _prefs.user = UserMe.fromJson(user).toJson();
+
+      respuesta = {"status": 200, "data": response.data};
+
+      // hago la peticion get a la api a la ruta /users/me
+    } catch (e) {
+      Logger().e(e);
+      respuesta = {"status": 500, "error": e};
+      rethrow;
+    }
+
+    return respuesta;
+  }
 }
+
+// funcion para obtener el token del shared preferences
+
+Function getToken = () {
+  return _prefs.token;
+};
+
+// funcion para configurar Dio
+
+Function configDio = () {
+  dio.options.headers["content-type"] = "application/json";
+  dio.options.headers["Authorization"] = "Bearer ${_prefs.token}";
+};
 
 AuthService auth = AuthService();

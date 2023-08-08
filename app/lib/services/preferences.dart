@@ -1,12 +1,8 @@
 import 'dart:convert';
-
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:provitask_app/common/conexion_common.dart';
-
-// llamo getx
-
 import 'package:get/get.dart';
+import 'package:provitask_app/common/conexion_common.dart';
+import 'package:provitask_app/models/user/user_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Preferences {
   static final Preferences _preferences = Preferences._internal();
@@ -17,48 +13,150 @@ class Preferences {
 
   Future<void> init() async => _prefs = await SharedPreferences.getInstance();
 
-  // Local Token Client
+  /*String? _token;
+  String? get token => _token;*/
+
   String? get token => _prefs.getString('token');
 
-  Map<String, dynamic>? get name {
-    final user = _prefs.getString('user');
-    if (user == null) return null;
-    return jsonDecode(user)['name'];
+  set token(String? value) {
+    //_token = value;
+
+    _prefs.setString('token', value!);
   }
 
-  set token(String? value) => _prefs.setString('token', value!);
+  UserMe? _userMe;
+  UserMe? get userMe => _userMe;
+  set userMe(UserMe? value) {
+    _userMe = value;
+    _prefs.setString('userMe', jsonEncode(value?.toJson()));
+  }
 
-  // Notification Token Client
-  String? get notificationToken => _prefs.getString('notificationToken');
+  // variables para saber si el usuario ya vio el tutorial inicial
 
-  set notificationToken(String? value) =>
-      _prefs.setString('notificationToken', value!);
+  bool? get tutorialInitial {
+    return _prefs.getBool('tutorialInitial');
+  }
 
-  // Allow notifications
-  bool? get allowNotifications => _prefs.getBool('allowNotifications');
+  set tutorialInitial(bool? value) {
+    _prefs.setBool('tutorialInitial', value!);
+  }
 
-  set allowNotification(bool? value) =>
-      _prefs.setBool('allowNotifications', value!);
+  String? _notificationToken;
+  String? get notificationToken => _notificationToken;
+  set notificationToken(String? value) {
+    _notificationToken = value;
+    _prefs.setString('notificationToken', value!);
+  }
 
-  // creo el set de datos del usuario
+  bool? _allowNotifications;
+  bool? get allowNotifications => _allowNotifications;
+  set allowNotifications(bool? value) {
+    _allowNotifications = value;
+    _prefs.setBool('allowNotifications', value!);
+  }
+
+  RxString imageProfile = ''.obs;
+
+  String get name {
+    if (_userMe == null) {
+      final userMeData = _prefs.getString('userMe');
+      if (userMeData != null) {
+        _userMe = UserMe.fromJson(jsonDecode(userMeData));
+      }
+    }
+    return _userMe?.name ?? '';
+  }
+
+  set user(Map<String, dynamic>? value) {
+    _prefs.setString('userMe', jsonEncode(value));
+    imageProfile.value = value!['avatarImage'] == null
+        ? ''
+        : '${ConexionCommon.hostBase}${value['avatarImage']}';
+  }
+
+  Map<String, dynamic>? get user {
+    if (_userMe == null) {
+      final userMeData = _prefs.getString('userMe');
+      if (userMeData != null) {
+        _userMe = UserMe.fromJson(jsonDecode(userMeData));
+      }
+    }
+    return _userMe?.toJson();
+  }
+
+  void clearUserData() {
+    _prefs.remove('token');
+    _prefs.remove('userMe');
+    // _token = null;
+    _userMe = null;
+  }
+}
+
+/*import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
+
+import 'package:provitask_app/common/conexion_common.dart';
+
+class Preferences {
+  static final Preferences _preferences = Preferences._internal();
+  factory Preferences() => _preferences;
+  Preferences._internal();
+
+  late SharedPreferences _prefs;
+
+  Future<void> init() async => _prefs = await SharedPreferences.getInstance();
+
+  String? _token;
+  String? get token => _token;
+  set token(String? value) {
+    _token = value;
+    _prefs.setString('token', value!);
+  }
+
+  Map<String, dynamic>? _name;
+  Map<String, dynamic>? get name {
+    if (_name == null) {
+      final user = _prefs.getString('user');
+      if (user != null) {
+        _name = jsonDecode(user)['name'];
+      }
+    }
+    return _name;
+  }
+
+  String? _notificationToken;
+  String? get notificationToken => _notificationToken;
+  set notificationToken(String? value) {
+    _notificationToken = value;
+    _prefs.setString('notificationToken', value!);
+  }
+
+  bool? _allowNotifications;
+  bool? get allowNotifications => _allowNotifications;
+  set allowNotifications(bool? value) {
+    _allowNotifications = value;
+    _prefs.setBool('allowNotifications', value!);
+  }
+
+  RxString imageProfile = ''.obs;
+
   set user(Map<String, dynamic>? value) {
     _prefs.setString('user', jsonEncode(value));
-    // actualizo la variable imageProfile
     imageProfile.value = value!['avatar_image'] == null
         ? ''
         : '${ConexionCommon.hostBase}${value['avatar_image']['url']}';
   }
 
-  // creo el get de datos del usuario
-
+  Map<String, dynamic>? _user;
   Map<String, dynamic>? get user {
-    final user = _prefs.getString('user');
-    if (user == null) return null;
-    return jsonDecode(user);
+    if (_user == null) {
+      final userData = _prefs.getString('user');
+      if (userData != null) {
+        _user = jsonDecode(userData);
+      }
+    }
+    return _user;
   }
-
-  // returno la imagen del usuario si no tiene imagen de perfil retorna null la variable es de tipo observable
-  RxString imageProfile = ''.obs;
-
-  // get data user
-}
+}*/

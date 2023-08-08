@@ -280,11 +280,7 @@ class FreelancersWidgets {
       onTap: () async {
         ProgressDialog pd = ProgressDialog(context: Get.context);
         try {
-          pd.show(
-            max: 100,
-            msg: 'Please wait...',
-            progressBgColor: Colors.transparent,
-          );
+          _controller.isLoading.value = true;
 
           List<Future> futures = [
             _controller.getPerfilProvider(freelancer.id, true)
@@ -294,7 +290,6 @@ class FreelancersWidgets {
           // Ejecutar las funciones en paralelo
           await Future.wait(futures);
 
-          pd.close();
           Get.dialog(
             Dialog(
               insetPadding: const EdgeInsets.all(0),
@@ -304,8 +299,9 @@ class FreelancersWidgets {
               ),
             ),
           );
+          _controller.isLoading.value = false;
         } catch (e) {
-          pd.close();
+          _controller.isLoading.value = false;
         }
       },
       child: Container(

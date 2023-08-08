@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:provitask_app/controllers/location/location_controller.dart';
 import 'package:provitask_app/models/provider/provider_model.dart';
+import 'package:provitask_app/models/user/provider_skill.dart';
 import 'package:provitask_app/services/freelances_services.dart';
 import 'package:provitask_app/services/task_services.dart';
 
@@ -24,8 +25,9 @@ class FreelancersController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-
+    isLoading.value = true;
     await getFreelancers();
+    isLoading.value = false;
   }
 
   getFreelancers() async {
