@@ -1,4 +1,3 @@
-import 'package:logger/logger.dart';
 import 'package:provitask_app/models/user/provider_skill.dart';
 
 class UserMe {
@@ -85,7 +84,6 @@ class UserMe {
   }
 
   factory UserMe.fromJson(Map<String, dynamic> json) {
-    Logger().i(json);
     late final Map<String, dynamic>? avatarImageJson;
     if (json['avatar_image'] != null) {
       avatarImageJson = json['avatar_image'] as Map<String, dynamic>;

@@ -56,14 +56,14 @@ class SplashBinding implements Bindings {
     Get.lazyPut<StatisticsController>(() => StatisticsController(),
         fenix: true);
 
-    //Get.put(LocationController(), permanent: true);
-    Get.lazyPut<LocationController>(() => LocationController(), fenix: true);
+    Get.put(LocationController(), permanent: true);
+    // Get.lazyPut<LocationController>(() => LocationController(), fenix: true);
 
     Get.lazyPut<ChatConversationController>(() => ChatConversationController(),
         fenix: true);
 
     // aplico el find a LocationController
 
-    Get.find<LocationController>();
+    //  Get.find<LocationController>();
   }
 }

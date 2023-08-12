@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:provitask_app/controllers/auth/login_controller.dart';
 import 'package:provitask_app/models/data/countries_data.dart';
 import 'package:provitask_app/models/provider/skill_model.dart';
 import 'package:provitask_app/services/auth_services.dart';
@@ -389,7 +388,7 @@ class ProfileController extends GetxController {
       // las recorro y añado a list skills skillsList
 
       skills.forEach((skill) {
-        // recorro element['media'] las urls de las imagenes
+        Logger().i(skill);
 
         List<String> media = [];
         skill['media']?.forEach((element) {
@@ -502,8 +501,6 @@ class ProfileController extends GetxController {
 
     user = user['data'];
 
-    Logger().i(user);
-
     clientNameShow.value = (user['name'] ?? "") +
         (user['lastname'] != null ? " " + user['lastname'] : "");
 
@@ -542,7 +539,8 @@ class ProfileController extends GetxController {
     close_hour.value = user['close_disponibility'] != null
         ? formatTimeFromFormattedString(user['close_disponibility'])
         : "9:00pm";
-
+    // limpio la lista de skills
+    skillsList.clear();
     if (user['provider_skills'] != null) {
       user['provider_skills'].forEach((skill) {
         // recorro element['media'] las urls de las imagenes
@@ -563,10 +561,14 @@ class ProfileController extends GetxController {
         ));
       });
     }
+    Logger().i("SKILLS LIST");
 
     if (user['description'] != null) {
       aboutMeController.value.text = user['description'];
     }
+    // actualizo el controlador
+
+    update();
   }
 
   void uploadImage(image) async {
@@ -648,7 +650,6 @@ class ProfileController extends GetxController {
     );
 
     if (response['status'] == 500) {
-      logger.e(response);
       Get.snackbar(
         'Error!',
         'Error updating password',
@@ -697,8 +698,6 @@ class ProfileController extends GetxController {
 
     var response = await _auth.requestResetPassword(clientEmail.value.text);
 
-    logger.i(response);
-
     if (response['status'] == 500) {
       Get.snackbar(
         'Error!',
@@ -744,8 +743,6 @@ class ProfileController extends GetxController {
       // verifico si hay imagenes para subir
 
       if (images.isNotEmpty) {
-        Logger().i(response['data']['id']);
-
         for (var i = 0; i < images.length; i++) {
           final responseUpload = await _upload.upload(
               'api::provider-skill.provider-skill',

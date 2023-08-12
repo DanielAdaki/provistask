@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+
 import 'package:provitask_app/services/preferences.dart';
 import 'package:provitask_app/controllers/auth/login_controller.dart';
+//import 'package:provitask_app/models/data/permission_data.dart';
 
 final _prefs = Preferences();
 
@@ -13,6 +14,7 @@ class SplashController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // PermissionData.getPermissionUbication();
     _start();
   }
 
@@ -21,7 +23,6 @@ class SplashController extends GetxController {
   }
 
   void _initApp() {
-    Logger().i('Tutorial seteado', _prefs.token);
     if (_prefs.tutorialInitial == true) {
       if (_prefs.token != null) {
         _loginController.autoLogin();
@@ -32,6 +33,6 @@ class SplashController extends GetxController {
       Get.offNamed('/welcome');
     }
 
-    //ClientRepository.setClientLocalToken();
+    // ClientRepository.setClientLocalToken();
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 import 'package:provitask_app/services/preferences.dart';
 
 final _prefs = Preferences();
@@ -20,6 +19,5 @@ class WelcomeController extends GetxController {
 
   void setTutorialViewed() async {
     _prefs.tutorialInitial = true;
-    Logger().i('Tutorial seteado', _prefs.tutorialInitial);
   }
 }

@@ -62,8 +62,6 @@ class ProviderSkill {
       }
     });
 
-    Logger().i(mediaUrl);
-
     return ProviderSkill(
       id: json['id'],
       typePrice: json['type_price'],

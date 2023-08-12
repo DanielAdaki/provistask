@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import './controllers/provistask_app_bar_controller.dart';
 import 'package:provitask_app/services/preferences.dart';
 
@@ -39,7 +40,10 @@ class HomeMainAppBar extends GetView<ProvitaskAppBarController>
                 padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
               ),
               child: Obx(() {
+                // busco el controlador de perfil y obtengo la imagen de perfil
+
                 final imageUrl = _preferences.imageProfile.value;
+                Logger().i(imageUrl);
                 if (imageUrl.isNotEmpty) {
                   return CircleAvatar(
                     backgroundImage: NetworkImage(imageUrl),

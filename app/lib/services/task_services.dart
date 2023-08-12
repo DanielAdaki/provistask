@@ -260,14 +260,14 @@ class TaskServices extends GetxController {
     try {
       // agrego a dio interceptor para errores
 
-      dio.interceptors.add(
+      /* dio.interceptors.add(
         InterceptorsWrapper(
           onError: (DioException e, errorInterceptorHandler) {
             // Mostrar el mensaje de error
             print('Error: ${e.response?.data ?? e.message}');
           },
         ),
-      );
+      );*/
 
       final response = await dio.put("/task-assigneds/$id", data: task);
 

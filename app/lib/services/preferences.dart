@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import 'package:provitask_app/common/conexion_common.dart';
 import 'package:provitask_app/models/user/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,9 +70,10 @@ class Preferences {
 
   set user(Map<String, dynamic>? value) {
     _prefs.setString('userMe', jsonEncode(value));
-    imageProfile.value = value!['avatarImage'] == null
+
+    imageProfile.value = value!['avatar_image'] == null
         ? ''
-        : '${ConexionCommon.hostBase}${value['avatarImage']}';
+        : '${ConexionCommon.hostBase}${value['avatar_image']["url"]}';
   }
 
   Map<String, dynamic>? get user {

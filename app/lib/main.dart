@@ -22,7 +22,6 @@ void main() async {
 
   //await initHiveForFlutter();
 
-  PermissionData.getPermissionUbication();
   Preferences prefs = Preferences();
 
   await prefs.init();
@@ -48,6 +47,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
           primaryColor: const Color(0xFF170591),
+          primaryColorDark: const Color(0xFF170591),
           scrollbarTheme: ScrollbarThemeData(
               thumbVisibility: MaterialStateProperty.all(true),
               thickness: MaterialStateProperty.all(10),

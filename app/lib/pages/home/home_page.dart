@@ -28,23 +28,26 @@ class HomePage extends GetView<HomeController> {
         appBar: const HomeMainAppBar(),
         drawer: const HomeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),
-        body: Scrollbar(
-          thickness: 3, // Ajusta el grosor de la barra de desplazamiento
-          radius: const Radius.circular(3),
-          child: RefreshIndicator(
-            onRefresh: () async {
-              controller.isLoading.value = true;
-              await Future.wait<void>([
-                controller.findCategory(),
-                controller.findTask(),
-                controller.getPopularProvider(),
-                //controller._getCategoryHomeSlider(),
-              ]);
-              controller.isLoading.value = false;
-            },
-            child: controller.isLoading.value == true
-                ? const SpinnerWidget()
-                : SingleChildScrollView(
+        body: controller.isLoading.value == true
+            ? const SpinnerWidget()
+            : Scrollbar(
+                thickness: 3, // Ajusta el grosor de la barra de desplazamiento
+                radius: const Radius.circular(3),
+                scrollbarOrientation: ScrollbarOrientation.right,
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    controller.isLoading.value = true;
+                    await controller.getCurrentLocation();
+                    await Future.wait<void>([
+                      controller.findCategory(),
+                      controller.findTask(),
+                      controller.getPopularProvider(),
+                      //controller._getCategoryHomeSlider(),
+                    ]);
+
+                    controller.isLoading.value = false;
+                  },
+                  child: SingleChildScrollView(
                     child: SafeArea(
                       child: Container(
                         alignment: Alignment.center,
@@ -181,8 +184,8 @@ class HomePage extends GetView<HomeController> {
                       ),
                     ),
                   ),
-          ),
-        ),
+                ),
+              ),
       ),
     );
   }

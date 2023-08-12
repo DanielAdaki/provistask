@@ -24,7 +24,7 @@ class UploadServices {
   Future<Map> upload(String ref, int refId, String field, file) async {
     Map respuesta;
     try {
-      dio.interceptors.add(LogInterceptor(error: true));
+      // dio.interceptors.add(LogInterceptor(error: true));
       List<int> imageBytes = await file.readAsBytes();
       FormData formData = FormData.fromMap({
         "ref": ref,
@@ -52,7 +52,7 @@ class UploadServices {
   Future<Map> deleteByPath(String ruta, String s, int id) async {
     Map respuesta;
     try {
-      dio.interceptors.add(LogInterceptor(error: true));
+      //  dio.interceptors.add(LogInterceptor(error: true));
 
       final response = await dio.post("/upload/delete-by-path", data: {
         "ref": s,

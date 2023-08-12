@@ -714,7 +714,9 @@ class RegisterTaskController extends GetxController {
       final response =
           await _task.getTaskByPaymentIntentId(info['paymentIntentId']);
 
-      final conversartion = response["data"]["data"];
+      final conversartion = response["data"]["data"]["conversation"];
+
+      final task = response["data"]["data"]["task"];
 
       Get.dialog(
         AlertDialog(

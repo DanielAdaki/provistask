@@ -370,7 +370,10 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 
 
 
-			return ctx.send({data: tarea.conversation.id});
+			return ctx.send({data: {
+				conversation: tarea.conversation.id,
+				task: tarea.id
+			}});
 
 
 

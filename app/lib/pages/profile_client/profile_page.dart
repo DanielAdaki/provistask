@@ -18,12 +18,12 @@ class ProfileClientPage extends GetView<ProfileController> {
         backgroundColor: Colors.white,
         drawer: _widgets.homeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),
-        body: Scrollbar(
-          thickness: 3, // Ajusta el grosor de la barra de desplazamiento
-          radius: const Radius.circular(3),
-          child: controller.isLoading.value == true
-              ? const SpinnerWidget()
-              : SingleChildScrollView(
+        body: controller.isLoading.value == true
+            ? const SpinnerWidget()
+            : Scrollbar(
+                thickness: 3, // Ajusta el grosor de la barra de desplazamiento
+                radius: const Radius.circular(3),
+                child: SingleChildScrollView(
                   child: SafeArea(
                     child: Container(
                       alignment: Alignment.center,
@@ -99,7 +99,7 @@ class ProfileClientPage extends GetView<ProfileController> {
                     ),
                   ),
                 ),
-        ),
+              ),
       ),
     );
   }

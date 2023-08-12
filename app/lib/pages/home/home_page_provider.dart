@@ -39,6 +39,7 @@ class HomePageProvider extends GetView<HomeProviderController> {
                       height: 30,
                     ),
                     _widgets.titleGenerate(
+                        // ignore: prefer_interpolation_to_compose_strings
                         "${'Hello ' + controller.user!['name']}.",
                         "center",
                         170591,

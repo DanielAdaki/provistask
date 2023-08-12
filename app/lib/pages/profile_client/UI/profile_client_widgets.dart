@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 
@@ -2317,6 +2319,161 @@ class ProfileClientWidgets {
             ),
           )
         ],
+      ),
+    );
+  }
+
+  Widget registerTaskImageZone() {
+    return Obx(
+      () => Container(
+        // height: Get.height * 0.2,
+        width: Get.width * 0.9,
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        child: Column(
+          children: [
+            if (_controller.images.isNotEmpty) ...[
+              Container(
+                margin: const EdgeInsets.only(top: 30),
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  itemCount: _controller.images.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    var img = _controller.images[index];
+                    return Stack(
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: FileImage(img!),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _controller.images.remove(img),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              )
+            ],
+            Visibility(
+              visible: _controller.images.length < 10 &&
+                  _controller.mediaBySkill.length < 10,
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                width: double.infinity, // Hace que el botón ocupe todo el ancho
+                child: ElevatedButton.icon(
+                  icon:
+                      const Icon(Icons.add_a_photo), // Añade un icono al botón
+                  label: Text(
+                    'Add images',
+                    style: TextStyle(
+                      color: Colors.indigo[800],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: Get.context!,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Select an option'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.camera_alt),
+                              title: const Text('Take a photo'),
+                              onTap: () async {
+                                Navigator.pop(context);
+                                final picker = ImagePicker();
+                                final pickedFile = await picker.pickImage(
+                                  source: ImageSource.camera,
+                                  maxWidth: 800,
+                                  maxHeight: 800,
+                                  imageQuality: 80,
+                                );
+                                if (pickedFile == null) return;
+                                _controller.images.clear();
+                                int length = await pickedFile.length();
+                                // uno controller.mediaBySkill  y controller.images para calcular el tamaño
+
+                                final countRest =
+                                    _controller.mediaBySkill.length;
+
+                                final count = 10 - countRest;
+                                if (length <= 20000000 &&
+                                    _controller.images.length < count) {
+                                  _controller.images.add(File(pickedFile.path));
+                                }
+                              },
+                            ),
+                            ListTile(
+                              leading: const Icon(Icons.photo),
+                              title: const Text('Select from gallery'),
+                              onTap: () async {
+                                Navigator.pop(context);
+                                final picker = ImagePicker();
+                                final List<XFile> pickedFile =
+                                    await picker.pickMultiImage(
+                                  maxWidth: 800,
+                                  maxHeight: 800,
+                                  imageQuality: 80,
+                                );
+
+                                if (pickedFile.isEmpty) return;
+
+                                //vacio el array de imagenes
+
+                                _controller.images.clear();
+                                final countRest =
+                                    _controller.mediaBySkill.length;
+
+                                final count = 10 - countRest;
+                                for (var img in pickedFile) {
+                                  int length = await img.length();
+                                  if (length <= 20000000 &&
+                                      _controller.images.length < count) {
+                                    _controller.images.add(File(img.path));
+                                  }
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.white),
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(90),
+                    )),
+                  ),
+                ),
+              ),
+            ),
+            const Text(
+              'Máximo 20MB por imagen, máximo 10 imágenes',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

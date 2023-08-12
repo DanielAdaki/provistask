@@ -87,7 +87,7 @@ class HomeController extends GetxController {
   void onInit() async {
     super.onInit();
     isLoading.value = true;
-    await _getCurrentLocation();
+    await getCurrentLocation();
 
     await Future.wait<void>([
       findCategory(),
@@ -95,20 +95,23 @@ class HomeController extends GetxController {
       _getCategoryHomeSlider(),
     ]);
 
-    getPopularProvider();
+    await getPopularProvider();
+
     // await listaCategorias();
     isLoading.value = false;
   }
 
-  _getCurrentLocation() {
+  getCurrentLocation() {
+    Logger().i("getCurrentLocation");
     Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.best,
             forceAndroidLocationManager: true)
         .then((Position position) {
+      Logger().i(position);
       currentPosition = position;
       _getAddressFromLatLng();
     }).catchError((e) {
-      print(e);
+      Logger().e(e, "aui");
     });
   }
 
@@ -185,6 +188,10 @@ class HomeController extends GetxController {
   }
 
   getPopularProvider() async {
+    if (currentPosition == null) {
+      popularProvider.clear();
+      return;
+    }
     final response = await _task.getPopularItems(currentPosition!.latitude,
         currentPosition!.longitude, Constants.distance);
 
