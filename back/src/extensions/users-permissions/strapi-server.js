@@ -858,12 +858,16 @@ LIMIT ?;
 		try {
 			const { id } = ctx.params;
 
+			console.log("id", id);
+
 			let { lat, lng, idSkill, reviews } = ctx.query;
 
 			if (!lat || !lng || lat == "false" || lng == "false") {
 				lat = null;
 				lng = null;
 			}
+
+			console
 
 			// saco el id del usuario logueado
 
@@ -880,6 +884,8 @@ LIMIT ?;
 					],
 				}
 			);
+
+
 
 			const tareas = await strapi.entityService.findMany(
 				"api::task-assigned.task-assigned",
@@ -903,11 +909,13 @@ LIMIT ?;
 				delete tarea.updatedAt;
 			});
 
-			if (lat && lng) {
-				let distance = await geolib.getDistance(
+			if (lat != null && lng != null && lat != "null" && lng != "null") {
+				let distance = await geolib.getDistance( 
 					{ latitude: lat, longitude: lng },
 					{ latitude: proveedor.lat, longitude: proveedor.lng }
 				);
+
+				console.log("distance", distance);
 
 				// Convertir distancia a kilómetros
 				distance = distance / 1000;

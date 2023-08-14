@@ -278,7 +278,7 @@ class FreelancersWidgets {
   Widget taskProCard(Provider freelancer) {
     return GestureDetector(
       onTap: () async {
-        ProgressDialog pd = ProgressDialog(context: Get.context);
+        //ProgressDialog pd = ProgressDialog(context: Get.context);
         try {
           _controller.isLoading.value = true;
 

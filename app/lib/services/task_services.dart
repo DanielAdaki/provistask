@@ -181,14 +181,12 @@ class TaskServices extends GetxController {
     return respuesta; //
   }
 
-  Future<Map> meTask(status) async {
+  Future<Map> meTask(status, [int page = 1, int limit = 5]) async {
     Map respuesta;
 
     try {
-      // hago la peticion
-
-      final response =
-          await dio.get('/task-assigneds?filters[status][\$eq]=$status');
+      final response = await dio
+          .get('/task-assigneds?status=$status&page=$page&limit=$limit');
 
       if (response.statusCode != 200) {
         throw response.data;

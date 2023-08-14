@@ -393,102 +393,250 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 				return ctx.unauthorized("No tienes permiso", { error: 'No autorizado' });
 			}
 
-			// añado el filtro client: user.id para que solo me traiga las tareas asignadas al usuario logueado
+		
+
+			// saco los parametros de la  paginacion, start, limit, sort where
+
+			let { page, limit, sort, status } = ctx.query;
+
+			
+
+			page	= page ? parseInt(page) : 1;
+
+			limit	= limit ? parseInt(limit) : 5;
+
+			sort	= sort ? sort : "createdAt:desc";
+
+			// calculo el offset
+
+			let offset = (page - 1) * limit;
 
 
-			ctx.query = {
 
-				...ctx.query,
+			// where solo puede ser valores  completed cancelled pending_completed request offer acepte si no es ninguno de esos valores lo seteo en completed
 
-				filters : {
+			if(status != "completed" && status != "cancelled" && status != "pending_completed" && status != "request" && status != "offer" && status != "acepted"){
 
-					...ctx.query.filters,
-						client:{
-							id : {
-								"$eq": user.id
-							}
+				status = "completed";
+
+			}
+
+
+			// busco las tareas filtrando por el usuario logueado y el status que recibo por params considerando la paginacion
+
+			let items = await strapi.db.query("api::task-assigned.task-assigned").findWithCount({
+
+				where: { status : status , client  : user.id },
+				
+				select: [ 'id','status', 'taskLength', 'datetime', 'time', 'createType', 'idCreador', "transportation"],
+
+				sort: sort,
+
+				limit: limit,
+
+				offset: offset,
+
+				populate: ['provider','provider.avatar_image', 'conversation', 'skill']
+
+			});
+
+			// los datos vienen de esta forma [Entry[], number]
+
+			// extraigo los datos y el total
+
+			let total	= items[1];
+
+			items		= items[0];
+
+			// los recorro para formatear datos
+
+			for (let i = 0; i < items.length; i++) {
+
+				let tarea = items[i];
+
+				// del proveedor necesito, nombre apellido, avatar y id
+
+				tarea.provider = {
+
+					id: tarea.provider.id,
+
+					name: tarea.provider.name,
+
+					lastname: tarea.provider.lastname,
+
+					avatar: tarea.provider.avatar_image ? process.env.URL + tarea.provider.avatar_image.url :  process.env.URL+'/uploads/user_147dd8408e.png'
+
+				}
+
+
+				// si conversation es null es porque la tarea no tiene conversacion le creo una
+
+				if(!tarea.conversation){
+
+				/*	let conversation = await strapi.entityService.create('api::conversation.conversation', {
+
+						data: {
+	
+							provider: tarea.provider.id,
+	
+							client: user.id,
+
+							name : "Convertation task between " + user.name + " and " + tarea.provider.name + "",
+	
+							task: tarea.id
+	
 						}
-				}
-
 	
+					});
 
-			}
+					await strapi.db.query("api::task-assigned.task-assigned").update({
+						where: { id: tarea.id  },
+						data: {
+							conversation: conversation.id
+						},
+				});*/
+	
+					tarea.conversation = null;
 
-			// añado populate para que me traiga los datos del proveedor
+				}else{
 
-			ctx.query = {
+					tarea.conversation = tarea.conversation.id;
 
-				...ctx.query,
-
-				"populate": "*"
-
-			}
-
-
-
-
-
-
-
-			let items = await super.find(ctx);
-
-
-			// recorro cada item para completar los datos	que me faltan usando for 
-
-
-			for (let i = 0; i < items.data.length; i++) {
-
-
-				let tarea = items.data[i]["attributes"];
-
-				// busco al proveedor por el id que me trae la tarea que es tarea.provider.data
-
-				const proveedor = await strapi.entityService.findOne('plugin::users-permissions.user', tarea.provider.data.id, {
-					populate: { location: true, avatar_image: true }
-				});
-
-				// busco la conversacion por el id que me trae la tarea que es tarea.conversation.data
-				if(tarea.conversation.data){
-					console.log("conversacion",tarea.conversation);
-					const conversation = await strapi.entityService.findOne('api::conversation.conversation', tarea.conversation.data.id, {
-
-						fields : ['id'] });
-						tarea.conversation = conversation.id;
 				}
 
 
+				let lengthName = tarea.skill.name.length;
+
+				if(lengthName > 25){
+
+					tarea.skill.shortName = tarea.skill.name.substring(0, 25) + "...";
+
+				}else{
+
+					tarea.skill.shortName = tarea.skill.name;
+
+				}
 
 
-				delete proveedor.createdAt;
-				delete proveedor.updatedAt;
-				delete proveedor.provider;
-				delete proveedor.password;
-				delete proveedor.resetPasswordToken;
-				delete proveedor.confirmationToken;
+				tarea.skill = {
+					id: tarea.skill.id,
+					name: tarea.skill.name,
+					shortName :tarea.skill.shortName
+				}
+
 			
-	
-				proveedor.avatar_image = proveedor.avatar_image ? proveedor.avatar_image.url : null;
-			
-				tarea.provider = proveedor;
 
-			
-
-				delete tarea.client;
 
 			}
 
 
+			// en base al limite	y al total calculo la cantidad de paginas
+
+			let lastPage = Math.ceil(total / limit);
 
 
 
 
+			return ctx.send({data: items, meta: {pagination:{ page: page , limit: limit, total: total, lastPage: lastPage}}});
+
+
+
+		},
+
+		async findOne(ctx) {
+
+			const user = ctx.state.user;
+
+			const { id } = ctx.params;
+
+			if(!id){
+
+				return ctx.notFound("No se ha enviado id", { error: 'No se envió id' });
+
+			}
+
+			if (!user) {
+
+				return ctx.unauthorized("No tienes permiso", { error: 'No autorizado' });
+			}
+
+
+
+			// busco las tareas filtrando por el usuario logueado y el status que recibo por params considerando la paginacion
+
+			let tarea = await strapi.db.query("api::task-assigned.task-assigned").findOne({
+
+				where: { id : id , client  : user.id },
+				
+				select: [ 'id','status', 'taskLength', 'datetime', 'time', 'createType', 'idCreador', "transportation"],
+
+				sort: sort,
+
+				limit: limit,
+
+				offset: offset,
+
+				populate: ['provider','provider.avatar_image', 'conversation', 'skill']
+
+			});
 
 
 
 
-console.log(items.data);
-			return items;
+				tarea.provider = {
 
+					id: tarea.provider.id,
+
+					name: tarea.provider.name,
+
+					lastname: tarea.provider.lastname,
+
+					avatar: tarea.provider.avatar_image ? process.env.URL + tarea.provider.avatar_image.url :  process.env.URL+'/uploads/user_147dd8408e.png'
+
+				}
+
+
+				// si conversation es null es porque la tarea no tiene conversacion le creo una
+
+				if(!tarea.conversation){
+
+	
+					tarea.conversation = null;
+
+				}else{
+
+					tarea.conversation = tarea.conversation.id;
+
+				}
+
+
+				let lengthName = tarea.skill.name.length;
+
+				if(lengthName > 25){
+
+					tarea.skill.shortName = tarea.skill.name.substring(0, 25) + "...";
+
+				}else{
+
+					tarea.skill.shortName = tarea.skill.name;
+
+				}
+
+
+				tarea.skill = {
+					id: tarea.skill.id,
+					name: tarea.skill.name,
+					shortName :tarea.skill.shortName
+				}
+
+			
+
+
+			
+
+
+
+			return ctx.send({data: items});
 
 
 		},

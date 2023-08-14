@@ -39,6 +39,23 @@ class Provider {
     this.allSkills,
     this.online,
   });
+  factory Provider.fromJson(Map<String, dynamic> json) {
+    return Provider(
+      id: json['id'],
+      isProvider: json['isProvider'],
+      name: json['name'],
+      lastname: json['lastname'],
+      typeProvider: json['type_provider'],
+      description: json['description'],
+      motorcycle: json['motorcycle'],
+      car: json['car'],
+      truck: json['truck'],
+      openDisponibility: json['open_disponibility'],
+      closeDisponibility: json['close_disponibility'],
+      avatarImage: json['avatar_image'],
+      distanceLineal: json['distance'],
+    );
+  }
 }
 
 class OnlineStatus {

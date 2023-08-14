@@ -13,6 +13,12 @@ class TasksPage extends GetView<TasksController> {
 
   @override
   Widget build(BuildContext context) {
+    controller.scrollController.addListener(() {
+      if (controller.scrollController.position.pixels >=
+          controller.scrollController.position.maxScrollExtent - 200) {
+        controller.loadMoreTasks();
+      }
+    });
     return Obx(
       () => Scaffold(
         floatingActionButton: _widgets.tasksFloatingButton(),
@@ -47,19 +53,21 @@ class TasksPage extends GetView<TasksController> {
 
                           // caso contrario else
 
-                          if (controller.tasks.isNotEmpty)
+                          if (controller.tasks.isNotEmpty) ...[
                             SizedBox(
                               height: Get.height * 0.6,
                               child: Center(
-                                child: ListView(
-                                  children: List.generate(
-                                    controller.tasks.length,
-                                    (index) => _widgets
-                                        .taskProCard(controller.tasks[index]),
-                                  ),
+                                child: ListView.builder(
+                                  controller: controller.scrollController,
+                                  itemCount: controller.tasks.length,
+                                  itemBuilder: (context, index) {
+                                    return _widgets
+                                        .taskProCard(controller.tasks[index]);
+                                  },
                                 ),
                               ),
                             ),
+                          ]
                         ],
                       ),
                     ),

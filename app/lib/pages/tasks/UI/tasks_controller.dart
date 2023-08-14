@@ -1,34 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provitask_app/models/pagination/pagination_model.dart';
 // importo task services
 
 import 'package:provitask_app/services/task_services.dart';
+import 'package:provitask_app/models/tasks/task_approced_model.dart';
 
 class TasksController extends GetxController {
   final programmedOrCompleted = Rx<int>(1);
 
-  // array de tareas
+  ScrollController scrollController = ScrollController();
 
-  final tasks = [].obs;
+  final tasks = RxList<TaskData>([]);
 
   final isLoading = false.obs;
+
+  final pagination = Pagination().obs;
 
   // instancio task services
 
   final _task = TaskServices();
 
-  getTasks() async {
-    isLoading.value = true;
+  int currentPage = 1;
+  int itemsPerPage = 5;
+
+  getTasks([bool loading = true]) async {
+    if (loading) {
+      isLoading.value = true;
+    }
+
     var status = "";
     if (programmedOrCompleted.value == 1) {
       status = "acepted";
+    } else if (programmedOrCompleted.value == 2) {
+      status = "canceled";
     } else {
       status = "completed";
     }
 
     // llamo al metodo getItems de task services
 
-    final response = await _task.meTask(status);
+    final response = await _task.meTask(status, currentPage, itemsPerPage);
 
     // si el status es 500 muestro un mensaje de error
 
@@ -36,17 +48,43 @@ class TasksController extends GetxController {
       // paso a json el body del erro
 
       // muestro el mensaje de error en un snackbar en la parte inferior de la pantalla y fondo en rojo
-      isLoading.value = false;
-
-      tasks.value = [];
-      isLoading.value = false;
+      //currentPage.value = 0;
+      tasks.clear();
+      if (loading) {
+        isLoading.value = false;
+      }
 
       return;
     }
 
-    tasks.value = response["data"]["data"];
+    // lleno el listado de categorias con el resultado de la consulta
 
-    isLoading.value = false;
+    if (loading == true) {
+      tasks.clear();
+    }
+    // añaado los items al listado de tasks
+    List<TaskData> tpm = response["data"]["data"]
+        .map<TaskData>((item) => TaskData.fromJson(item))
+        .toList();
+
+    tasks.addAll(tpm);
+
+    pagination.value =
+        Pagination.fromJson(response["data"]["meta"]["pagination"]);
+    currentPage = pagination.value.page;
+    if (loading) {
+      isLoading.value = false;
+    }
+  }
+
+  void loadMoreTasks() {
+    if (currentPage == pagination.value.lastPage) {
+      return;
+    }
+
+    currentPage = pagination.value.page + 1;
+
+    getTasks(false);
   }
 
   @override

@@ -33,7 +33,6 @@ class ProfileDialog extends GetWidget {
 
   @override
   Widget build(BuildContext context) {
-    Logger().i(perfilProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -691,13 +690,15 @@ class ProfileDialog extends GetWidget {
               const SizedBox(
                 width: 5,
               ),
-              Text(
-                '$distance km for you',
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey,
+              if (distance != "") ...[
+                Text(
+                  '$distance km for you',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
           const SizedBox(
