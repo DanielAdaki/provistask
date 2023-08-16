@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 import 'package:provitask_app/common/conexion_common.dart';
 import 'package:provitask_app/models/user/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';

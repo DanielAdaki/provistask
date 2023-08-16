@@ -13,6 +13,8 @@ import 'package:provitask_app/services/task_services.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:provitask_app/services/provider_services.dart';
 import 'package:provitask_app/services/payment_services.dart';
+import 'package:provitask_app/services/upload/upload_controller.dart';
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 class RegisterTaskController extends GetxController {
   @override
@@ -36,6 +38,10 @@ class RegisterTaskController extends GetxController {
   final _services = ProviderRegisterServices();
   final _paymentServices = PaymentServices();
   final _task = TaskServices();
+
+  final message = 'Please wait...'.obs;
+
+  // final uplodController = UploadServices();
 
   final form1Controller = RxInt(1);
   // usada por daniel
@@ -542,8 +548,6 @@ class RegisterTaskController extends GetxController {
       prepareSkills(response['data'].data["data"]);
       final args = Get.arguments;
 
-      Logger().d(args);
-
       if (args != null) {
         if (args["id"] != null) {
           filters["skill"].value = args["id"].toString();
@@ -690,9 +694,18 @@ class RegisterTaskController extends GetxController {
   }
 
   Future<void> initPaymentSheet() async {
+    ProgressDialog pd = ProgressDialog(context: Get.context);
+
+    pd.show(
+      max: 100,
+      msg: message.value,
+      progressBgColor: Colors.transparent,
+    );
     try {
       // 1. create payment intent on the server
       final data = await _generateIntentPayment();
+
+      message.value = 'Please wait while the payment is initialized...';
 
       final info = data["data"].data["data"];
 
@@ -706,10 +719,14 @@ class RegisterTaskController extends GetxController {
         customerId: info['customer'],
         style: ThemeMode.dark,
       ));
-
+      pd.close();
       await Stripe.instance.presentPaymentSheet();
 
-      // busco tarea por paymentIntentId
+      pd.show(
+        max: 100,
+        msg: message.value,
+        progressBgColor: Colors.transparent,
+      );
 
       final response =
           await _task.getTaskByPaymentIntentId(info['paymentIntentId']);
@@ -718,6 +735,18 @@ class RegisterTaskController extends GetxController {
 
       final task = response["data"]["data"]["task"];
 
+      // verifico si hay imagenes
+
+      if (images.isNotEmpty) {
+        // recorro las imagenes y las subo
+
+        for (var i = 0; i < images.length; i++) {
+          message.value = 'Uploading image ${i + 1} of ${images.length}';
+          await UploadServices().upload(
+              "api::task-assigned.task-assigned", task, "images", images[i]!);
+        }
+      }
+      pd.close();
       Get.dialog(
         AlertDialog(
           title: const Text('Exito'),
@@ -741,8 +770,7 @@ class RegisterTaskController extends GetxController {
         barrierDismissible: false,
       );
     } catch (e) {
-      // muestro  un error en un dialog usando Getx
-
+      pd.close();
       Get.dialog(AlertDialog(
         title: const Text('Error'),
         content: const Text('Ocurrio un error al procesar el pago'),

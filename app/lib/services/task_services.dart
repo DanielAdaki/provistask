@@ -25,7 +25,7 @@ class TaskServices extends GetxController {
   Future<Map> getItems(
       [int limit = 6, int start = 0, bool featured = true]) async {
     Map respuesta;
-
+    configDio();
     try {
       final response =
           await dio.get("/tasks?featured=$featured&start=$start&limit=$limit");
@@ -47,7 +47,7 @@ class TaskServices extends GetxController {
   Future<Map> getPopularItems(
       [double lat = 0, double lng = 0, int distance = 0]) async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio.get(
           "/users-permissions/proveedores/destacados?lat=$lat&lng=$lng&distance=$distance");
@@ -70,7 +70,7 @@ class TaskServices extends GetxController {
 
   Future<Map> getItem(id, [double? lat, double? lng]) async {
     Map respuesta;
-
+    configDio();
     try {
       if (lat == null || lng == null) {
         lat = 0;
@@ -100,7 +100,7 @@ class TaskServices extends GetxController {
   Future<Map> getProviders(double? lat, double? lng, int? distance,
       [filters]) async {
     Map respuesta;
-
+    configDio();
     try {
       Logger().d(
           "/users-permissions/proveedores/?lat=$lat&lng=$lng&distance=$distance&time_of_day=${filters["time_of_day"]}&long_task=${filters["long_task"]}&type_price=${filters["type_price"]}&provider_type=${filters["provider_type"]}&sortBy=${filters["sortBy"]}&hour=${filters["hour"]}&day=${filters["day"]}&skill=${filters["skill"]}&transportation=${filters["transportation"]}&start=${filters["start"]}&limit=${filters["limit"]}");
@@ -129,7 +129,7 @@ class TaskServices extends GetxController {
   Future<Map> getProvider(int id,
       [lat = false, lng = false, int? idSkill]) async {
     Map respuesta;
-
+    configDio();
     try {
       //
       // hago la peticion
@@ -158,7 +158,7 @@ class TaskServices extends GetxController {
   Future<Map> createTask(Map<String, dynamic> task,
       [status = 'request']) async {
     Map respuesta;
-
+    configDio();
     try {
       task = {...task, status: status};
 
@@ -183,10 +183,32 @@ class TaskServices extends GetxController {
 
   Future<Map> meTask(status, [int page = 1, int limit = 5]) async {
     Map respuesta;
-
+    configDio();
     try {
       final response = await dio
           .get('/task-assigneds?status=$status&page=$page&limit=$limit');
+
+      if (response.statusCode != 200) {
+        throw response.data;
+      }
+
+      // mando al modelo
+
+      var aux = response.data;
+
+      respuesta = {"status": 200, "data": aux};
+    } catch (e) {
+      respuesta = {"status": 500, "error": e};
+    }
+
+    return respuesta; //
+  }
+
+  Future<Map> taskDetail(int id) async {
+    Map respuesta;
+    configDio();
+    try {
+      final response = await dio.get('/task-assigneds/$id');
 
       if (response.statusCode != 200) {
         throw response.data;
@@ -230,7 +252,7 @@ class TaskServices extends GetxController {
 
   Future<Map> generarChat(id) async {
     Map respuesta;
-
+    configDio();
     try {
       // hago la peticion
 
@@ -254,7 +276,7 @@ class TaskServices extends GetxController {
 
   Future<Map> editTask(int id, Map<String, dynamic> task) async {
     Map respuesta;
-
+    configDio();
     try {
       // agrego a dio interceptor para errores
 
@@ -310,9 +332,9 @@ class TaskServices extends GetxController {
     return respuesta;
   }
 
-  Future getTaskByPaymentIntentId(String paimentInt) async {
+  Future<Map> getTaskByPaymentIntentId(String paimentInt) async {
     Map respuesta;
-
+    configDio();
     try {
       final response =
           await dio.get("/task-assigneds/by-payment-intent/$paimentInt");
@@ -335,9 +357,67 @@ class TaskServices extends GetxController {
     return respuesta;
   }
 
-// importo conexion_common.dart
+  Future<Map> sendCalificacion(
+      int iDProvider, int iDTask, double calificacion, String rewiew) async {
+    Map respuesta;
+    configDio();
+
+    try {
+      final response = await dio.post("/valorations", data: {
+        "provider": iDProvider,
+        "task": iDTask,
+        "rating": calificacion,
+        "description": rewiew
+      });
+
+      // reviso el status de la respuesta si es distinto a 200 lanzo error
+
+      if (response.statusCode != 200) {
+        throw response.data;
+      }
+
+      respuesta = {"status": 200, "data": response};
+    } catch (e) {
+      respuesta = {"status": 500, "error": e};
+    }
+
+    return respuesta;
+  }
+
+  Future<Map> canceledTask(int id, String reason) async {
+    Map respuesta;
+    configDio();
+
+    try {
+      final response = await dio.post("/task-assigneds/canceled-task", data: {
+        "id": id,
+        "reason": reason,
+      });
+
+      // reviso el status de la respuesta si es distinto a 200 lanzo error
+
+      if (response.statusCode != 200) {
+        throw response.data;
+      }
+
+      respuesta = {"status": 200, "data": response};
+    } catch (e) {
+      respuesta = {"status": 500, "error": e};
+    }
+
+    return respuesta;
+  }
 }
 
-//getPopularItems
+Function getToken = () {
+  return prefs.token;
+};
+
+// funcion para configurar Dio
+
+Function configDio = () {
+  dio.options.headers["content-type"] = "application/json";
+  dio.options.headers["Authorization"] = "Bearer ${getToken()}";
+};
 
 TaskServices auth = TaskServices();

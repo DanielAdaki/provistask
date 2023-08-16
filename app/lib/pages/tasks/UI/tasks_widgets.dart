@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provitask_app/models/tasks/task_approced_model.dart';
 
 import 'package:provitask_app/pages/freelancers/UI/freelancers_controller.dart';
 import 'package:provitask_app/pages/tasks/UI/tasks_controller.dart';
 import 'package:provitask_app/services/preferences.dart';
 import 'package:provitask_app/widget/provider/provider_perfil_dialog.dart';
+import 'package:provitask_app/widget/tasks/task_details_widget.dart';
 
 final prefs = Preferences();
 
@@ -216,7 +218,7 @@ class TasksWidgets {
     );
   }
 
-  Widget taskProCard(dynamic item) {
+  Widget taskProCard(TaskData item) {
     return GestureDetector(
       onTap: () async {
         //ProgressDialog pd = ProgressDialog(context: Get.context);
@@ -224,7 +226,7 @@ class TasksWidgets {
           _controller.isLoading.value = true;
 
           List<Future> futures = [
-            _freelancersController.getPerfilProvider(item.provider.id, true)
+            _controller.getTask(item.id),
             // controller.getComments(item.id),
           ];
 
@@ -234,10 +236,7 @@ class TasksWidgets {
           Get.dialog(
             Dialog(
               insetPadding: const EdgeInsets.all(0),
-              child: ProfileDialog(
-                perfilProvider: _freelancersController.perfilProvider.value,
-                general: true,
-              ),
+              child: TaskDetailDialog(task: _controller.task),
             ),
           );
           _controller.isLoading.value = false;

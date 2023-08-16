@@ -46,6 +46,12 @@
         }
       },
       "type": "text"
+    },
+    "task": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::task-assigned.task-assigned",
+      "inversedBy": "valoration"
     }
   }
 }

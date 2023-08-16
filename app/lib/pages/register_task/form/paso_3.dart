@@ -413,12 +413,17 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
                                                         MainAxisSize.min,
                                                     children: [
                                                       // imagen del proveedor redondeada
-
-                                                      Image(
-                                                        image: NetworkImage(item
-                                                                .avatarImage ??
-                                                            "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png"),
-                                                        width: 75,
+                                                      ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(75),
+                                                        child: Image(
+                                                          image: NetworkImage(
+                                                              item.avatarImage!),
+                                                          width: 75,
+                                                          height: 75,
+                                                          fit: BoxFit.cover,
+                                                        ),
                                                       ),
 
                                                       const SizedBox(width: 10),

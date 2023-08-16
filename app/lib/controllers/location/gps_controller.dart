@@ -56,6 +56,8 @@ class GpsController extends GetxController {
         setGpsEnableAndPermission(gpsPermission: false);
         openAppSettings();
         break;
+      case PermissionStatus.provisional:
+        break;
     }
   }
 

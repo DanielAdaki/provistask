@@ -2153,6 +2153,18 @@ LIMIT ?;
 
 							console.log("payment_intent.succeeded", response);
 
+					// actualizo la orden con el id de la tarea
+
+					await strapi.entityService.update("api::order.order",order.id,{
+
+						data: {
+
+							task_assigned: response.taskEntity.id,
+
+						}
+
+					});
+
 					return ctx.send({ data : response });
 
 					break;
@@ -2232,7 +2244,7 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 
 			// transportation solo puede ser "motorcycle"  "transportation"  "truck"  "not_necessary"
 
-			if (transportation != "motorcycle" && transportation != "transportation" && transportation != "truck" && transportation != "not_necessary") {
+			if (transportation != 'car' && transportation != "motorcycle" && transportation != "transportation" && transportation != "truck" && transportation != "not_necessary" ) {
 				console.log("El campo transportation solo puede ser motorcycle, transportation, truck o not_necessary", { error: 'El campo transportation solo puede ser motorcycle, transportation, truck o not_necessary' });
 				return ctx.badRequest("El campo transportation solo puede ser motorcycle, transportation, truck o not_necessary", { error: 'El campo transportation solo puede ser motorcycle, transportation, truck o not_necessary' });
 

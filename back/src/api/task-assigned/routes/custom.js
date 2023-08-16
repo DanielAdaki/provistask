@@ -31,5 +31,11 @@ module.exports = {
 			handler: "task-assigned.taskByConversation",
 			
 		},
+		{
+			method: "POST",
+			path: "/task-assigneds/canceled-task",
+			handler: "task-assigned.taskCanceled",
+			
+		},
 	],
 };

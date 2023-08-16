@@ -84,7 +84,7 @@
       "default": false
     },
     "descriptionProvis": {
-      "type": "string"
+      "type": "text"
     },
     "brutePrice": {
       "type": "string"
@@ -114,9 +114,9 @@
     "idCreador": {
       "type": "integer"
     },
-    "image": {
+    "images": {
       "type": "media",
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "allowedTypes": [
         "images"
@@ -127,6 +127,12 @@
       "relation": "oneToOne",
       "target": "api::conversation.conversation",
       "inversedBy": "task_assigned"
+    },
+    "valoration": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::valoration.valoration",
+      "mappedBy": "task"
     }
   }
 }

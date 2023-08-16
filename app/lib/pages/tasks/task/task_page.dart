@@ -35,62 +35,53 @@ class TaskPage extends GetView<TaskController> {
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        _widget.titleGenerate(_controller
-                                .taskDetail.value.isNotEmpty
-                            ? _controller.taskDetail.value["attributes"]["name"]
+                        _widget.titleGenerate(_controller.taskDetail.isNotEmpty
+                            ? _controller.taskDetail["attributes"]["name"]
                             : ""),
-                        _widget.imageTask(
-                            _controller.taskDetail.value.isNotEmpty
-                                ? _controller.taskDetail.value["attributes"]
-                                    ["image"]["data"]["attributes"]["url"]
-                                : ""),
-                        _widget.priceTask(
-                            _controller.taskDetail.value.isNotEmpty
-                                ? _controller
-                                    .taskDetail.value["attributes"]["price"]
-                                    .toString()
-                                : ""),
-                        _controller.provider.value["name"] != null
+                        _widget.imageTask(_controller.taskDetail.isNotEmpty
+                            ? _controller.taskDetail["attributes"]["image"]
+                                ["data"]["attributes"]["url"]
+                            : ""),
+                        _widget.priceTask(_controller.taskDetail.isNotEmpty
+                            ? _controller.taskDetail["attributes"]["price"]
+                                .toString()
+                            : ""),
+                        _controller.provider["name"] != null
                             ? _widget.proviData(
-                                _controller.provider.value["name"] +
+                                _controller.provider["name"] +
                                         " " +
-                                        _controller
-                                            .provider.value["lastname"] ??
+                                        _controller.provider["lastname"] ??
                                     "",
-                                _controller.provider.value["type_provider"],
-                                _controller.provider.value["cost_per_houers"] !=
-                                        null
-                                    ? _controller
-                                        .provider.value["cost_per_houers"]
+                                _controller.provider["type_provider"],
+                                _controller.provider["cost_per_houers"] != null
+                                    ? _controller.provider["cost_per_houers"]
                                         .toString()
                                     : "",
-                                _controller.provider.value["distanceGoogle"]
+                                _controller.provider["distanceGoogle"]
                                     .toString(),
-                                _controller.provider.value["scoreAverage"]
+                                _controller.provider["scoreAverage"].toString(),
+                                _controller.provider["open_disponibility"]
                                     .toString(),
-                                _controller.provider.value["open_disponibility"]
+                                _controller.provider["close_disponibility"]
                                     .toString(),
-                                _controller
-                                    .provider.value["close_disponibility"]
-                                    .toString(),
-                                _controller.provider.value["skills"],
-                                _controller.provider.value["car"],
-                                _controller.provider.value["truck"],
-                                _controller.provider.value["motorcycle"],
+                                _controller.provider["skills"],
+                                _controller.provider["car"],
+                                _controller.provider["truck"],
+                                _controller.provider["motorcycle"],
                                 Random().nextInt(100).toString())
                             : Container(),
                         _widget.descriptionTask(
-                            _controller.taskDetail.value.isNotEmpty
-                                ? _controller.taskDetail.value["attributes"]
+                            _controller.taskDetail.isNotEmpty
+                                ? _controller.taskDetail["attributes"]
                                     ["description"]
                                 : ""),
 
                         const SizedBox(
                           height: 30,
                         ),
-                        _controller.provider.value != null
-                            ? _widget
-                                .buttonContact(_controller.provider.value["id"])
+                        // ignore: unnecessary_null_comparison
+                        _controller.provider != null
+                            ? _widget.buttonContact(_controller.provider["id"])
                             : Container(),
                         const SizedBox(
                           height: 30,

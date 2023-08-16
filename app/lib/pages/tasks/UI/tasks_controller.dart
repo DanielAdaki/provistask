@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import 'package:provitask_app/models/pagination/pagination_model.dart';
+import 'package:provitask_app/models/tasks/task_aproved_detaill_model.dart';
 // importo task services
 
 import 'package:provitask_app/services/task_services.dart';
@@ -14,6 +16,8 @@ class TasksController extends GetxController {
   final tasks = RxList<TaskData>([]);
 
   final isLoading = false.obs;
+
+  dynamic task = "".obs;
 
   final pagination = Pagination().obs;
 
@@ -41,6 +45,8 @@ class TasksController extends GetxController {
     // llamo al metodo getItems de task services
 
     final response = await _task.meTask(status, currentPage, itemsPerPage);
+
+    Logger().i(response);
 
     // si el status es 500 muestro un mensaje de error
 
@@ -77,6 +83,21 @@ class TasksController extends GetxController {
     }
   }
 
+  getTask(int id) async {
+    isLoading.value = true;
+    final response = await _task.taskDetail(id);
+
+    if (response["status"] != 200) {
+      isLoading.value = false;
+
+      return;
+    }
+
+    task = TaskApprovalDetail.fromJson(response["data"]);
+
+    isLoading.value = false;
+  }
+
   void loadMoreTasks() {
     if (currentPage == pagination.value.lastPage) {
       return;
@@ -89,9 +110,8 @@ class TasksController extends GetxController {
 
   @override
   void onInit() async {
-    isLoading.value = true;
     await getTasks();
-    isLoading.value = false;
+
     super.onInit();
   }
 

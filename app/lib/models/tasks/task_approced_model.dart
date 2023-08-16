@@ -1,4 +1,6 @@
 import 'package:provitask_app/models/pagination/pagination_model.dart';
+import 'package:provitask_app/models/provider/provider_lite_model.dart';
+import 'package:provitask_app/models/provider/skill_lite_model.dart';
 
 class TaskAssigned {
   List<TaskData> data;
@@ -57,49 +59,6 @@ class TaskData {
       provider: ProviderLite.fromJson(json['provider']),
       conversation: json['conversation'],
       skill: SkillLite.fromJson(json['skill']),
-    );
-  }
-}
-
-class ProviderLite {
-  int id;
-  String name;
-  String lastname;
-  String avatar;
-
-  ProviderLite({
-    required this.id,
-    required this.name,
-    required this.lastname,
-    required this.avatar,
-  });
-
-  factory ProviderLite.fromJson(Map<String, dynamic> json) {
-    return ProviderLite(
-      id: json['id'],
-      name: json['name'],
-      lastname: json['lastname'],
-      avatar: json['avatar'],
-    );
-  }
-}
-
-class SkillLite {
-  int id;
-  String name;
-  String shortName;
-
-  SkillLite({
-    required this.id,
-    required this.name,
-    required this.shortName,
-  });
-
-  factory SkillLite.fromJson(Map<String, dynamic> json) {
-    return SkillLite(
-      id: json['id'],
-      name: json['name'],
-      shortName: json['shortName'],
     );
   }
 }

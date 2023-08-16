@@ -91,12 +91,18 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                             child: Row(
                                               children: [
                                                 // imagen del proveedor redondeada
-
-                                                Image(
-                                                  image: NetworkImage(
-                                                      controller.perfilProvider[
-                                                          "avatar_image"]),
-                                                  width: 75,
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(75),
+                                                  child: Image(
+                                                    image: NetworkImage(
+                                                        controller
+                                                                .perfilProvider[
+                                                            "avatar_image"]),
+                                                    width: 75,
+                                                    height: 75,
+                                                    fit: BoxFit.cover,
+                                                  ),
                                                 ),
 
                                                 const SizedBox(width: 10),
@@ -564,32 +570,7 @@ class RegisterTaskPage4 extends GetView<RegisterTaskController> {
                                 ),
                                 _widgets.registerContinueButton(
                                     'Chat & confirm', 20, () async {
-                                  /* ProgressDialog pd =
-                                      ProgressDialog(context: Get.context);
-
-                                                                  try {
-                                    pd.show(
-                                      max: 100,
-                                      msg: 'Please wait...',
-                                      progressBgColor: Colors.transparent,
-                                    );
-                                    final conversation =
-                                        await controller.registerTask();
-
-                                    Get.offAllNamed('/chat/$conversation');
-                                  } catch (e) {
-                                    pd.close();
-                                    // snackBar de error  que salga de la parte de abajo
-
-                                    Get.snackbar(
-                                      'Error',
-                                      'Error al crear la tarea',
-                                      backgroundColor: Colors.red,
-                                      colorText: Colors.white,
-                                      snackPosition: SnackPosition.BOTTOM,
-                                    );
-                                  }*/
-                                  controller.initPaymentSheet();
+                                  await controller.initPaymentSheet();
                                 }, bgColor: Colors.indigo[800]!),
                               ],
                             )

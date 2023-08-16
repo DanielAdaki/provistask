@@ -108,4 +108,50 @@ class TaskController extends GetxController {
 
     //imprimo tipo de dato de data
   }
+
+  sendCalificacion(id, idTask, double rating, String comment) async {
+    final response = await _task.sendCalificacion(id, idTask, rating, comment);
+
+    if (response["status"] != 200) {
+      return null;
+    }
+
+    // imprimo el tipo de dato que devuelve la consulta
+
+    final data = response["data"];
+
+    return data;
+  }
+
+  finishTask(item) async {
+    // llamo el metodo finishTask de task services usando async await
+
+    final response = await _task.finishTask(item);
+
+    // si el status es 500 muestro un mensaje de error
+
+    if (response["status"] != 200) {
+      return null;
+    }
+
+    final data = response["data"];
+
+    return data;
+  }
+
+  canceledTask(int id, String reason) async {
+    // llamo el metodo finishTask de task services usando async await
+
+    final response = await _task.canceledTask(id, reason);
+
+    // si el status es 500 muestro un mensaje de error
+
+    if (response["status"] != 200) {
+      return null;
+    }
+
+    final data = response["data"];
+
+    return data;
+  }
 }

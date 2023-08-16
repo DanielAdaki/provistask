@@ -2466,7 +2466,7 @@ class RegisterTaskWidget {
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.add_a_photo), // Añade un icono al botón
                 label: Text(
-                  'Añadir una foto',
+                  'Add images',
                   style: TextStyle(
                     color: Colors.indigo[800],
                     fontWeight: FontWeight.bold,
@@ -2477,7 +2477,7 @@ class RegisterTaskWidget {
                   showDialog(
                     context: Get.context!,
                     builder: (context) => AlertDialog(
-                      title: const Text('Selecciona una opción'),
+                      title: const Text('Select an option'),
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -2523,7 +2523,7 @@ class RegisterTaskWidget {
                               for (var img in pickedFile) {
                                 int length = await img.length();
                                 print("añadiendo");
-                                if (length <= 5000000 &&
+                                if (length <= 10000000 &&
                                     _controller.images.length < 3) {
                                   _controller.images.add(File(img.path));
                                 }

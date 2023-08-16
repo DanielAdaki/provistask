@@ -1,10 +1,8 @@
 // ignore_for_file: avoid_print
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
-import 'package:provitask_app/models/data/permission_data.dart';
 import 'utility/fix_https.dart';
 import 'package:provitask_app/services/preferences.dart';
 import 'package:provitask_app/pages/pages.dart';
