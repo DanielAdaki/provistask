@@ -34,12 +34,16 @@ class ChatConversationWidgets {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Center(
-            child: Text(
-              '${_controller.user["name"]}  ${_controller.user["lastname"] ?? ""}',
-              style: TextStyle(
-                color: Colors.indigo[800],
-                fontSize: 25,
+          SizedBox(
+            width: Get.width * 0.5,
+            child: Center(
+              child: Text(
+                '${_controller.user["name"]}  ${_controller.user["lastname"] ?? ""}',
+                style: TextStyle(
+                  color: Colors.indigo[800],
+                  fontSize: 17,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -1326,7 +1330,7 @@ class ChatConversationWidgets {
       color: Colors.amber[800],
 
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
             margin: const EdgeInsets.only(left: 10),
@@ -1339,30 +1343,33 @@ class ChatConversationWidgets {
             ),
           ),
 
-          // icono de flecha hacia la derecha
+          Row(
+            children: [
+              IconButton(
 
-          IconButton(
+                  // icono de flecha hacia la derecha
 
-              // icono de flecha hacia la derecha
+                  icon: const Icon(
+                    Icons.remove_red_eye,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    dialogTaskDetail();
+                  }),
+              IconButton(
 
-              icon: const Icon(
-                Icons.remove_red_eye,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                dialogTaskDetail();
-              }),
-          IconButton(
+                  // icono de flecha hacia la derecha
 
-              // icono de flecha hacia la derecha
+                  icon: const Icon(
+                    Icons.reply_sharp,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    dialogTaskPresupuesto();
+                  }),
+            ],
+          )
 
-              icon: const Icon(
-                Icons.reply_sharp,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                dialogTaskPresupuesto();
-              }),
           // icono de flecha hacia la derecha
         ],
       ),

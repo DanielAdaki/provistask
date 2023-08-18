@@ -43,7 +43,7 @@ module.exports = createCoreController('api::conversation.conversation', ({ strap
 				...ctx.query,
 
 
-				// añado populacion
+				
 				populate: "users",
 				filters: {
 

@@ -1,6 +1,13 @@
 'use strict';
 const {URL} = process.env;
 const { v4: uuid } = require('uuid');
+const { Readable } = require("stream");
+const path = require('path');
+
+const os = require('os');
+
+const fse = require('fs-extra');
+
 module.exports = {
   /**
    * An asynchronous register function that runs before
@@ -41,8 +48,7 @@ module.exports = {
               'users-permissions'
             ].services.jwt.verify(socket.handshake.query.token);
   
-  
-            console.log(result)
+
   
             if (!result) {
   
@@ -106,7 +112,6 @@ module.exports = {
   
   
             socket.user = user;
-            console.log('user', user)
             next();
           } catch (error) {
   
@@ -148,7 +153,7 @@ module.exports = {
   
               }
   
-              console.log(id, "conversacion")
+
   
               let conversacion = await strapi.entityService.findOne('api::conversation.conversation', id, {
   
@@ -171,7 +176,6 @@ module.exports = {
   
               }
 
-              console.log(socket.user)
   
               let user = conversacion.users.filter(us => us.id == socket.user.id);
   
@@ -245,39 +249,43 @@ module.exports = {
             try {
               let otherUser = [];
   
-              console.log(data)
+
   
-              const { id, page, limit } = data;
+              let { id, page, limit } = data;
              
   
-              page ? parseInt(page) : 1;
+             page= page ? parseInt(page) : 1;
   
-              limit ? parseInt(limit) : 10;
+             limit = limit ? parseInt(limit) : 10;
   
   
-              const start = (page - 1) * limit;
+              const offset = (page - 1) * limit;
   
-             let mensajes =  await strapi.db.query('api::chat-message.chat-message').findMany({
+             let mensajes =  await strapi.db.query('api::chat-message.chat-message').findWithCount({
   
                 where: { conversation: id.toString() },
   
-                orderBy :{ createdAt: 'DESC' } ,
+                orderBy :{"createdAt" : "desc"} ,
   
                 limit : limit,
   
-                offset : start,
+                offset : offset,
   
-                populate: [ "emit", "emit.avatar_image"]
+                populate: [ "emit", "emit.avatar_image", 'media']
   
               });
   
+              let total = mensajes[1];
+
+              mensajes = mensajes[0];
   
-  
-              let conversacion = await strapi.entityService.findOne('api::conversation.conversation', id, {
-  
+              let conversacion = await strapi.db.query('api::conversation.conversation').findOne({
+
+                where: { id: id.toString() , users: socket.user.id.toString() },	 
+          
                 populate: { users: true }
-  
-              })
+          
+              });
   
             ///  socket.join(id);
   
@@ -357,10 +365,11 @@ module.exports = {
   
                 }
   
-                mensaje.datetime = mensaje.datetime ? mensaje.datetime : mensaje.createdAt;
+                mensaje.datetime = mensaje.createdAt ?  mensaje.createdAt :mensaje.datetime;
   
                 let fechaUnix = new Date(mensaje.datetime).getTime();
-  
+
+                if(mensaje.type != 'image'  && mensaje.type != 'file' && mensaje.type != 'video' && mensaje.type != 'audio'  ){
                 mensajes[i] = {
   
                   'author': {
@@ -371,12 +380,49 @@ module.exports = {
                   },
                   'createdAt': fechaUnix,//paso hora en formato unix  ,
                   'remoteId': mensaje.id.toString(),
-                  'id': uuid(),
+                  'id': mensaje.clientId ?? uuid(),
                   'status': mensaje.status ?? 'seen',
                   'text': mensaje.message ?? '',
                   'type': mensaje.type ?? 'text',
                   'roomId': id.toString(),
                 }
+              
+              }else{
+
+
+   
+
+                  let media = mensaje.media;
+
+                mensajes[i] = {
+
+                  'author': {
+                    'firstName': user.name,
+                    'id': user.id.toString(),
+                    'imageUrl': user.avatar_image,
+                    'lastName': user.lastname
+                  },
+      
+                  'createdAt':fechaUnix,
+                  'id':mensaje.clientId ?? uuid(),
+                  'remoteId': mensaje.id.toString(), //id del mensaje en la base de datos
+                  'status': mensaje.status ?? 'seen',
+                  'text': mensaje.text ?? 'File uploaded',
+                  'type': mensaje.type,
+                  'roomId': id.toString(),
+                  'name' : media.name,
+                  'size' : media.size,
+                  'mimeType' :media.mime,
+                  'width' : media.width,
+                  'height' : media.height,
+                  'uri' :  URL + media.url,
+
+                }
+
+
+              }
+
+
   
   
   
@@ -386,19 +432,12 @@ module.exports = {
   
   
   
-              //socket.join(conversation);
-  
-              // busco si la conversacion con id = id tiene una tarea asiugnada api::task-assigned.task-assigned
+            //  mensajes.sort((a, b) => b.createdAt - a.createdAt);
   
   
-              //ordeno por datetime de manera descendente
+            let lastPage = Math.ceil(total / limit);
   
-              mensajes.sort((a, b) => b.createdAt - a.createdAt);
-  
-  
-              console.log(otherUser)
-  
-              socket.emit('getChatResponse', { mensajes, otherUser});
+              socket.emit('getChatResponse', { data: {mensajes, otherUser}, meta: { pagination: { page: page, limit: limit, total: total, lastPage: lastPage } } });
             } catch (error) {
   
               console.log(error)
@@ -411,40 +450,31 @@ module.exports = {
           // send mensaje
   
           socket.on('sendMessage', async (data) => {
-  
-  
-  
-  
-            console.log(data)
-  
-         
+
+            let {message, fileData} = data;
+
+            if (!message.id){
+              message.id = uuid();
+            }
+
+            if(message.type != 'image'  && message.type != 'file' && message.type != 'video' && message.type != 'audio'  ){
   
             const mensaje = await strapi.entityService.create('api::chat-message.chat-message', {
   
               data: {
   
-                conversation: data.roomId,
+                conversation: message.roomId,
                 emit: socket.user.id,
-                message: data.text,
-                datetime: data.createdAt,
+                message: message.text,
+                datetime: message.createdAt,
                 status: 'sent',
-                type: data.type
+                type: message.type,
+                clientId: message.id,
   
               }
   
             });
-  
-            console.log(data)
-  
-  
-          
-  
-            if (!data.id){
-              data.id = uuid();
-            }
-  
-  
-            io.to(`sala_${data.roomId.toString()}`).emit('sendMessageResponse', {
+            io.to(`sala_${message.roomId.toString()}`).emit('sendMessageResponse', {
   
               'author': {
                 'firstName': socket.user.name,
@@ -453,14 +483,103 @@ module.exports = {
                 'lastName': socket.user.lastname
               },
   
-              'createdAt': data.createdAt,
-              'id': data.id.toString(),
+              'createdAt': message.createdAt,
+              'id': message.id.toString(),
               'remoteId': mensaje.id.toString(), //id del mensaje en la base de datos
               'status': 'sent',
-              'text': data.text,
-              'type': data.type,
-              'roomId': data.roomId.toString(),
+              'text': message.text,
+              'type': message.type,
+              'roomId': message.roomId.toString(),
             });
+          }else{
+
+
+           const mensaje = await strapi.entityService.create('api::chat-message.chat-message', {
+  
+              data: {
+  
+                conversation: message.roomId,
+                emit: socket.user.id,
+                message: "file uploaded",
+                datetime: message.createdAt,
+                status: 'sent',
+                type: message.type,
+                clientId: message.id,
+  
+              }
+  
+            });
+
+            
+
+
+            let fileNameNoExt = uuid() + '_' + fileData.name.split('.')[0];
+
+            const createAndAssignTmpWorkingDirectoryToFiles = () => fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
+
+
+            const entity = {
+              name: `${fileData.name}`,
+              hash: fileNameNoExt,
+              ext: path.extname(fileData.name),
+              mime:fileData.mimeType,
+              size: fileData.size,
+              provider: 'local',
+              tmpWorkingDirectory: await createAndAssignTmpWorkingDirectoryToFiles(),
+              getStream: () => Readable.from(fileData.bytes),
+            related :{
+                id: mensaje.id,
+                __type: "api::chat-message.chat-message",
+                __pivot: { field: "media" }
+              }
+            };
+
+
+
+          if(fileData.mimeType.includes('image')){
+
+            await  strapi.plugin('upload').service('upload').uploadImage(entity)
+
+          }else{
+            await  strapi.plugin('upload').service('upload').uploadFileAndPersist(entity)
+          }
+          
+          let fileCreate= await strapi.query('plugin::upload.file').create({ data: entity });
+        
+
+           io.to(`sala_${message.roomId.toString()}`).emit('sendMessageResponse', {
+  
+            'author': {
+              'firstName': socket.user.name,
+              'id': socket.user.id.toString(),
+              'imageUrl': socket.user.avatar_image,
+              'lastName': socket.user.lastname
+            },
+
+            'createdAt': message.createdAt,
+            'id': message.id.toString(),
+            'remoteId': mensaje.id.toString(), //id del mensaje en la base de datos
+            'status': 'sent',
+            'text': message.text ?? 'File uploaded',
+            'type': message.type,
+            'roomId': message.roomId.toString(),
+            'name' : fileCreate.name,
+            'size' : fileCreate.size,
+            'mimeType' :fileCreate.mimeType,
+            'width' : fileCreate.width,
+            'height' : fileCreate.height,
+            'uri' :  URL + fileCreate.url,
+            
+          });
+
+
+
+
+
+          }
+  
+  
+
             
   
   
@@ -494,6 +613,37 @@ module.exports = {
             }
   
   
+          });
+
+
+          socket.on('messageReceived', async (data) => {
+
+
+            // busco el mensaje en la base de datos y lo actualizo a recibido
+
+            
+            await strapi.db.query('api::chat-message.chat-message').update({
+
+              where: { clientId: data.messageId },
+
+              data: {
+
+                status: 'seen',
+
+              },
+
+            });
+
+
+            socket.broadcast.to(`sala_${data.roomId}`).emit('messageRead', { id: data.messageId, roomId: data.roomId, user: socket.user.id, datetime: new Date().getTime(), status: 'seen', message: 'Mensaje recibido' });
+
+
+            
+
+     
+
+            
+
           });
   
   

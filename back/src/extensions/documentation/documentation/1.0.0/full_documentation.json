@@ -14,7 +14,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "x-generation-date": "2023-08-15T23:29:38.807Z"
+    "x-generation-date": "2023-08-17T21:00:03.189Z"
   },
   "x-strapi-config": {
     "path": "/documentation",
@@ -1775,6 +1775,9 @@
                   }
                 ],
                 "example": "string or id"
+              },
+              "clientId": {
+                "type": "string"
               }
             }
           }
@@ -3289,6 +3292,9 @@
                       "skillAndExperience": {
                         "type": "string"
                       },
+                      "device_token": {
+                        "type": "string"
+                      },
                       "createdAt": {
                         "type": "string",
                         "format": "date-time"
@@ -4098,6 +4104,9 @@
                 }
               }
             }
+          },
+          "clientId": {
+            "type": "string"
           },
           "createdAt": {
             "type": "string",
@@ -6528,6 +6537,9 @@
                         "skillAndExperience": {
                           "type": "string"
                         },
+                        "device_token": {
+                          "type": "string"
+                        },
                         "createdAt": {
                           "type": "string",
                           "format": "date-time"
@@ -8774,6 +8786,9 @@
                       "skillAndExperience": {
                         "type": "string"
                       },
+                      "device_token": {
+                        "type": "string"
+                      },
                       "createdAt": {
                         "type": "string",
                         "format": "date-time"
@@ -10459,6 +10474,9 @@
                       "skillAndExperience": {
                         "type": "string"
                       },
+                      "device_token": {
+                        "type": "string"
+                      },
                       "createdAt": {
                         "type": "string",
                         "format": "date-time"
@@ -12120,6 +12138,9 @@
                         }
                       },
                       "skillAndExperience": {
+                        "type": "string"
+                      },
+                      "device_token": {
                         "type": "string"
                       },
                       "createdAt": {
@@ -13831,6 +13852,9 @@
                                     }
                                   },
                                   "skillAndExperience": {
+                                    "type": "string"
+                                  },
+                                  "device_token": {
                                     "type": "string"
                                   },
                                   "createdAt": {
@@ -17222,6 +17246,9 @@
                         }
                       },
                       "skillAndExperience": {
+                        "type": "string"
+                      },
+                      "device_token": {
                         "type": "string"
                       },
                       "createdAt": {
@@ -21159,6 +21186,9 @@
                       "skillAndExperience": {
                         "type": "string"
                       },
+                      "device_token": {
+                        "type": "string"
+                      },
                       "createdAt": {
                         "type": "string",
                         "format": "date-time"
@@ -23108,6 +23138,9 @@
                         }
                       },
                       "skillAndExperience": {
+                        "type": "string"
+                      },
+                      "device_token": {
                         "type": "string"
                       },
                       "createdAt": {
@@ -25687,6 +25720,9 @@
                                     }
                                   },
                                   "skillAndExperience": {
+                                    "type": "string"
+                                  },
+                                  "device_token": {
                                     "type": "string"
                                   },
                                   "createdAt": {
@@ -29016,6 +29052,9 @@
                         }
                       },
                       "skillAndExperience": {
+                        "type": "string"
+                      },
+                      "device_token": {
                         "type": "string"
                       },
                       "createdAt": {

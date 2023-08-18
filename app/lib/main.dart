@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
@@ -7,18 +8,24 @@ import 'utility/fix_https.dart';
 import 'package:provitask_app/services/preferences.dart';
 import 'package:provitask_app/pages/pages.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // var path = Directory.current.path;
 
-  // Hive
-  //   ..init(path)
-  //   ..registerAdapter();
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      name: 'Provitask',
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
+  final fcmToken = await FirebaseMessaging.instance.getToken();
+
+  print('fcmToken: $fcmToken');
 
   localNotificationsPlugin.initialize(initSetttings);
-
-  //await initHiveForFlutter();
 
   Preferences prefs = Preferences();
 

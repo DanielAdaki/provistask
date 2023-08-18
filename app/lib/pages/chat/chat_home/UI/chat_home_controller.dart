@@ -48,4 +48,11 @@ class ChatHomeController extends GetxController {
     isLoading.value = false;
     super.onInit();
   }
+
+  @override
+  void onClose() {
+    searchChat.value.dispose();
+
+    super.onClose();
+  }
 }

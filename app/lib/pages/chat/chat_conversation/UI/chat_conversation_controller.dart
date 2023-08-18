@@ -10,6 +10,7 @@ import 'package:mime/mime.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:provitask_app/models/pagination/pagination_model.dart';
 import 'package:provitask_app/services/message_services.dart';
 
 //llamo las preferencias
@@ -50,6 +51,9 @@ class ChatConversationController extends GetxController {
   final page = 1.obs;
 
   final limit = 10.obs;
+  final pagination = Pagination().obs;
+
+  final isLastPage = false.obs;
 
   final selectedSkill = "Bookshelf Assembly".obs;
 
@@ -61,7 +65,7 @@ class ChatConversationController extends GetxController {
     // tomo el id de la conversacion que viene en la ruta como parametros
 
     id.value = Get.parameters['id'] ?? '';
-    await getTaskConversation();
+    //await getTaskConversation();
     _socketController.socket.emit('join', {
       "id": id.value
     }); // me uno a la sala de chat con el id de la conversacion
@@ -71,10 +75,15 @@ class ChatConversationController extends GetxController {
 
     // espero dos segundos
 
-    _socketController.socket.once('getChatResponse', (data) async {
+    _socketController.socket.once('getChatResponse', (datos) async {
+      final data = datos["data"];
       user.value = data["otherUser"];
 
-      // recorro los mensajes y voy asignaod una a una
+      pagination.value = Pagination.fromJson(datos["meta"]["pagination"]);
+
+      // es la ultima pagina ???
+
+      isLastPage.value = pagination.value.lastPage == pagination.value.page;
 
       for (var i = 0; i < data["mensajes"].length; i++) {
         final mess = types.Message.fromJson(data["mensajes"][i]);
@@ -86,7 +95,61 @@ class ChatConversationController extends GetxController {
     _socketController.socket.on('sendMessageResponse', (data) async {
       final mess = types.Message.fromJson(data as Map<String, dynamic>);
 
-      messages.insert(0, mess);
+      // busco el mensaje en la lista de mensajes y lo actualizo como enviado
+
+      if (mess.author.id != prefs.user!["id"].toString()) {
+        // añaado el mensaje a la lista de mensajes
+
+        messages.insert(0, mess);
+
+        _socketController.socket.emit('messageReceived', {
+          "messageId": mess.id,
+          "roomId": mess.roomId,
+          "userId": prefs.user!["id"].toString()
+        });
+      } else {
+        final index = messages.indexWhere((element) => element.id == mess.id);
+
+        if (index != -1) {
+          final updatedMessage = messages[index].copyWith(
+            status: types.Status.sent,
+          );
+
+          messages[index] = updatedMessage;
+        }
+      }
+    });
+
+    _socketController.socket.on('messageRead', (data) async {
+      final index = messages.indexWhere((element) => element.id == data["id"]);
+
+      // si lo encuentro actualizo el estado del mensaje a leido
+
+      if (index != -1) {
+        final updatedMessage = messages[index].copyWith(
+          status: types.Status.seen,
+        );
+
+        messages[index] = updatedMessage;
+      }
+    });
+
+    _socketController.socket.on('joinResponse', (data) async {
+      // si el usuario que se unio es el mismo que el usuario logueado
+
+      if (data["otherUser"] == prefs.user!["id"].toString()) {
+        return;
+      }
+
+      // marco los mensajes como leidos
+
+      for (var i = 0; i < messages.length; i++) {
+        final updatedMessage = messages[i].copyWith(
+          status: types.Status.seen,
+        );
+
+        messages[i] = updatedMessage;
+      }
     });
   }
 
@@ -127,8 +190,6 @@ class ChatConversationController extends GetxController {
     if (result != null) {
       final bytes = await result.readAsBytes();
 
-      // verifico el tamaño de la imagen no sea mayor a 20 mb
-
       if (bytes.length > 20971520) {
         Get.snackbar("Error", "La imagen no puede ser mayor a 20mb",
             backgroundColor: Colors.red,
@@ -144,8 +205,6 @@ class ChatConversationController extends GetxController {
 
       final image = await decodeImageFromList(bytes);
 
-      Logger().i("TAMAÑO IMAGEN", image);
-
       final message = types.ImageMessage(
           author: types.User(id: prefs.user!["id"].toString()),
           createdAt: DateTime.now().millisecondsSinceEpoch,
@@ -154,19 +213,31 @@ class ChatConversationController extends GetxController {
           name: result.name,
           size: bytes.length,
           uri: result.path,
+          status: types.Status.sending,
           width: image.width.toDouble(),
           roomId: id.value);
 
-      messages.insert(0, message);
+      // file Data
 
-      _addMessage(message);
+      final fileData = {
+        "id": idImage,
+        "width": image.width.toDouble(),
+        "size": bytes.length,
+        "height": image.height.toDouble(),
+        "name": result.name,
+        "bytes": bytes,
+        "mimeType": lookupMimeType(result.path),
+      };
+
+      _addMessage(message, fileData);
     }
   }
 
-  _addMessage(types.Message message) {
-    // messages.insert(0, message);
+  _addMessage(types.Message message, [Map fileData = const {}]) {
+    messages.insert(0, message);
 
-    _socketController.socket.emit('sendMessage', message);
+    _socketController.socket
+        .emit('sendMessage', {"message": message, "fileData": fileData});
   }
 
   handleFileSelection() async {
@@ -174,19 +245,45 @@ class ChatConversationController extends GetxController {
       type: FileType.any,
     );
 
-    if (result != null && result.files.single.path != null) {
-      final message = types.FileMessage(
-        author: types.User(id: prefs.user!["id"].toString()),
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-        id: const Uuid().v4(),
-        mimeType: lookupMimeType(result.files.single.path!),
-        name: result.files.single.name,
-        size: result.files.single.size,
-        uri: result.files.single.path!,
-        roomId: id.value,
-      );
+    // verifico el tamaño de la imagen no sea mayor a 10mb
 
-      _addMessage(message);
+    if (result != null && result.files.single.path != null) {
+      final file = File(result.files.single.path!);
+
+      final bytes = await file.readAsBytes();
+
+      if (result.files.single.size > 52428800) {
+        Get.snackbar("Error", "The file cannot be larger than 50mb",
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM);
+
+        return;
+      }
+
+      /// mando al servidor la imagen en base64
+
+      final idImage = const Uuid().v4();
+
+      final message = types.FileMessage(
+          author: types.User(id: prefs.user!["id"].toString()),
+          createdAt: DateTime.now().millisecondsSinceEpoch,
+          name: result.files.single.name,
+          id: idImage,
+          uri: result.files.single.path!,
+          size: result.files.single.size,
+          status: types.Status.sending,
+          roomId: id.value);
+
+      final fileData = {
+        "id": idImage,
+        "size": result.files.single.size,
+        "name": result.files.single.name,
+        "bytes": bytes,
+        "mimeType": lookupMimeType(result.files.single.path!),
+      };
+
+      _addMessage(message, fileData);
     }
   }
 
@@ -250,6 +347,7 @@ class ChatConversationController extends GetxController {
       id: const Uuid().v4(),
       text: message.text,
       roomId: id.value,
+      status: types.Status.sending,
     );
 
     _addMessage(textMessage);
@@ -261,22 +359,48 @@ class ChatConversationController extends GetxController {
     // muestro un snackbar con el error en la parte de abajo
   }
 
-  Future<void> handleEndReached() {
+  Future<void> handleEndReached() async {
     // si el total de mensajes es menor al total de mensajes de la paginacion
+    if (page.value == pagination.value.lastPage) {
+      return;
+    }
+    final respuesta =
+        await _services.getMessagesChat(id.value, page.value + 1, limit.value);
 
-    _socketController.socket.emit('getChat',
-        {"id": id.value, "limit": limit, "page": page, "init": true});
+    if (respuesta["status"] != 200) {
+      return;
+    }
 
-    _socketController.socket.once('getChatResponse', (data) async {
-      messages.clear();
+    final data = respuesta["data"];
 
-      for (var i = 0; i < data["mensajes"].length; i++) {
-        final mess = types.Message.fromJson(data["mensajes"][i]);
+    // es la ultima pagina ???
 
-        messages.add(mess);
-      }
-    });
+    pagination.value = Pagination.fromJson(data["meta"]["pagination"]);
 
-    return Future.value();
+    // si es la ultima pagina
+
+    if (pagination.value.lastPage == pagination.value.page) {
+      isLastPage.value = true;
+    } else {
+      page.value = pagination.value.page + 1;
+      isLastPage.value = false;
+    }
+
+    for (var i = 0; i < data["data"]["mensajes"].length; i++) {
+      final mess = types.Message.fromJson(data["data"]["mensajes"][i]);
+
+      messages.add(mess);
+    }
+  }
+
+// dispose del controlador
+
+  @override
+  void onClose() {
+    super.onClose();
+    _socketController.socket.off('sendMessageResponse');
+    _socketController.socket.off('getChatResponse');
+    _socketController.socket.off('messageRead');
+    _socketController.socket.off('joinResponse');
   }
 }

@@ -42,11 +42,11 @@ class TasksController extends GetxController {
       status = "completed";
     }
 
+    Logger().i("status: $status");
+
     // llamo al metodo getItems de task services
 
     final response = await _task.meTask(status, currentPage, itemsPerPage);
-
-    Logger().i(response);
 
     // si el status es 500 muestro un mensaje de error
 

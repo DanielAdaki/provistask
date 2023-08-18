@@ -147,14 +147,18 @@ class ChatHomeWidgets {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item["attributes"]["contact"]["name"] +
-                        " " +
-                        item["attributes"]["contact"]["lastname"],
-                    style: TextStyle(
-                        color: Colors.indigo[800],
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
+                  SizedBox(
+                    width: Get.width * 0.4,
+                    child: Text(
+                      item["attributes"]["contact"]["name"] +
+                          " " +
+                          item["attributes"]["contact"]["lastname"],
+                      style: TextStyle(
+                          color: Colors.indigo[800],
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   const SizedBox(
                     height: 10,

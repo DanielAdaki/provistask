@@ -417,7 +417,7 @@ module.exports = createCoreController(
 
 			// where solo puede ser valores  completed cancelled pending_completed request offer acepte si no es ninguno de esos valores lo seteo en completed
 
-			if (status != "completed" && status != "cancelled" && status != "pending_completed" && status != "request" && status != "offer" && status != "acepted") {
+			if (status != "completed" && status != "canceled" && status != "pending_completed" && status != "request" && status != "offer" && status != "acepted") {
 
 				status = "completed";
 
@@ -724,6 +724,16 @@ module.exports = createCoreController(
 			} else {
 
 				tarea.review = null;
+
+			}
+
+			// si la tarea está en status cancelled  busco el motivo de cancelacion
+
+			if (tarea.status == "cancelled") {
+
+
+				//let cancelation = await strapi.db.query("api::cancelation.cancelation").findOne({
+					
 
 			}
 

@@ -247,6 +247,33 @@ class MessageServices {
     return respuesta; //
   }
 
+  Future<Map> getMessagesChat(String id, [int page = 1, int limit = 10]) async {
+    Map respuesta;
+    configDio();
+    try {
+      /*
+        @id : id de la conversacion no de los mensajes
+      */
+
+      final response =
+          await dio.get('/chat-messages?id=$id&page=$page&limit=$limit');
+
+      if (response.statusCode != 200) {
+        throw response.data;
+      }
+
+      // mando al modelo
+
+      var aux = response.data;
+
+      respuesta = {"status": 200, "data": aux};
+    } catch (e) {
+      respuesta = {"status": 500, "error": e};
+    }
+
+    return respuesta; //
+  }
+
   Future<Map> acceptProposal(int id) async {
     Map respuesta;
     configDio();
@@ -283,7 +310,6 @@ Function getToken = () {
 Function configDio = () {
   dio.options.headers["content-type"] = "application/json";
   dio.options.headers["Authorization"] = "Bearer ${getToken()}";
-  Logger().d(dio.options.headers);
 };
 
 MessageServices auth = MessageServices();

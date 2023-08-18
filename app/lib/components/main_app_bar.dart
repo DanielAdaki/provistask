@@ -43,7 +43,7 @@ class HomeMainAppBar extends GetView<ProvitaskAppBarController>
                 // busco el controlador de perfil y obtengo la imagen de perfil
 
                 final imageUrl = _preferences.imageProfile.value;
-                Logger().i(imageUrl);
+
                 if (imageUrl.isNotEmpty) {
                   return CircleAvatar(
                     backgroundImage: NetworkImage(imageUrl),

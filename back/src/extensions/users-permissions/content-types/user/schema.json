@@ -164,6 +164,9 @@
     },
     "skillAndExperience": {
       "type": "text"
+    },
+    "device_token": {
+      "type": "string"
     }
   }
 }

@@ -22,73 +22,69 @@ class ChatConversationPage extends GetView<ChatConversationController> {
       appBar: const HomeMainAppBar(),
       bottomNavigationBar: const ProvitaskBottomBar(),
       body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            // await controller.getMessages();
-            await controller.getTaskConversation();
-            await _controllerP.getTaskConversation();
-          },
-          child: Obx(
-            () => controller.isLoading.value
-                ? const Center(child: CircularProgressIndicator())
-                : SizedBox(
-                    // Envuelve SingleChildScrollView con un Container
-                    height: Get.height * 1, // Define la altura del Container
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _widgets.messagesAppBar(),
-                        if (controller.task.isNotEmpty &&
-                            controller.task['provider'] ==
-                                controller.prefs.user?['id']) ...[
-                          _widgets.stickerMessage(),
-                        ],
-                        Container(
-                            height: Get.height * 0.0,
-                            child: ListView.builder(
-                              itemCount: controller.messages.length,
-                              itemBuilder: (context, index) {
-                                final message = controller.messages[index];
-                                final isUser =
-                                    message.author.id == controller.user['id'];
-                                return Visibility(
-                                  visible: false,
-                                  child: Text(
-                                    message.author.id,
-                                    style: TextStyle(
-                                      color: isUser
-                                          ? Colors.green
-                                          : Colors.redAccent,
-                                    ),
-                                  ),
-                                );
-                              },
-                            )),
-                        Expanded(
-                            child: SizedBox(
-                          height: Get.height * 1,
-                          width: Get.width * 1,
-                          child: Chat(
-                            key: controller.chatKey,
-                            messages: controller.messages,
-                            onAttachmentPressed:
-                                _widgets.handleAttachmentPressed,
-                            onMessageTap: controller.handleMessageTap,
-                            onPreviewDataFetched:
-                                controller.handlePreviewDataFetched,
-                            onSendPressed: controller.handleSendPressed,
-                            onEndReached: controller.handleEndReached,
-                            showUserAvatars: true,
-                            showUserNames: true,
-                            user: types.User(
-                              id: controller.prefs.user!["id"].toString(),
-                            ),
-                          ),
-                        ))
+        child: Obx(
+          () => controller.isLoading.value
+              ? const Center(child: CircularProgressIndicator())
+              : SizedBox(
+                  // Envuelve SingleChildScrollView con un Container
+                  height: Get.height * 1, // Define la altura del Container
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _widgets.messagesAppBar(),
+                      if (controller.task.isNotEmpty &&
+                          controller.task['provider'] ==
+                              controller.prefs.user?['id']) ...[
+                        _widgets.stickerMessage(),
                       ],
-                    ),
+                      SizedBox(
+                          height: Get.height * 0.0,
+                          child: ListView.builder(
+                            itemCount: controller.messages.length,
+                            itemBuilder: (context, index) {
+                              final message = controller.messages[index];
+                              final isUser =
+                                  message.author.id == controller.user['id'];
+                              return Visibility(
+                                visible: false,
+                                child: Text(
+                                  message.author.id,
+                                  style: TextStyle(
+                                    color: isUser
+                                        ? Colors.green
+                                        : Colors.redAccent,
+                                  ),
+                                ),
+                              );
+                            },
+                          )),
+                      Expanded(
+                          child: SizedBox(
+                        height: Get.height * 1,
+                        width: Get.width * 1,
+                        child: Chat(
+                          key: controller.chatKey,
+                          messages: controller.messages,
+                          onAttachmentPressed: _widgets.handleAttachmentPressed,
+                          onMessageTap: controller.handleMessageTap,
+                          onPreviewDataFetched:
+                              controller.handlePreviewDataFetched,
+                          onSendPressed: controller.handleSendPressed,
+                          onEndReached: controller.handleEndReached,
+                          isLastPage: controller.isLastPage.value,
+                          showUserAvatars: true,
+                          showUserNames: true,
+                          theme: const DefaultChatTheme(
+                            inputBackgroundColor: Color(0xff170591),
+                          ),
+                          user: types.User(
+                            id: controller.prefs.user!["id"].toString(),
+                          ),
+                        ),
+                      ))
+                    ],
                   ),
-          ),
+                ),
         ),
       ),
     );
