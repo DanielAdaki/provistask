@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:provitask_app/controllers/notification/notification_controller.dart';
+
 import './controllers/provistask_app_bar_controller.dart';
 import 'package:provitask_app/services/preferences.dart';
 
@@ -8,7 +9,10 @@ Preferences _preferences = Preferences();
 
 class HomeMainAppBar extends GetView<ProvitaskAppBarController>
     implements PreferredSizeWidget {
-  const HomeMainAppBar({Key? key}) : super(key: key);
+  HomeMainAppBar({Key? key}) : super(key: key);
+
+  final NotificationController notificationController =
+      Get.find<NotificationController>();
 
   @override
   Size get preferredSize => const Size.fromHeight(80);
@@ -26,9 +30,59 @@ class HomeMainAppBar extends GetView<ProvitaskAppBarController>
         width: Get.width * 0.2,
       ),
       actions: [
-        Column(
+        Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // icono de notificaciones con cantidad de notificaciones
+            ElevatedButton(
+              style: ButtonStyle(
+                elevation: MaterialStateProperty.all(0),
+                backgroundColor: MaterialStateProperty.all(Colors.indigo[800]),
+                minimumSize: MaterialStateProperty.all(const Size(35, 35)),
+                shape: MaterialStateProperty.all<CircleBorder>(
+                  const CircleBorder(),
+                ),
+                padding: MaterialStateProperty.all(const EdgeInsets.all(0)),
+              ),
+              onPressed: () {
+                // limmpio total de notificaciones
+                notificationController.totalNotificaciones.value = 0;
+                Get.toNamed('/notificaciones');
+              },
+              child: Obx(
+                () => Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    const Icon(
+                      Icons.notifications,
+                      color: Colors.white,
+                    ),
+                    if (notificationController.totalNotificaciones.value > 0)
+                      Positioned(
+                        top: -2,
+                        right: -2,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            notificationController.totalNotificaciones.value
+                                .toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              //fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+
             ElevatedButton(
               style: ButtonStyle(
                 elevation: MaterialStateProperty.all(0),

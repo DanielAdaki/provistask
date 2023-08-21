@@ -166,7 +166,12 @@
       "type": "text"
     },
     "device_token": {
-      "type": "string"
+      "type": "string",
+      "private": true
+    },
+    "notification": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

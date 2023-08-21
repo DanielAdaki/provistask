@@ -15,6 +15,12 @@ class GpsController extends GetxController {
     isGpsEnabled.value = gpsEnable ?? isGpsEnabled.value;
     isGpsPermissionGranted.value =
         gpsPermission ?? isGpsPermissionGranted.value;
+
+    if (isAllGranted) {
+      // si el usuario es de tipo cliente lo envio a la pantalla de home
+
+      Get.offNamed('/home');
+    }
   }
 
   Future<void> _init() async {

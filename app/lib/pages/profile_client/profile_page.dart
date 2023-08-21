@@ -14,7 +14,7 @@ class ProfileClientPage extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     return Obx(
       () => Scaffold(
-        appBar: _widgets.profileAppBar("Profile"),
+        appBar: _widgets.profileAppBar(context, "Profile"),
         backgroundColor: Colors.white,
         drawer: _widgets.homeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),

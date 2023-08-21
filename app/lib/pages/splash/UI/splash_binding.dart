@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:provitask_app/common/socket.dart';
+
 import 'package:provitask_app/components/controllers/provitask_bottom_bar_controller.dart';
 import 'package:provitask_app/controllers/auth/login_controller.dart';
 import 'package:provitask_app/controllers/auth/register_controller.dart';
@@ -21,6 +21,7 @@ import 'package:provitask_app/pages/tasks/UI/tasks_controller.dart';
 import 'package:provitask_app/pages/verification_provider/UI/verification_provider_controller.dart';
 import 'package:provitask_app/pages/welcome/UI/welcome_controller.dart';
 //import 'package:provitask_app/pages/chat/chat_conversation/UI/chat_conversation_controller.dart';
+import 'package:provitask_app/controllers/location/gps_controller.dart';
 
 class SplashBinding implements Bindings {
   @override
@@ -37,8 +38,7 @@ class SplashBinding implements Bindings {
         fenix: true);
 
     Get.lazyPut<WelcomeController>(() => WelcomeController());
-    Get.lazyPut<HomeController>(() => HomeController());
-    Get.lazyPut<LoginController>(() => LoginController());
+    Get.lazyPut<HomeController>(() => HomeController(), fenix: true);
     Get.lazyPut<FreelancersController>(() => FreelancersController());
     Get.lazyPut<TasksController>(() => TasksController());
 
@@ -47,16 +47,14 @@ class SplashBinding implements Bindings {
     Get.lazyPut<ProvitaskBottomBarController>(
         () => ProvitaskBottomBarController());
 
-    Get.lazyPut<ChatHomeController>(() => ChatHomeController());
     Get.lazyPut<HomeProviderController>(() => HomeProviderController(),
         fenix: true);
     Get.lazyPut<PendingPageController>(() => PendingPageController(),
         fenix: true);
-    Get.lazyPut<SocketController>(() => SocketController(), fenix: true);
+
     Get.lazyPut<StatisticsController>(() => StatisticsController(),
         fenix: true);
 
-    Get.put(LocationController(), permanent: true);
     // Get.lazyPut<LocationController>(() => LocationController(), fenix: true);
 
     Get.lazyPut<ChatConversationController>(() => ChatConversationController(),
@@ -65,5 +63,10 @@ class SplashBinding implements Bindings {
     // aplico el find a LocationController
 
     //  Get.find<LocationController>();
+  }
+
+  void resetControllers() {
+    /// Get.deleteAll();
+    dependencies();
   }
 }

@@ -11,14 +11,12 @@ import 'package:provitask_app/widget/home/provider/home_provider_widget.dart';
 class CalendarPage extends GetView<HomeProviderController> {
   final _widgets = HomeWidgetsProvider();
 
-  //saco listCategory de la clase HomeController
-
   CalendarPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const HomeMainAppBar(),
+      appBar: HomeMainAppBar(),
       drawer: const HomeDrawer(),
       bottomNavigationBar: const ProvitaskBottomBar(),
       body: Scrollbar(

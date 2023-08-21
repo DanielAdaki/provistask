@@ -1,10 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:provitask_app/controllers/auth/login_controller.dart';
+import 'package:provitask_app/pages/register_client/UI/register_client_controller.dart';
 //import 'package:provitask_app/pages/register_client/UI/register_client_controller.dart';
 
 class LoginWidgets {
-  final _controller = Get.find<LoginController>();
+  //final _controller = Get.find<LoginController>();
+
+  final _controller = Get.put(LoginController());
+
+  Widget loginPage() {
+    return LoadingOverlay(
+      isLoading: _controller.isLoading.value,
+      progressIndicator: const CircularProgressIndicator(),
+      color: Colors.white,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [loginForm()],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget loginHeader() {
     return Container(
@@ -175,7 +196,7 @@ class LoginWidgets {
   Widget loginRegisterButton() {
     return TextButton(
       onPressed: () {
-        //Get.put<RegisterCLientController>(RegisterCLientController());
+        Get.put<RegisterCLientController>(RegisterCLientController());
         Get.toNamed('/register_client');
       },
       child: Text(

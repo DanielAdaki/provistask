@@ -745,7 +745,7 @@ module.exports = createCoreController(
 
 		async taskPending(ctx) {
 
-			console.log("taskPending");
+		
 
 			const user = ctx.state.user;
 
@@ -755,7 +755,6 @@ module.exports = createCoreController(
 
 			}
 
-			console.log(user);
 
 			//verifico sea proveedor
 
@@ -777,7 +776,7 @@ module.exports = createCoreController(
 
 			});
 
-			console.log(items);
+
 
 
 
@@ -826,7 +825,6 @@ module.exports = createCoreController(
 
 			}
 
-			console.log(elementos);
 
 			return ctx.send(elementos);
 
@@ -1024,7 +1022,6 @@ module.exports = createCoreController(
 
 		async taskAcepted(ctx) {
 
-			console.log("taskCompleted");
 
 			const user = ctx.state.user;
 

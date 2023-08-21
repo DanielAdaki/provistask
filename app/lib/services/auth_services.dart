@@ -2,8 +2,11 @@
 
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:get/instance_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:provitask_app/common/socket.dart';
+import 'package:provitask_app/controllers/auth/auth_controller.dart';
 import 'package:provitask_app/models/user/user_model.dart';
 import 'package:provitask_app/services/preferences.dart';
 
@@ -25,6 +28,9 @@ BaseOptions options = BaseOptions(headers: {
 Dio dio = Dio(options);
 
 class AuthService {
+  final AuthController autC = Get.find<AuthController>();
+
+  SocketController socket = Get.find<SocketController>();
   Future<Map> login(String email, String password) async {
     Map respuesta;
 
@@ -54,7 +60,29 @@ class AuthService {
 
       _prefs.token = token;
 
+      if (_prefs.fcmToken != null && _prefs.fcmToken != "") {
+        await setTokenFcm(_prefs.fcmToken!);
+      }
+
       respuesta = {"status": 200, "token": token};
+    } catch (e) {
+      Logger().e(e);
+      respuesta = {"status": 500, "error": e};
+    }
+    return respuesta;
+  }
+
+  Future<Map> setTokenFcm(String token) async {
+    Map respuesta;
+    configDio();
+    try {
+      final response = await dio.post("/auth/local/fcm", data: {
+        "token": token,
+      });
+      // configuro dio para que use el token en el header
+
+      respuesta = {"status": 200, "data": response.data};
+      print(response.data);
     } catch (e) {
       Logger().e(e);
       respuesta = {"status": 500, "error": e};
@@ -198,13 +226,7 @@ class AuthService {
 
       final user = response.data;
 
-      // mando el uyser al modelo
-
       _prefs.user = user;
-
-      // imprimo el user del shared preferences par adebug
-
-      // guardo la respuesta en el map _respuesta y lo retorno con status 200
 
       respuesta = {"status": 200, "data": response.data};
 
@@ -467,8 +489,8 @@ class AuthService {
 
   void logout() {
     _prefs.clearUserData();
-
-    // limpio preferencias
+    socket.disconnectSocket();
+    //autC.logout();
   }
 
   Future<Map> createStripeAccountConnet() async {

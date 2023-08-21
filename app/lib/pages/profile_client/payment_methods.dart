@@ -17,7 +17,7 @@ class PaymentPerfil extends GetView<ProfileController> {
     return Obx(
       () => Scaffold(
         // paso elñ titulo edit perfil
-        appBar: _widgets.profileAppBar('Paymet Methods'),
+        appBar: _widgets.profileAppBar(context, 'Paymet Methods'),
         backgroundColor: Colors.white,
         drawer: _widgets.homeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),

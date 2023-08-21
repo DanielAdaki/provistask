@@ -28,7 +28,8 @@ class ChatHomeWidgets {
               Get.put<ProfileProviderController>(ProfileProviderController());
               Get.toNamed('/profile_provider');
             } else {
-              Get.put<HomeController>(HomeController());
+              //Get.put<HomeController>(HomeController());
+              Get.find<HomeController>();
               Get.toNamed('/home');
             }
           },

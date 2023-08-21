@@ -12,15 +12,13 @@ import 'package:provitask_app/widget/home/provider/home_provider_widget.dart';
 class HomePageProvider extends GetView<HomeProviderController> {
   final _widgets = HomeWidgetsProvider();
 
-  //saco listCategory de la clase HomeController
-
   HomePageProvider({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Obx(
       () => Scaffold(
-        appBar: const HomeMainAppBar(),
+        appBar: HomeMainAppBar(),
         drawer: const HomeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),
         body: Scrollbar(

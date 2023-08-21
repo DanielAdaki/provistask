@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:get/get.dart';
-import 'package:provitask_app/controllers/home/home_controller.dart';
+//import 'package:provitask_app/controllers/home/home_controller.dart';
 import 'package:provitask_app/pages/profile_provider/UI/profile_provider_controller.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 // import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -16,7 +16,7 @@ class ProfileProviderWidgets {
       leading: IconButton(
           onPressed: () {
             if (_controller.profileOptions.value == 0) {
-              Get.put<HomeController>(HomeController());
+              //  Get.put<HomeController>(HomeController());
               Get.back();
             } else {
               _controller.profileOptions.value = 0;

@@ -16,7 +16,7 @@ class VehiclesProvider extends GetView<ProfileController> {
     return Obx(
       () => Scaffold(
         // paso elñ titulo edit perfil
-        appBar: _widgets.profileAppBar(),
+        appBar: _widgets.profileAppBar(context, ''),
         backgroundColor: Colors.white,
         drawer: _widgets.homeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),

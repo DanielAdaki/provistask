@@ -19,7 +19,7 @@ class CrearTaskClient extends GetView<ChatPropuestaController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const HomeMainAppBar(),
+      appBar: HomeMainAppBar(),
       bottomNavigationBar: const ProvitaskBottomBar(),
       body: SafeArea(
         child: Obx(

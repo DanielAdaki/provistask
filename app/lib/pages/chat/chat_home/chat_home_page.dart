@@ -13,7 +13,7 @@ class ChatHomePage extends GetView<ChatHomeController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
-          appBar: const HomeMainAppBar(),
+          appBar: HomeMainAppBar(),
           bottomNavigationBar: const ProvitaskBottomBar(),
           backgroundColor: Colors.white,
           body: RefreshIndicator(

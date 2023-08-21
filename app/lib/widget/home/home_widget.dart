@@ -7,9 +7,7 @@ import 'package:provitask_app/common/conexion_common.dart';
 import 'package:provitask_app/models/home/home_category_model.dart';
 
 class HomeWidgets {
-  // final _controller = Get.find<HomeController>();
-
-  final _controller = Get.put(HomeController());
+  final _controller = Get.find<HomeController>();
 
   Widget homeSearchBar() {
     return Container(

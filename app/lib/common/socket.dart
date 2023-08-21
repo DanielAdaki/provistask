@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import 'package:provitask_app/common/conexion_common.dart';
+import 'package:provitask_app/services/auth_services.dart';
 import 'package:provitask_app/services/preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -8,24 +10,42 @@ final _prefs = Preferences();
 class SocketController extends GetxController {
   late IO.Socket socket;
 
-  @override
-  void onInit() {
-    // Inicializar socket en el método onInit()
+  void initSocket() {
     socket = IO.io(ConexionCommon.hostBase, <String, dynamic>{
-      'autoConnect': true,
+      'autoConnect': true, // Desactivar la conexión automática
       'transports': ['websocket'],
-      'query': {'token': _prefs.token}
+      'reconnection': true,
+      'query': {'token': '${_prefs.token}'},
     });
+
     socket.connect();
-    socket.emit('connection', 'data');
+    socket.onConnect((_) {
+      print('Connection established');
+    });
+  }
+
+  void connectSocket() {
+    socket.io.options['query'] = {
+      'token': '${_prefs.token}',
+    };
+
+    socket.connect();
     socket.onConnect((_) {
       print('Connection established');
     });
 
-    socket.onDisconnect((_) => print('Connection Disconnection'));
-    socket.onConnectError((err) => print(err));
-    socket.onError((err) => print(err));
-    super.onInit();
+    socket.on('disconnect', (_) => print('disconnect'));
+  }
+
+  void disconnectSocket() {
+    socket.disconnect();
+    socket.onDisconnect((_) => print('disconnect'));
+  }
+
+  @override
+  void onClose() {
+    disconnectSocket();
+    super.onClose();
   }
 }
 

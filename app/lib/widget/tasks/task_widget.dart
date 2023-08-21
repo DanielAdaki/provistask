@@ -7,10 +7,7 @@ import 'package:provitask_app/controllers/task/task_controller.dart';
 import 'package:provitask_app/common/conexion_common.dart';
 
 class TaskWidgets {
-  // final _controller = Get.find<HomeController>();
-
-  final _controller = Get.put(TaskController());
-
+  final _controller = Get.find<TaskController>();
   AppBar homeAppBar() {
     return AppBar(
       elevation: 0,

@@ -19,7 +19,7 @@ class TaskPage extends GetView<TaskController> {
   Widget build(BuildContext context) {
     return Obx(
       () => Scaffold(
-        appBar: const HomeMainAppBar(),
+        appBar: HomeMainAppBar(),
         drawer: const HomeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),
         body: SafeArea(

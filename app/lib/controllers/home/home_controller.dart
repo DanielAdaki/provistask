@@ -85,7 +85,6 @@ class HomeController extends GetxController {
 
   @override
   void onInit() async {
-    super.onInit();
     isLoading.value = true;
     await getCurrentLocation();
 
@@ -99,6 +98,7 @@ class HomeController extends GetxController {
 
     // await listaCategorias();
     isLoading.value = false;
+    super.onInit();
   }
 
   getCurrentLocation() {
@@ -112,6 +112,9 @@ class HomeController extends GetxController {
       _getAddressFromLatLng();
     }).catchError((e) {
       Logger().e(e, "aui");
+      // mando a la pantalla de permiso de localizacion
+
+      Get.toNamed("/gps-access");
     });
   }
 

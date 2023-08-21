@@ -20,7 +20,7 @@ class RegisterTaskPage extends GetView<RegisterTaskController> {
     _controllerLocation.onInit();
     return Obx(
       () => Scaffold(
-        appBar: const HomeMainAppBar(),
+        appBar: HomeMainAppBar(),
         backgroundColor: Colors.white,
         drawer: const HomeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),

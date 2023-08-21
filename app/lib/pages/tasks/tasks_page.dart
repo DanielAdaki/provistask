@@ -22,7 +22,7 @@ class TasksPage extends GetView<TasksController> {
     return Obx(
       () => Scaffold(
         floatingActionButton: _widgets.tasksFloatingButton(),
-        appBar: const HomeMainAppBar(),
+        appBar: HomeMainAppBar(),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         bottomNavigationBar: const ProvitaskBottomBar(),
         body: RefreshIndicator(

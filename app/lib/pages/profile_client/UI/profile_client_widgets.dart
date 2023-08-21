@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 
 import 'package:get/get.dart';
@@ -8,6 +9,7 @@ import 'package:logger/logger.dart';
 
 import 'package:provitask_app/common/conexion_common.dart';
 import 'package:provitask_app/models/data/client_information.dart';
+import 'package:provitask_app/pages/auth/login_page.dart';
 import 'package:provitask_app/pages/payments_methods/UI/payments_metods_controller.dart';
 import 'package:provitask_app/controllers/user/profile_controller.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,14 +24,14 @@ import 'package:url_launcher/url_launcher.dart';
 class ProfileClientWidgets {
   final _controller = Get.put<ProfileController>(ProfileController());
 
-  AppBar profileAppBar([String? title]) {
+  AppBar profileAppBar(BuildContext context, [String? title]) {
     return AppBar(
       actions: [
         // boton de deslogueo con un icono
         IconButton(
-          onPressed: () {
+          onPressed: () async {
             // limpio los campos
-            _controller.logout();
+            await _controller.logout();
           },
           icon: const Icon(
             Icons.logout,
@@ -120,7 +122,7 @@ class ProfileClientWidgets {
             ),
             onTap: () {
               if (!ClientInformation.isLoggedIn) {
-                Get.put<LoginController>(LoginController());
+                // Get.put<LoginController>(LoginController());
                 Get.toNamed('/login');
               } else {
                 // Get.put<ProfileController>(ProfileController());
@@ -302,7 +304,7 @@ class ProfileClientWidgets {
               ),
             ),
             onTap: () {
-              Get.toNamed('/notifications');
+              Get.toNamed('/profile_client/notifications');
             },
           )*/
         ],

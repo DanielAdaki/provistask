@@ -21,7 +21,7 @@ class ChangePassword extends GetView<ProfileController> {
     return Obx(
       () => Scaffold(
         // paso elñ titulo edit perfil
-        appBar: _widgets.profileAppBar('Change Password'),
+        appBar: _widgets.profileAppBar(context, 'Change Password'),
         backgroundColor: Colors.white,
         drawer: _widgets.homeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),

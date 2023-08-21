@@ -29,7 +29,7 @@ class ProvitaskBottomBar extends GetView<ProvitaskBottomBarController> {
                 children: [
                   InkWell(
                     onTap: () {
-                      Get.offNamed('/home');
+                      Get.toNamed('/home');
                     },
                     child: Image.asset(
                       'assets/images/BOTTOM BAR/home.png',
@@ -65,7 +65,7 @@ class ProvitaskBottomBar extends GetView<ProvitaskBottomBarController> {
                   ),
                   InkWell(
                     onTap: () {
-                      Get.offAllNamed('/chat_home');
+                      Get.toNamed('/chat_home');
                     },
                     child: Icon(
                       Icons.chat_outlined,

@@ -30,7 +30,7 @@ class MapServices extends GetView<ProfileController> {
 
       () => Scaffold(
         // paso elñ titulo edit perfil
-        appBar: _widgets.profileAppBar(),
+        appBar: _widgets.profileAppBar(context, ""),
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.white,
         drawer: _widgets.homeDrawer(),

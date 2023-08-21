@@ -25,7 +25,7 @@ class HomePage extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Obx(
       () => Scaffold(
-        appBar: const HomeMainAppBar(),
+        appBar: HomeMainAppBar(),
         drawer: const HomeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),
         body: controller.isLoading.value == true

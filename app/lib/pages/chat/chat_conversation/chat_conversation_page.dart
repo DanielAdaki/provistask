@@ -19,7 +19,7 @@ class ChatConversationPage extends GetView<ChatConversationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const HomeMainAppBar(),
+      appBar: HomeMainAppBar(),
       bottomNavigationBar: const ProvitaskBottomBar(),
       body: SafeArea(
         child: Obx(

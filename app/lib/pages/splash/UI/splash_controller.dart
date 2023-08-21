@@ -27,6 +27,8 @@ class SplashController extends GetxController {
       if (_prefs.token != null) {
         _loginController.autoLogin();
       } else {
+        // put de llogin
+        //  Get.put(LoginController());
         Get.offNamed('/login');
       }
     } else {

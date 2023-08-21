@@ -43,3 +43,6 @@ export 'package:provitask_app/pages/home/home_page_provider.dart';
 export 'package:provitask_app/pages/home/pages/pending_request_page.dart';
 export 'package:provitask_app/pages/calendar/calendar_provider_page.dart';
 export 'package:provitask_app/pages/statistics/statistics_page.dart';
+
+export 'package:provitask_app/pages/auth/gps_acces_page.dart';
+export 'package:provitask_app/pages/notificaciones/notificaciones_page.dart';

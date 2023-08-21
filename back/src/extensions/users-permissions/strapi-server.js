@@ -10,7 +10,7 @@ let {
 	STRIPE_WEBHOOK_SECRET,
 	REMOTE_URL,
 	URL,
-COMISION_BASE} = process.env;
+	COMISION_BASE } = process.env;
 const stripe = require("stripe")(STRIPE_SECRET_KEY);
 const unparsed = require("koa-body/unparsed.js");
 const moment = require("moment");
@@ -30,7 +30,6 @@ module.exports = (plugin) => {
 				populate: true,
 			});
 
-		console.log(entity);
 
 		// si no hay usuario retorno un error 404
 
@@ -910,7 +909,7 @@ LIMIT ?;
 			});
 
 			if (lat != null && lng != null && lat != "null" && lng != "null") {
-				let distance = await geolib.getDistance( 
+				let distance = await geolib.getDistance(
 					{ latitude: lat, longitude: lng },
 					{ latitude: proveedor.lat, longitude: proveedor.lng }
 				);
@@ -1131,9 +1130,9 @@ LIMIT ?;
 
 			const user = ctx.state.user;
 
-			const user_id  = user ? user.id : null;
+			const user_id = user ? user.id : null;
 
-				// lat y lng solo pueden ser numeros lat del -90 al 90 y lng del -180 al 180
+			// lat y lng solo pueden ser numeros lat del -90 al 90 y lng del -180 al 180
 
 			if (lat && lng) {
 
@@ -1162,12 +1161,12 @@ LIMIT ?;
 
 			limit = limit ? parseInt(limit) : 10;
 
-		let proID = [];
+			let proID = [];
 
-		if(lat && lng) {
+			if (lat && lng) {
 
-		proID = await strapi.db.connection.raw(
-			`SELECT up_users.id
+				proID = await strapi.db.connection.raw(
+					`SELECT up_users.id
 							FROM up_users
 							LEFT JOIN valorations_provider_links ON up_users.id = valorations_provider_links.user_id
 							LEFT JOIN valorations ON valorations.id = valorations_provider_links.valoration_id
@@ -1198,20 +1197,20 @@ LIMIT ?;
 							ORDER BY AVG(valorations.valoration) DESC
 							LIMIT ?, ?;
 			`,
-			[
-							user_id,
-							user_id,
-							lng,
-							lat,
-							distance,
-							start,
-							limit,
-			]
-		)
-		}	else {
+					[
+						user_id,
+						user_id,
+						lng,
+						lat,
+						distance,
+						start,
+						limit,
+					]
+				)
+			} else {
 
-			proID = await strapi.db.connection.raw(
-				`SELECT up_users.id
+				proID = await strapi.db.connection.raw(
+					`SELECT up_users.id
 								FROM up_users
 								LEFT JOIN valorations_provider_links ON up_users.id = valorations_provider_links.user_id
 								LEFT JOIN valorations ON valorations.id = valorations_provider_links.valoration_id
@@ -1240,63 +1239,63 @@ LIMIT ?;
 
 								LIMIT ?, ?;
 				`,
-				[
-								user_id,
-								user_id,
-								start,
-								limit,
-				]
-			)
+					[
+						user_id,
+						user_id,
+						start,
+						limit,
+					]
+				)
 
-		}
-
-		proID = proID[0].map((pro) => pro.id);
-
-
-		const proveedores = await strapi.entityService.findMany(
-			"plugin::users-permissions.user",
-			{
-				filters: {
-					$and: [
-						{
-							id: {
-								$in: proID,
-							},
-						},
-					],
-				},
-				// no incluyo al que hace la busqueda
-
-				start: start,
-				limit: limit,
-				populate: [
-					"avatar_image",
-					"provider_skills",
-					"provider_skills.categorias_skill,provider_skills.media",
-				],
 			}
-		);
 
-		// segundo filtrado para saber si tienen disponibilidad
+			proID = proID[0].map((pro) => pro.id);
 
-		for (const proveedor of proveedores) {
-	
 
-				if(lat && lng) {
+			const proveedores = await strapi.entityService.findMany(
+				"plugin::users-permissions.user",
+				{
+					filters: {
+						$and: [
+							{
+								id: {
+									$in: proID,
+								},
+							},
+						],
+					},
+					// no incluyo al que hace la busqueda
 
-				let distance = await geolib.getDistance(
-					{ latitude: lat, longitude: lng },
-					{ latitude: proveedor.lat, longitude: proveedor.lng }
-				);
+					start: start,
+					limit: limit,
+					populate: [
+						"avatar_image",
+						"provider_skills",
+						"provider_skills.categorias_skill,provider_skills.media",
+					],
+				}
+			);
 
-				// Convertir distancia a kilómetros
-				distance = distance / 1000;
+			// segundo filtrado para saber si tienen disponibilidad
 
-				// Redondear distancia a 2 decimales
-				distance = Math.round(distance * 100) / 100;
+			for (const proveedor of proveedores) {
 
-				// Agregar distancia al objeto proveedor
-				proveedor.distanceLineal = distance;
+
+				if (lat && lng) {
+
+					let distance = await geolib.getDistance(
+						{ latitude: lat, longitude: lng },
+						{ latitude: proveedor.lat, longitude: proveedor.lng }
+					);
+
+					// Convertir distancia a kilómetros
+					distance = distance / 1000;
+
+					// Redondear distancia a 2 decimales
+					distance = Math.round(distance * 100) / 100;
+
+					// Agregar distancia al objeto proveedor
+					proveedor.distanceLineal = distance;
 
 				} else {
 
@@ -1316,14 +1315,14 @@ LIMIT ?;
 				delete proveedor.stripe_customer_id;
 				delete proveedor.stripe_connect_id;
 				delete proveedor.is_stripe_connect;
-			 proveedor.lat ? 	delete proveedor.lat : null;
-				proveedor.lng ? 	delete proveedor.lng : null;
+				proveedor.lat ? delete proveedor.lat : null;
+				proveedor.lng ? delete proveedor.lng : null;
 				delete proveedor.email;
 				delete proveedor.phone;
 				delete proveedor.username;
 				delete proveedor.postal_code;
 
-									
+
 
 				proveedor.avatar_image = proveedor.avatar_image
 					? URL + proveedor.avatar_image.url
@@ -1397,7 +1396,7 @@ LIMIT ?;
 
 
 						return {
-							id : skillP.id,
+							id: skillP.id,
 							type_price: skillP.type_price,
 							cost: skillP.cost,
 							media: skillP.media ? media : null,
@@ -1413,20 +1412,20 @@ LIMIT ?;
 					}
 				);
 
-		}
+			}
 
-		proveedores.sort((a, b) => b.averageScore - a.averageScore);
-	
-		//creo meta	para la paginacion
+			proveedores.sort((a, b) => b.averageScore - a.averageScore);
 
-		const meta = {
-			start: start,
-			limit: limit,
+			//creo meta	para la paginacion
 
-			total: proveedores.length,
-		};
+			const meta = {
+				start: start,
+				limit: limit,
 
-		return ctx.send({ data: proveedores, meta: meta });
+				total: proveedores.length,
+			};
+
+			return ctx.send({ data: proveedores, meta: meta });
 		} catch (error) {
 
 			console.error("Error al buscar proveedores:", error);
@@ -1482,7 +1481,7 @@ LIMIT ?;
 			limit = limit ? parseInt(limit) : 10;
 
 			let idSkill = null;
-			let idsUnicos	= [];
+			let idsUnicos = [];
 
 			if (status == "booked") {
 				// saco los proveedores de las tareas asignadas
@@ -1545,7 +1544,7 @@ LIMIT ?;
 						],
 					},
 					// no incluyo al que hace la busqueda
-	
+
 					start: start,
 					limit: limit,
 					populate: [
@@ -1555,180 +1554,180 @@ LIMIT ?;
 					],
 				}
 			);
-	
+
 			// segundo filtrado para saber si tienen disponibilidad
-	
+
 			for (const proveedor of proveedores) {
-		
-	
-					if(lat && lng) {
-	
+
+
+				if (lat && lng) {
+
 					let distance = await geolib.getDistance(
 						{ latitude: lat, longitude: lng },
 						{ latitude: proveedor.lat, longitude: proveedor.lng }
 					);
-	
+
 					// Convertir distancia a kilómetros
 					distance = distance / 1000;
-	
+
 					// Redondear distancia a 2 decimales
 					distance = Math.round(distance * 100) / 100;
-	
+
 					// Agregar distancia al objeto proveedor
 					proveedor.distanceLineal = distance;
-	
-					} else {
-	
-						proveedor.distanceLineal = null;
-	
-					}
-	
-					delete proveedor.createdAt;
-					delete proveedor.updatedAt;
-					delete proveedor.provider;
-					delete proveedor.password;
-					delete proveedor.resetPasswordToken;
-					delete proveedor.confirmationToken;
-					delete proveedor.otp;
-					delete proveedor.blocked;
-					delete proveedor.confirmed;
-					delete proveedor.stripe_customer_id;
-					delete proveedor.stripe_connect_id;
-					delete proveedor.is_stripe_connect;
-					proveedor.lat ? 	delete proveedor.lat : null;
-					proveedor.lng ? 	delete proveedor.lng : null;
-					delete proveedor.email;
-					delete proveedor.phone;
-					delete proveedor.username;
-					delete proveedor.postal_code;
-	
-										
-	
-					proveedor.avatar_image = proveedor.avatar_image
-						? URL + proveedor.avatar_image.url
-						: null;
-	
-					proveedor.online = await strapi.db
-						.query("api::online-user.online-user")
-						.findOne({
-							where: { user: proveedor.id },
-							select: ["socket_id", "lastConnection", "status"],
-						});
-	
-					let average = await strapi.db
-						.query("api::valoration.valoration")
-						.findMany({
-							where: { provider: proveedor.id },
-						});
-	
-					proveedor["averageScore"] =
-						average.length > 0
-							? average.reduce((a, b) => a + b.valoration, 0) / average.length
-							: 0;
-					proveedor["averageCount"] = average.length;
-					let taskCompleted = await strapi.db
-						.query("api::task-assigned.task-assigned")
-						.count({
-							where: {
-								provider: proveedor.id,
-								status: "completed",
-							},
-						});
-	
-	
-	
-	
-	
-	
-	
-					proveedor["taskCompleted"] = taskCompleted;
 
-					proveedor["skill_select"] = null;
-	
-					if (proveedor.online) {
-						if (proveedor.online.status == "offline") {
-							proveedor.online.lastConnection = generateConnectionMessage(
-								proveedor.online.lastConnection
-							);
-						} else {
-							proveedor.online.lastConnection = "online";
-						}
+				} else {
+
+					proveedor.distanceLineal = null;
+
+				}
+
+				delete proveedor.createdAt;
+				delete proveedor.updatedAt;
+				delete proveedor.provider;
+				delete proveedor.password;
+				delete proveedor.resetPasswordToken;
+				delete proveedor.confirmationToken;
+				delete proveedor.otp;
+				delete proveedor.blocked;
+				delete proveedor.confirmed;
+				delete proveedor.stripe_customer_id;
+				delete proveedor.stripe_connect_id;
+				delete proveedor.is_stripe_connect;
+				proveedor.lat ? delete proveedor.lat : null;
+				proveedor.lng ? delete proveedor.lng : null;
+				delete proveedor.email;
+				delete proveedor.phone;
+				delete proveedor.username;
+				delete proveedor.postal_code;
+
+
+
+				proveedor.avatar_image = proveedor.avatar_image
+					? URL + proveedor.avatar_image.url
+					: null;
+
+				proveedor.online = await strapi.db
+					.query("api::online-user.online-user")
+					.findOne({
+						where: { user: proveedor.id },
+						select: ["socket_id", "lastConnection", "status"],
+					});
+
+				let average = await strapi.db
+					.query("api::valoration.valoration")
+					.findMany({
+						where: { provider: proveedor.id },
+					});
+
+				proveedor["averageScore"] =
+					average.length > 0
+						? average.reduce((a, b) => a + b.valoration, 0) / average.length
+						: 0;
+				proveedor["averageCount"] = average.length;
+				let taskCompleted = await strapi.db
+					.query("api::task-assigned.task-assigned")
+					.count({
+						where: {
+							provider: proveedor.id,
+							status: "completed",
+						},
+					});
+
+
+
+
+
+
+
+				proveedor["taskCompleted"] = taskCompleted;
+
+				proveedor["skill_select"] = null;
+
+				if (proveedor.online) {
+					if (proveedor.online.status == "offline") {
+						proveedor.online.lastConnection = generateConnectionMessage(
+							proveedor.online.lastConnection
+						);
 					} else {
-						proveedor.online = {
-							socket_id: null,
-							lastConnection: null,
-							status: "offline",
+						proveedor.online.lastConnection = "online";
+					}
+				} else {
+					proveedor.online = {
+						socket_id: null,
+						lastConnection: null,
+						status: "offline",
+					};
+				}
+
+
+
+				proveedor.provider_skills = proveedor.provider_skills.map(
+					(skillP) => {
+						// si la skillP recorrida comparte id con skill de la consulta , lo agrego al campo proveedor.skill_select
+
+						let media = [];
+
+						if (skillP.media) {
+							media = skillP.media.map((media) => {
+								return URL + media.url;
+							});
+						}
+
+						if (idSkill) {
+							if (skillP.categorias_skill.id == idSkill) {
+								proveedor.skill_select = {
+									id: skillP.id,
+									taskCompleted: taskCompletedSkill,
+									scoreAverage: avgAux.averageScore,
+									count: avgAux.averageCount,
+									type_price: skillP.type_price,
+									cost: skillP.cost,
+									media: skillP.media ? media : null,
+									categorias_skill: skillP.categorias_skill
+										? skillP.categorias_skill.name
+										: null,
+									categorias_skill_id: skillP.categorias_skill
+										? skillP.categorias_skill.id
+										: null,
+									description: skillP.description ? skillP.description : null,
+									hourMinimum: skillP.hourMinimum ? skillP.hourMinimum : "hour_1",
+								};
+							}
+						}
+
+
+
+						return {
+							id: skillP.id,
+							type_price: skillP.type_price,
+							cost: skillP.cost,
+							media: skillP.media ? media : null,
+							categorias_skill: skillP.categorias_skill
+								? skillP.categorias_skill.name
+								: null,
+							categorias_skill_id: skillP.categorias_skill
+								? skillP.categorias_skill.id
+								: null,
+							description: skillP.description ? skillP.description : null,
+							hourMinimum: skillP.hourMinimum ? skillP.hourMinimum : "hour_1",
 						};
 					}
-	
-	
-	
-					proveedor.provider_skills = proveedor.provider_skills.map(
-						(skillP) => {
-							// si la skillP recorrida comparte id con skill de la consulta , lo agrego al campo proveedor.skill_select
-	
-							let media = [];
-	
-							if (skillP.media) {
-								media = skillP.media.map((media) => {
-									return URL + media.url;
-								});
-							}
+				);
 
-							if (idSkill) {
-								if (skillP.categorias_skill.id == idSkill) {
-									proveedor.skill_select = {
-										id: skillP.id,
-										taskCompleted: taskCompletedSkill,
-										scoreAverage: avgAux.averageScore,
-										count: avgAux.averageCount,
-										type_price: skillP.type_price,
-										cost: skillP.cost,
-										media: skillP.media ? media : null,
-										categorias_skill: skillP.categorias_skill
-											? skillP.categorias_skill.name
-											: null,
-										categorias_skill_id: skillP.categorias_skill
-											? skillP.categorias_skill.id
-											: null,
-										description: skillP.description ? skillP.description : null,
-										hourMinimum: skillP.hourMinimum ? skillP.hourMinimum : "hour_1",
-									};
-								}
-							}
-	
-	
-	
-							return {
-								id : skillP.id,
-								type_price: skillP.type_price,
-								cost: skillP.cost,
-								media: skillP.media ? media : null,
-								categorias_skill: skillP.categorias_skill
-									? skillP.categorias_skill.name
-									: null,
-								categorias_skill_id: skillP.categorias_skill
-									? skillP.categorias_skill.id
-									: null,
-								description: skillP.description ? skillP.description : null,
-								hourMinimum: skillP.hourMinimum ? skillP.hourMinimum : "hour_1",
-							};
-						}
-					);
-	
 			}
-	
+
 			proveedores.sort((a, b) => b.averageScore - a.averageScore);
-		
+
 			//creo meta	para la paginacion
-	
+
 			const meta = {
 				start: start,
 				limit: limit,
-	
+
 				total: proveedores.length,
 			};
-	
+
 			return ctx.send({ data: proveedores, meta: meta });
 
 
@@ -1938,7 +1937,7 @@ LIMIT ?;
 
 			//brutePrice = parseInt(brutePrice); // lo paso a entero
 
- 
+
 
 			COMISION_BASE = parseFloat(COMISION_BASE);
 
@@ -1948,7 +1947,7 @@ LIMIT ?;
 
 			comision = parseInt(comision);
 
-			
+
 
 			let netoPrice = brutePrice - comision;
 
@@ -2000,9 +1999,9 @@ LIMIT ?;
 					netoPrice,
 			});
 
-			let metodo_pago =  paymentIntent.payment_method_types ? paymentIntent.payment_method_types[0] : "Stripe";
+			let metodo_pago = paymentIntent.payment_method_types ? paymentIntent.payment_method_types[0] : "Stripe";
 
-			const data= {
+			const data = {
 				total: netoPrice,
 				sub_total: brutePrice,
 				usuario: user.id,
@@ -2018,7 +2017,7 @@ LIMIT ?;
 					location: {
 						latitud: location.lat,
 						longitud: location.lng,
-						name : location_geo,
+						name: location_geo,
 					},
 
 					taskLength: length,
@@ -2031,28 +2030,30 @@ LIMIT ?;
 					description: description,
 					paymentIntentId: paymentIntent.id,
 					provider: provider,
-					brutePrice:brutePrice,
-					netoPrice:netoPrice,
-					idCreador	: user.id,
-					createType : createType,
-					addDetails	: false,
+					brutePrice: brutePrice,
+					netoPrice: netoPrice,
+					idCreador: user.id,
+					createType: createType,
+					addDetails: false,
 
-		}
-	}
-		await strapi.entityService.create("api::order.order", {	
+				}
+			}
+			await strapi.entityService.create("api::order.order", {
 
-			data: data
+				data: data
 
-		});
+			});
 
 
-			return ctx.send({ data: {
-				paymentIntent: paymentIntent.client_secret,
-				ephemeralKey: ephemeralKey.secret,
-				customer: customer.stripe_customer_id,
-				publishableKey: STRIPE_PUBLIC_KEY,
-				paymentIntentId: paymentIntent.id
-			}});
+			return ctx.send({
+				data: {
+					paymentIntent: paymentIntent.client_secret,
+					ephemeralKey: ephemeralKey.secret,
+					customer: customer.stripe_customer_id,
+					publishableKey: STRIPE_PUBLIC_KEY,
+					paymentIntentId: paymentIntent.id
+				}
+			});
 		} catch (error) {
 			console.error("Error al cobrar:", error);
 
@@ -2086,120 +2087,120 @@ LIMIT ?;
 
 
 
-  switch (event.type) {
+		switch (event.type) {
 			case 'payment_intent.amount_capturable_updated':
-					const paymentIntentAmountCapturableUpdated = event.data.object;
-					console.log("payment_intent.amount_capturable_updated", paymentIntentAmountCapturableUpdated);
-					break;
+				const paymentIntentAmountCapturableUpdated = event.data.object;
+				console.log("payment_intent.amount_capturable_updated", paymentIntentAmountCapturableUpdated);
+				break;
 			case 'payment_intent.canceled':
-					const paymentIntentCanceled = event.data.object;
-					console.log("payment_intent.canceled", paymentIntentCanceled);
-					break;
+				const paymentIntentCanceled = event.data.object;
+				console.log("payment_intent.canceled", paymentIntentCanceled);
+				break;
 			case 'payment_intent.created':
-					const paymentIntentCreated = event.data.object;
-					console.log("payment_intent.created", paymentIntentCreated);
-					break;
+				const paymentIntentCreated = event.data.object;
+				console.log("payment_intent.created", paymentIntentCreated);
+				break;
 			case 'payment_intent.partially_funded':
-					const paymentIntentPartiallyFunded = event.data.object;
-					console.log("payment_intent.partially_funded", paymentIntentPartiallyFunded);
-					break;
+				const paymentIntentPartiallyFunded = event.data.object;
+				console.log("payment_intent.partially_funded", paymentIntentPartiallyFunded);
+				break;
 			case 'payment_intent.payment_failed':
-					const paymentIntentPaymentFailed = event.data.object;
-					console.log("payment_intent.payment_failed", paymentIntentPaymentFailed);
-					break;
+				const paymentIntentPaymentFailed = event.data.object;
+				console.log("payment_intent.payment_failed", paymentIntentPaymentFailed);
+				break;
 			case 'payment_intent.processing':
-					const paymentIntentProcessing = event.data.object;
-					console.log("payment_intent.processing", paymentIntentProcessing);
-					break;
+				const paymentIntentProcessing = event.data.object;
+				console.log("payment_intent.processing", paymentIntentProcessing);
+				break;
 			case 'payment_intent.requires_action':
-					const paymentIntentRequiresAction = event.data.object;
-					console.log("payment_intent.requires_action", paymentIntentRequiresAction);
-					break;
+				const paymentIntentRequiresAction = event.data.object;
+				console.log("payment_intent.requires_action", paymentIntentRequiresAction);
+				break;
 			case 'payment_intent.succeeded':
-					const paymentIntentSucceeded = event.data.object;
+				const paymentIntentSucceeded = event.data.object;
 
 
-					let order  = await strapi.db
-						.query("api::order.order")
-						.findOne({
-							where: { paymentIntentId: paymentIntentSucceeded.id },
+				let order = await strapi.db
+					.query("api::order.order")
+					.findOne({
+						where: { paymentIntentId: paymentIntentSucceeded.id },
 
-							populate: { usuario: true },
-						});
-
-
-						if(!order){
-
-							console.log("No se encontro la orden", { error: 'No se encontro la orden con el paymentIntentId'+ paymentIntentSucceeded.id });
-
-							return ctx.badRequest("No se encontro la orden", { error: 'No se encontro la orden con el paymentIntentId' + paymentIntentSucceeded.id });
-
-						}
-
-
-						// actualizo el estado de la orden
-
-						await strapi.entityService.update("api::order.order",order.id,{
-							data: {
-									estado: paymentIntentSucceeded.status,
-
-								}
-							});
-
-
-							// creo la tarea 
-
-					let response =	await	crearTarea(order.usuario, order.datosTarea,ctx);
-
-							console.log("payment_intent.succeeded", response);
-
-					// actualizo la orden con el id de la tarea
-
-					await strapi.entityService.update("api::order.order",order.id,{
-
-						data: {
-
-							task_assigned: response.taskEntity.id,
-
-						}
-
+						populate: { usuario: true },
 					});
 
-					return ctx.send({ data : response });
 
-					break;
+				if (!order) {
+
+					console.log("No se encontro la orden", { error: 'No se encontro la orden con el paymentIntentId' + paymentIntentSucceeded.id });
+
+					return ctx.badRequest("No se encontro la orden", { error: 'No se encontro la orden con el paymentIntentId' + paymentIntentSucceeded.id });
+
+				}
+
+
+				// actualizo el estado de la orden
+
+				await strapi.entityService.update("api::order.order", order.id, {
+					data: {
+						estado: paymentIntentSucceeded.status,
+
+					}
+				});
+
+
+				// creo la tarea 
+
+				let response = await crearTarea(order.usuario, order.datosTarea, ctx);
+
+				console.log("payment_intent.succeeded", response);
+
+				// actualizo la orden con el id de la tarea
+
+				await strapi.entityService.update("api::order.order", order.id, {
+
+					data: {
+
+						task_assigned: response.taskEntity.id,
+
+					}
+
+				});
+
+				return ctx.send({ data: response });
+
+				break;
 			// ... handle other event types
 			default:
-					console.log(`Unhandled event type ${event.type}`);
-	}
+				console.log(`Unhandled event type ${event.type}`);
+		}
 
 
 
-		return ctx.send({ data : "ok" });
+		return ctx.send({ data: "ok" });
 
 	};
 
-	async function crearTarea(user, data,ctx ) {
+	async function crearTarea(user, data, ctx) {
 
 		try {
-			
+
 
 
 			if (!user) {
-					console.log("No tienes permiso", { error: 'No autorizado' });
+				console.log("No tienes permiso", { error: 'No autorizado' });
 				return ctx.unauthorized("No tienes permiso", { error: 'No autorizado' });
 			}
 
 
 
-			let {location, taskLength,date,time,transportation,description,skill,client,paymentIntentId,provider,brutePrice,netoPrice,idCreador,createType,addDetails} = data;
+			let { location, taskLength, date, time, transportation, description, skill, client, paymentIntentId, provider, brutePrice, netoPrice, idCreador, createType, addDetails } = data;
 
 
 			console.log("========================CREANDO TAREA=============");
 			console.log("data", data);
 
 			if (!provider) {
-console.log("El campo provider es obligatorio", { error: 'El campo provider es obligatorio' });
+				console.log("El campo provider es obligatorio", { error: 'El campo provider es obligatorio' });
 				return ctx.badRequest("El campo provider es obligatorio", { error: 'El campo provider es obligatorio' });
 
 			}
@@ -2209,13 +2210,13 @@ console.log("El campo provider es obligatorio", { error: 'El campo provider es o
 
 				where: { id: provider },
 
-				select: ['id', 'isProvider', 'username', 'name' , 'lastname'],
+				select: ['id', 'isProvider', 'username', 'name', 'lastname'],
 
 			});
 
 
 			if (!providerx) {
-console.log("El provider no existe", { error: 'El provider no existe' });
+				console.log("El provider no existe", { error: 'El provider no existe' });
 				return ctx.badRequest("El provider no existe", { error: 'El provider no existe' });
 
 			}
@@ -2223,7 +2224,7 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 			if (!providerx.isProvider) {
 
 				console.log("El provider no es un proveedor", { error: 'El provider no es un proveedor' });
-					return ctx.badRequest("El provider no es un proveedor", { error: 'El provider no es un proveedor' });
+				return ctx.badRequest("El provider no es un proveedor", { error: 'El provider no es un proveedor' });
 
 			}
 
@@ -2244,7 +2245,7 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 
 			// transportation solo puede ser "motorcycle"  "transportation"  "truck"  "not_necessary"
 
-			if (transportation != 'car' && transportation != "motorcycle" && transportation != "transportation" && transportation != "truck" && transportation != "not_necessary" ) {
+			if (transportation != 'car' && transportation != "motorcycle" && transportation != "transportation" && transportation != "truck" && transportation != "not_necessary") {
 				console.log("El campo transportation solo puede ser motorcycle, transportation, truck o not_necessary", { error: 'El campo transportation solo puede ser motorcycle, transportation, truck o not_necessary' });
 				return ctx.badRequest("El campo transportation solo puede ser motorcycle, transportation, truck o not_necessary", { error: 'El campo transportation solo puede ser motorcycle, transportation, truck o not_necessary' });
 
@@ -2256,7 +2257,7 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 
 
 
-		let	combinedDateTime  = "";
+			let combinedDateTime = "";
 			if (time != "I'm Flexible") {
 
 				// TIME TIENE FORMATO 11:30am o 11:30pm LE QUITO EL AM O PM
@@ -2271,96 +2272,96 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 
 				combinedDateTime = moment(date).format('YYYY-MM-DD') + ' ' + time + ':00.000';
 
-				combinedDateTime	= Date.parse(combinedDateTime);
+				combinedDateTime = Date.parse(combinedDateTime);
 
-				combinedDateTime	= moment(combinedDateTime).format('YYYY-MM-DD HH:mm:ss');
+				combinedDateTime = moment(combinedDateTime).format('YYYY-MM-DD HH:mm:ss');
 
-			}	else {
+			} else {
 
-					combinedDateTime = moment(date).format('YYYY-MM-DD') + ' ' + "00:00:00.000";
-					combinedDateTime	= moment(combinedDateTime).format('YYYY-MM-DD HH:mm:ss');
+				combinedDateTime = moment(date).format('YYYY-MM-DD') + ' ' + "00:00:00.000";
+				combinedDateTime = moment(combinedDateTime).format('YYYY-MM-DD HH:mm:ss');
 			}
 
 
 
-	
-				// creo una conversacion con el proveedor y el cliente. Las conversaciones se crean recibiendo un nombre  y un array de usuarios
-	
-				let users = [provider, user.id];
-	
-	
-				let name = "Conversation between " + user.username + " and " + providerx.username;
-				conversation = await strapi.entityService.create('api::conversation.conversation', {
-					data:{
-						name: name,
-						users: users
-					}
-	
-	
-				});
+
+			// creo una conversacion con el proveedor y el cliente. Las conversaciones se crean recibiendo un nombre  y un array de usuarios
+
+			let users = [provider, user.id];
 
 
-				// creo un mensaje de bienvenida para la conversacion
+			let name = "Conversation between " + user.username + " and " + providerx.username;
+			conversation = await strapi.entityService.create('api::conversation.conversation', {
+				data: {
+					name: name,
+					users: users
+				}
 
 
-					 let taskp = strapi.entityService.create('api::task-assigned.task-assigned', {
-						data: {
-							provider,
-	
-							client: user.id,
-							transportation: transportation,
-							description: description,
-							taskLength: taskLength,
-							location: location,
-							datetime: combinedDateTime,
-							time:  moment(combinedDateTime).format('HH:mm:ss'),
-							status :  "acepted",
-							timeFlexible : time == "I'm Flexible" ? true : false,
-							idCreador : idCreador,
-							paymentIntentId	:  paymentIntentId  ,
-							skill : skill,
-							createType	: 'client',
-							conversation : conversation.id,
-							netoPrice	: netoPrice.toString(),
-							brutePrice	: brutePrice.toString(),
-							addDetails	: false,
-					
-						},
-				});
-
-				
-
-			let chatP =	await strapi.entityService.create('api::chat-message.chat-message', {
-	
-					data:{
-						conversation: conversation.id,
-						bot: true,
-						message: "Task request created "	,
-						emit	:provider,
-						type :"system" // mensaje de bienvenida
-					}
-	
-				});
-	
-				 let [taskEntity, chatEntity] = await Promise.all([taskp, chatP]);
-
-			
+			});
 
 
-				console.log("taskEntity", taskEntity);
+			// creo un mensaje de bienvenida para la conversacion
 
-				console.log("chatEntity", chatEntity);
+
+			let taskp = strapi.entityService.create('api::task-assigned.task-assigned', {
+				data: {
+					provider,
+
+					client: user.id,
+					transportation: transportation,
+					description: description,
+					taskLength: taskLength,
+					location: location,
+					datetime: combinedDateTime,
+					time: moment(combinedDateTime).format('HH:mm:ss'),
+					status: "acepted",
+					timeFlexible: time == "I'm Flexible" ? true : false,
+					idCreador: idCreador,
+					paymentIntentId: paymentIntentId,
+					skill: skill,
+					createType: 'client',
+					conversation: conversation.id,
+					netoPrice: netoPrice.toString(),
+					brutePrice: brutePrice.toString(),
+					addDetails: false,
+
+				},
+			});
+
+
+
+			let chatP = await strapi.entityService.create('api::chat-message.chat-message', {
+
+				data: {
+					conversation: conversation.id,
+					bot: true,
+					message: "Task request created ",
+					emit: provider,
+					type: "system" // mensaje de bienvenida
+				}
+
+			});
+
+			let [taskEntity, chatEntity] = await Promise.all([taskp, chatP]);
+
+
+
+
+			console.log("taskEntity", taskEntity);
+
+			console.log("chatEntity", chatEntity);
 
 			//await super.create(ctx);
 
-			return  {
+			return {
 				taskEntity,
 				chatEntity,
 				conversation
-			} ;
+			};
 		} catch (error) {
 			console.error("Error al crear tarea:", error);
-			throw new	Error(error);
+			throw new Error(error);
 		}
 
 	};
@@ -2631,6 +2632,26 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 		}
 	};
 
+	plugin.controllers.user.saveFCM = async (ctx) => {
+
+		const user = ctx.state.user;
+
+		if (!user) return ctx.badRequest("No se envio el usuario");
+
+
+		console.log("ctx.request.body", ctx.request.body);
+
+			const { token } = ctx.request.body;
+
+			if (!token) return ctx.badRequest("No se envio el token");
+
+		 await strapi.entityService.update('plugin::users-permissions.user', ctx.state.user.id, { data: { device_token: token } });
+		
+		return ctx.send({ data: "ok" });
+	};
+
+
+
 	plugin.routes["content-api"].routes.push(
 		{
 			method: "GET",
@@ -2646,8 +2667,8 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 			method: "GET",
 			path: "/proveedores/destacados",
 			handler: "user.buscarProveedoresDestacados",
-		
-				
+
+
 		},
 		{
 			method: "GET",
@@ -2663,6 +2684,15 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 			method: "GET",
 			path: "/proveedores/:id",
 			handler: "user.perfilProveedor",
+		},
+		{
+			method: 'POST',
+			path: '/auth/local/fcm',
+			handler: 'user.saveFCM',
+			config: {
+				prefix: '',
+				policies: []
+			}
 		},
 		{
 			method: "POST",
@@ -2741,6 +2771,6 @@ console.log("El provider no existe", { error: 'El provider no existe' });
 			},
 		}
 	);
-	
+
 	return plugin;
 };

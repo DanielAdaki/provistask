@@ -1,9 +1,15 @@
 // ignore_for_file: avoid_print
 import 'dart:io';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:get/get.dart';
+import 'package:provitask_app/common/socket.dart';
+import 'package:provitask_app/controllers/auth/auth_controller.dart';
+import 'package:provitask_app/controllers/firebase/firebase_controller.dart';
+import 'package:provitask_app/controllers/location/gps_controller.dart';
+import 'package:provitask_app/controllers/location/location_controller.dart';
+import 'package:provitask_app/controllers/notification/notification_controller.dart';
+import 'package:provitask_app/middlewares/auth_middleware.dart';
 import 'utility/fix_https.dart';
 import 'package:provitask_app/services/preferences.dart';
 import 'package:provitask_app/pages/pages.dart';
@@ -11,8 +17,42 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
-void main() async {
+/*void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Get.put(AuthController(), permanent: true);
+
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      name: 'Provitask',
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+  Preferences prefs = Preferences();
+
+  await prefs.init();
+  Get.put(SocketController(), permanent: true);
+  Get.put(FirebaseController(), permanent: true);
+  Get.put(NotificationController(), permanent: true);
+  await FirebaseController().initNotifications();
+
+  // inicializo el controlador de autenticación
+
+  HttpOverrides.global = MyHttpOverrides();
+  initializeDateFormatting('en').then((_) {
+    runApp(Phoenix(child: const MyApp()));
+  });
+}*/
+
+void main() async {
+  await initializeAppAndRun();
+  initializeDateFormatting('en').then((_) {
+    runApp(Phoenix(child: const MyApp()));
+  });
+}
+
+Future<void> initializeAppAndRun() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Get.put(AuthController(), permanent: true);
 
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
@@ -21,35 +61,44 @@ void main() async {
     );
   }
 
-  final fcmToken = await FirebaseMessaging.instance.getToken();
-
-  print('fcmToken: $fcmToken');
-
-  localNotificationsPlugin.initialize(initSetttings);
-
   Preferences prefs = Preferences();
-
   await prefs.init();
 
+  Get.put(SocketController(), permanent: true);
+  Get.put(FirebaseController(), permanent: true);
+  Get.put(NotificationController(), permanent: true);
+  Get.put(GpsController(), permanent: true);
+  Get.put(LocationController(), permanent: true);
+  await FirebaseController().initNotifications();
+
   HttpOverrides.global = MyHttpOverrides();
-  initializeDateFormatting('en').then((_) {
-    runApp(const MyApp());
-  });
 }
 
-class MyApp extends StatefulWidget {
+// Agrega esta función para reiniciar la aplicación después del cierre de sesión
+Future<void> restartApp() async {
+  await Get.deleteAll(force: true);
+  await Get.delete<Preferences>(force: true);
+  await Get.delete<AuthController>(force: true);
+  await Get.delete<SocketController>(force: true);
+  await Get.delete<FirebaseController>(force: true);
+  await Get.delete<NotificationController>(force: true);
+  await Get.delete<GpsController>(force: true);
+  await Get.delete<LocationController>(force: true);
+  Phoenix.rebirth(Get.context!);
+  Get.reset();
+
+  await initializeAppAndRun();
+  // Get.offAllNamed('/login');
+}
+
+class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  @override
-  // ignore: library_private_types_in_public_api
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
+      navigatorKey: Get.key,
       theme: ThemeData(
           primaryColor: const Color(0xFF170591),
           primaryColorDark: const Color(0xFF170591),
@@ -65,10 +114,12 @@ class _MyAppState extends State<MyApp> {
       getPages: [
         GetPage(name: '/', page: () => const SplashPage()),
         GetPage(name: '/welcome', page: () => WelcomePage()),
+        GetPage(name: '/gps-access', page: () => const GPSAccessScreen()),
         GetPage(
             name: '/home',
             page: () => HomePage(),
-            transition: Transition.rightToLeftWithFade),
+            transition: Transition.rightToLeftWithFade,
+            middlewares: [AuthMiddleware()]),
         GetPage(
             name: '/login',
             page: () => LoginPage(),
@@ -76,96 +127,206 @@ class _MyAppState extends State<MyApp> {
         GetPage(
             name: '/profile_client',
             page: () => ProfileClientPage(),
+            middlewares: [
+              AuthMiddleware()
+            ],
             children: [
-              GetPage(name: '/payments_methods', page: () => PaymentPerfil()),
-              GetPage(name: '/edit-skills', page: () => EditSkills()),
-              GetPage(name: '/edit-vehicles', page: () => VehiclesProvider()),
-              GetPage(name: '/edit-about', page: () => AboutProvider()),
               GetPage(
-                  name: '/edit-services-location', page: () => MapServices()),
+                  name: '/notifications',
+                  page: () => NotificacionConfigPage(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/payments_methods',
+                  page: () => PaymentPerfil(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/edit-skills',
+                  page: () => EditSkills(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/edit-vehicles',
+                  page: () => VehiclesProvider(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/edit-about',
+                  page: () => AboutProvider(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/edit-services-location',
+                  page: () => MapServices(),
+                  middlewares: [AuthMiddleware()]),
             ]),
         GetPage(
-          name: '/edit-perfil',
-          page: () => EditPerfil(),
-        ),
-        GetPage(name: '/edit-password', page: () => ChangePassword()),
+            name: '/edit-perfil',
+            page: () => EditPerfil(),
+            middlewares: [AuthMiddleware()]),
+        GetPage(
+            name: '/notificaciones',
+            page: () => const NotificacionesPage(),
+            middlewares: [AuthMiddleware()]),
+        GetPage(
+            name: '/edit-password',
+            page: () => ChangePassword(),
+            middlewares: [AuthMiddleware()]),
         GetPage(
             name: '/register_client',
             page: () => RegisterClientPage(),
-            transition: Transition.rightToLeftWithFade),
+            transition: Transition.rightToLeftWithFade,
+            middlewares: [AuthMiddleware()]),
         GetPage(
             name: '/register_provider',
             page: () => RegisterProviderPage(),
+            middlewares: [
+              AuthMiddleware()
+            ],
             children: [
-              GetPage(name: '/step2', page: () => RegisterProviderPage2()),
-              GetPage(name: '/step3', page: () => RegisterProviderPage3()),
-              GetPage(name: '/step4', page: () => RegisterProviderPage4()),
-              GetPage(name: '/step5', page: () => RegisterProviderPage5()),
-              GetPage(name: '/step6', page: () => RegisterProviderPage6()),
-              GetPage(name: '/step7', page: () => RegisterProviderPage7()),
-              GetPage(name: '/step8', page: () => RegisterProviderPage8()),
-              GetPage(name: '/step9', page: () => RegisterProviderPage9()),
+              GetPage(
+                  name: '/step2',
+                  page: () => RegisterProviderPage2(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/step3',
+                  page: () => RegisterProviderPage3(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/step4',
+                  page: () => RegisterProviderPage4(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/step5',
+                  page: () => RegisterProviderPage5(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/step6',
+                  page: () => RegisterProviderPage6(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/step7',
+                  page: () => RegisterProviderPage7(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/step8',
+                  page: () => RegisterProviderPage8(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/step9',
+                  page: () => RegisterProviderPage9(),
+                  middlewares: [AuthMiddleware()]),
             ]),
-        GetPage(name: '/payment-methods', page: () => PaymentMethodsPage()),
+        GetPage(
+            name: '/payment-methods',
+            page: () => PaymentMethodsPage(),
+            middlewares: [AuthMiddleware()]),
         GetPage(
             name: '/verification_provider',
-            page: () => VerificationProviderPage()),
-        GetPage(name: '/profile_provider', page: () => ProfileProviderPage()),
+            page: () => VerificationProviderPage(),
+            middlewares: [AuthMiddleware()]),
+        GetPage(
+            name: '/profile_provider',
+            page: () => ProfileProviderPage(),
+            middlewares: [AuthMiddleware()]),
         GetPage(
             name: '/register_task',
             page: () => RegisterTaskPage(),
+            middlewares: [
+              AuthMiddleware()
+            ],
             children: [
-              GetPage(name: '/step2', page: () => RegisterTaskPage2()),
-              GetPage(name: '/step3', page: () => RegisterTaskPage3()),
-              GetPage(name: '/step4', page: () => RegisterTaskPage4())
+              GetPage(
+                  name: '/step2',
+                  page: () => RegisterTaskPage2(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/step3',
+                  page: () => RegisterTaskPage3(),
+                  middlewares: [AuthMiddleware()]),
+              GetPage(
+                  name: '/step4',
+                  page: () => RegisterTaskPage4(),
+                  middlewares: [AuthMiddleware()])
             ]),
-        GetPage(name: '/calendar_provider', page: () => CalendarPage()),
-        GetPage(name: '/statistics', page: () => StatisticsPageProvider()),
-        GetPage(name: '/tasks', page: () => TasksPage()),
-        GetPage(name: '/task/:id', page: () => TaskPage()),
-        GetPage(name: '/locations', page: () => LocationsPage()),
-        GetPage(name: '/freelancers', page: () => FreelancersPage()),
-        GetPage(name: '/chat_home', page: () => ChatHomePage()),
+        GetPage(
+            name: '/calendar_provider',
+            page: () => CalendarPage(),
+            middlewares: [AuthMiddleware()]),
+        GetPage(
+            name: '/statistics',
+            page: () => StatisticsPageProvider(),
+            middlewares: [AuthMiddleware()]),
+        GetPage(
+            name: '/tasks',
+            page: () => TasksPage(),
+            middlewares: [AuthMiddleware()]),
+        GetPage(
+            name: '/task/:id',
+            page: () => TaskPage(),
+            middlewares: [AuthMiddleware()]),
+        GetPage(
+            name: '/locations',
+            page: () => LocationsPage(),
+            middlewares: [AuthMiddleware()]),
+        GetPage(
+            name: '/freelancers',
+            page: () => FreelancersPage(),
+            middlewares: [AuthMiddleware()]),
+        GetPage(
+            name: '/chat_home',
+            page: () => ChatHomePage(),
+            middlewares: [AuthMiddleware()]),
         GetPage(
             name: '/home-proveedor',
             page: () => HomePageProvider(),
             children: [
               GetPage(
                   name: '/tareas-pendientes',
-                  page: () => PendingPageProvider()),
+                  page: () => PendingPageProvider(),
+                  middlewares: [AuthMiddleware()]),
+
               /*GetPage(
                   name: '/crearTareaProvider/',
                   page: () => CrearTaskProvider()),
               GetPage(
                   name: '/crearTareaClient/', page: () => CrearTaskClient())*/
             ]),
-        GetPage(name: '/task-assing-detail/:id', page: () => TaskPage()),
+        GetPage(
+            name: '/task-assing-detail/:id',
+            page: () => TaskPage(),
+            middlewares: [AuthMiddleware()]),
         GetPage(
             name: '/chat/:id',
             page: () => ChatConversationPage(),
+            middlewares: [
+              AuthMiddleware()
+            ],
             children: [
               GetPage(
-                  name: '/crearPropusta/', page: () => CrearPropuestaChat()),
+                  name: '/crearPropusta/',
+                  page: () => CrearPropuestaChat(),
+                  middlewares: [AuthMiddleware()]),
               GetPage(
                   name: '/crearTareaProvider/',
                   page: () => CrearTaskProvider()),
-              GetPage(name: '/crearTareaClient/', page: () => CrearTaskClient())
+              GetPage(
+                  name: '/crearTareaClient/',
+                  page: () => CrearTaskClient(),
+                  middlewares: [AuthMiddleware()])
             ]),
         GetPage(
             name: '/register-payment-success',
-            page: () => const RegisterSuccesPage()),
+            page: () => const RegisterSuccesPage(),
+            middlewares: [AuthMiddleware()]),
       ],
     );
   }
 }
 
-FlutterLocalNotificationsPlugin localNotificationsPlugin =
+/*FlutterLocalNotificationsPlugin localNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 AndroidInitializationSettings android =
     const AndroidInitializationSettings('@mipmap/ic_launcher');
 DarwinInitializationSettings iOS = const DarwinInitializationSettings();
 InitializationSettings initSetttings =
-    InitializationSettings(android: android, iOS: iOS);
+    InitializationSettings(android: android, iOS: iOS);*/
 
 /*void _showNotification(String titulo, String? contenido,
     FlutterLocalNotificationsPlugin localNotificationsPlugin) async {

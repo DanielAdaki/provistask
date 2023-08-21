@@ -21,7 +21,7 @@ class RegisterTaskPage2 extends GetView<RegisterTaskController> {
     return Obx(
       () => Scaffold(
         key: _controller.key,
-        appBar: const HomeMainAppBar(),
+        appBar: HomeMainAppBar(),
         bottomNavigationBar: const ProvitaskBottomBar(),
         drawerEnableOpenDragGesture: false,
         backgroundColor: Colors.white,

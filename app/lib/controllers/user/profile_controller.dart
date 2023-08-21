@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provitask_app/controllers/firebase/firebase_controller.dart';
 import 'package:provitask_app/models/data/countries_data.dart';
 import 'package:provitask_app/models/provider/skill_model.dart';
 import 'package:provitask_app/services/auth_services.dart';
@@ -12,6 +14,7 @@ import 'package:provitask_app/services/payment_services.dart';
 import 'package:provitask_app/services/preferences.dart';
 import 'package:provitask_app/services/provider_services.dart';
 import 'package:provitask_app/services/upload/upload_controller.dart';
+import 'package:provitask_app/main.dart';
 // llamo pref para obtener datos del usuario
 
 class ProfileController extends GetxController {
@@ -65,6 +68,8 @@ class ProfileController extends GetxController {
   final lat = 90.0.obs;
 
   final lng = 180.0.obs;
+
+  final isNotificationActive = true.obs;
 
   TextEditingController textEditingController = TextEditingController();
 
@@ -433,7 +438,7 @@ class ProfileController extends GetxController {
 
       await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
-        merchantDisplayName: 'Provistask',
+        merchantDisplayName: 'Provitask',
         paymentIntentClientSecret: info['paymentIntent'],
         customerEphemeralKeySecret: info['ephemeralKey'],
         customerId: info['customer'],
@@ -531,7 +536,7 @@ class ProfileController extends GetxController {
     lat.value = user['lat'] != null ? user['lat'].toDouble() : 90.0;
 
     lng.value = user['lng'] != null ? user['lng'].toDouble() : 180.0;
-
+    Logger().i(user['close_disponibility']);
     open_hour.value = user['open_disponibility'] != null
         ? formatTimeFromFormattedString(user['open_disponibility'])
         : "8:00am";
@@ -539,6 +544,7 @@ class ProfileController extends GetxController {
     close_hour.value = user['close_disponibility'] != null
         ? formatTimeFromFormattedString(user['close_disponibility'])
         : "9:00pm";
+    Logger().i(close_hour.value);
     // limpio la lista de skills
     skillsList.clear();
     if (user['provider_skills'] != null) {
@@ -845,15 +851,11 @@ class ProfileController extends GetxController {
     otpCode.value = "";
   }
 
-  void logout() {
+  Future<void> logout() async {
     _auth.logout();
 
-    Get.offAllNamed('/login');
-
-    //  Get.lazyPut<LoginController>(() => LoginController());
+    await restartApp();
   }
-
-  void becomeProvider() {}
 
   createStripeAccount() async {
     try {
@@ -994,5 +996,28 @@ class ProfileController extends GetxController {
     return formattedTime;
   }
 
-  auxRefreshUser() {}
+  void requestPermission() async {
+    final FirebaseController firebaseController =
+        Get.find<FirebaseController>();
+
+    final response = await firebaseController.requestNotificationPermission();
+
+    if (response == true) {
+      allowNotifications.value = true;
+    } else {
+      allowNotifications.value = false;
+    }
+  }
+
+  void cancelAllNotifications() {
+    // anulo el permiso de notificaciones
+
+    final FirebaseController firebaseController =
+        Get.find<FirebaseController>();
+
+    firebaseController.cancelAllNotifications();
+
+    prefs.allowNotifications = false;
+    allowNotifications.value = false;
+  }
 }

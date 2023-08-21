@@ -18,7 +18,7 @@ class RegisterTaskPage3 extends GetView<RegisterTaskController> {
   Widget build(BuildContext context) {
     return Obx(
       () => Scaffold(
-        appBar: const HomeMainAppBar(),
+        appBar: HomeMainAppBar(),
         bottomNavigationBar: const ProvitaskBottomBar(),
         drawerEnableOpenDragGesture: false,
         backgroundColor: Colors.white,

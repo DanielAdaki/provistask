@@ -15,7 +15,7 @@ class FreelancersPage extends GetView<FreelancersController> {
     return Obx(
       () => Scaffold(
         bottomNavigationBar: const ProvitaskBottomBar(),
-        appBar: const HomeMainAppBar(),
+        appBar: HomeMainAppBar(),
         body: RefreshIndicator(
           onRefresh: () async {
             controller.isLoading.value = true;

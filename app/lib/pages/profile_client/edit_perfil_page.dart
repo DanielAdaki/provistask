@@ -16,7 +16,7 @@ class EditPerfil extends GetView<ProfileController> {
     return Obx(
       () => Scaffold(
         // paso elñ titulo edit perfil
-        appBar: _widgets.profileAppBar('Edit Profile'),
+        appBar: _widgets.profileAppBar(context, 'Edit Profile'),
         backgroundColor: Colors.white,
         drawer: _widgets.homeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),

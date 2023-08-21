@@ -6,14 +6,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
 class LocationController extends GetxController {
-  // variable observable para almacenar la ubicación inicial de la cámara
-  @override
-  onInit() async {
-    super.onInit();
-    await getUserLocation();
-    // imprimo las coordenadas de la ubicación del usuario
-  }
-
   final Rx<LatLng?> _initialCameraPosition = Rx<LatLng?>(null);
   final Rx<LatLng?> currentLocartion = Rx<LatLng?>(null);
   LatLng? get initialCameraPosition => _initialCameraPosition.value;

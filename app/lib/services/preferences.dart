@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:provitask_app/common/conexion_common.dart';
+import 'package:provitask_app/controllers/auth/auth_controller.dart';
 import 'package:provitask_app/models/user/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,7 +9,7 @@ class Preferences {
   static final Preferences _preferences = Preferences._internal();
   factory Preferences() => _preferences;
   Preferences._internal();
-
+  final AuthController authController = Get.find();
   late SharedPreferences _prefs;
 
   Future<void> init() async => _prefs = await SharedPreferences.getInstance();
@@ -22,6 +23,15 @@ class Preferences {
     //_token = value;
 
     _prefs.setString('token', value!);
+  }
+
+  String? _fcmToken;
+
+  String? get fcmToken => _fcmToken;
+
+  set fcmToken(String? value) {
+    _fcmToken = value;
+    _prefs.setString('fcmToken', value!);
   }
 
   UserMe? _userMe;
@@ -85,11 +95,19 @@ class Preferences {
     return _userMe?.toJson();
   }
 
-  void clearUserData() {
-    _prefs.remove('token');
-    _prefs.remove('userMe');
+  void clearUserData() async {
+    await Future.wait([
+      _prefs.remove('fcmToken'),
+      _prefs.remove('token'),
+      _prefs.remove('userMe'),
+    ]);
+
+    authController.isAuthenticated.value = false;
     // _token = null;
     _userMe = null;
+    _fcmToken = null;
+
+    //await _prefs.clear();
   }
 }
 

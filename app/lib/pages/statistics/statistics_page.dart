@@ -11,14 +11,12 @@ import 'package:provitask_app/widget/statistics/statistics_widget.dart';
 class StatisticsPageProvider extends GetView<StatisticsController> {
   final _widgets = StatisticsWidgetsProvider();
 
-  //saco listCategory de la clase HomeController
-
   StatisticsPageProvider({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const HomeMainAppBar(),
+      appBar: HomeMainAppBar(),
       drawer: const HomeDrawer(),
       bottomNavigationBar: const ProvitaskBottomBar(),
       body: Scrollbar(

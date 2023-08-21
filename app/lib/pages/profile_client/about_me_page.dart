@@ -15,7 +15,7 @@ class AboutProvider extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     return Scaffold(
       // paso elñ titulo edit perfil
-      appBar: _widgets.profileAppBar(''),
+      appBar: _widgets.profileAppBar(context, ''),
       backgroundColor: Colors.white,
       drawer: _widgets.homeDrawer(),
       bottomNavigationBar: const ProvitaskBottomBar(),
