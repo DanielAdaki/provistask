@@ -36,7 +36,9 @@ class TaskServices extends GetxController {
         throw response.data;
       }
 
-      respuesta = {"status": 200, "data": response};
+      Logger().d(response.data);
+
+      respuesta = {"status": 200, "data": response.data};
     } catch (e) {
       respuesta = {"status": 500, "error": e};
     }
@@ -58,7 +60,7 @@ class TaskServices extends GetxController {
         throw response.data;
       }
 
-      respuesta = {"status": 200, "data": response};
+      respuesta = {"status": 200, "data": response.data};
     } catch (e) {
       respuesta = {"status": 500, "error": e};
     }

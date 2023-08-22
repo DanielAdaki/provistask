@@ -1,4 +1,3 @@
-// ignore_for_file: avoid_print
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
@@ -69,6 +68,7 @@ Future<void> initializeAppAndRun() async {
   Get.put(NotificationController(), permanent: true);
   Get.put(GpsController(), permanent: true);
   Get.put(LocationController(), permanent: true);
+  await LocationController().getUserLocation();
   await FirebaseController().initNotifications();
 
   HttpOverrides.global = MyHttpOverrides();

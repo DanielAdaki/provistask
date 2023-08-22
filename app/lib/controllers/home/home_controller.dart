@@ -118,7 +118,8 @@ class HomeController extends GetxController {
     });
   }
 
-  findCategory([int start = 0, int limit = 10, bool featured = false]) async {
+  Future<void> findCategory(
+      [int start = 0, int limit = 10, bool featured = false]) async {
     start = start * limit;
 
     final response = await _task.getItems(limit, start, false);
@@ -137,7 +138,7 @@ class HomeController extends GetxController {
       listCategory.value = [];
     }
 
-    final data = jsonDecode(response["data"].toString());
+    final data = response["data"];
 
     listCategory.clear();
 
@@ -154,7 +155,8 @@ class HomeController extends GetxController {
     });
   }
 
-  findTask([int start = 0, int limit = 20, bool featured = true]) async {
+  Future<void> findTask(
+      [int start = 0, int limit = 20, bool featured = true]) async {
     start = start * limit;
 
     final response = await _task.getItems(limit, start, featured);
@@ -173,9 +175,15 @@ class HomeController extends GetxController {
       listTask.value = [];
     }
 
-    final data = jsonDecode(response["data"].toString());
+    final data = response["data"];
 
     listTask.clear();
+
+    Logger().i(data["data"]);
+
+    if (data["data"] == null) {
+      return;
+    }
 
     data["data"].forEach((element) {
       listTask.add(HomeCategory(
@@ -190,7 +198,7 @@ class HomeController extends GetxController {
     });
   }
 
-  getPopularProvider() async {
+  Future<void> getPopularProvider() async {
     if (currentPosition == null) {
       popularProvider.clear();
       return;
@@ -207,7 +215,7 @@ class HomeController extends GetxController {
       popularProvider.clear();
     }
 
-    final data = jsonDecode(response["data"].toString());
+    final data = response["data"];
 
     popularProvider.clear();
 
@@ -235,7 +243,7 @@ class HomeController extends GetxController {
     });
   }
 
-  _getAddressFromLatLng() async {
+  Future<void> _getAddressFromLatLng() async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(
           currentPosition!.latitude, currentPosition!.longitude);
@@ -248,7 +256,7 @@ class HomeController extends GetxController {
     }
   }
 
-  _getCategoryHomeSlider() async {
+  Future<void> _getCategoryHomeSlider() async {
     try {
       final response = await _category.getItemHomeSlider();
 

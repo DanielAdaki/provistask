@@ -770,6 +770,7 @@ class RegisterTaskController extends GetxController {
         barrierDismissible: false,
       );
     } catch (e) {
+      Logger().e(e);
       pd.close();
       Get.dialog(AlertDialog(
         title: const Text('Error'),

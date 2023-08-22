@@ -1,7 +1,5 @@
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 import 'package:provitask_app/common/conexion_common.dart';
-import 'package:provitask_app/services/auth_services.dart';
 import 'package:provitask_app/services/preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
