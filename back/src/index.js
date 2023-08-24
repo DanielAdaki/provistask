@@ -500,6 +500,8 @@ module.exports = {
 
           socket.on('sendMessage', async (data) => {
 
+            console.log("data",data);
+
             let { message, fileData } = data;
 
             if (!message.id) {
