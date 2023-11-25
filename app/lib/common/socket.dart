@@ -24,10 +24,11 @@ class SocketController extends GetxController {
 
   void connectSocket() {
     if (_prefs.token != null) {
-      socket.io.options ??= {};
-      socket.io.options['query'] = {
-        'token': '${_prefs.token}',
-      };
+      // Inicializar 'options' si es nulo
+      socket.io.options ??= <String, dynamic>{};
+
+      // Ahora 'options' está garantizado de no ser nulo
+      socket.io.options!['query'] = {'token': '${_prefs.token}'};
     }
 
     socket.connect();
