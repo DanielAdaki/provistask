@@ -24,6 +24,7 @@ class SocketController extends GetxController {
 
   void connectSocket() {
     if (_prefs.token != null) {
+      socket.io.options ??= {};
       socket.io.options['query'] = {
         'token': '${_prefs.token}',
       };
