@@ -69,7 +69,7 @@ Future<void> initializeAppAndRun() async {
   Get.put(GpsController(), permanent: true);
   Get.put(LocationController(), permanent: true);
   await LocationController().getUserLocation();
-  await FirebaseController().initNotifications();
+  //await FirebaseController().initNotifications();
 
   HttpOverrides.global = MyHttpOverrides();
 }
