@@ -53,18 +53,18 @@ Future<void> initializeAppAndRun() async {
   WidgetsFlutterBinding.ensureInitialized();
   Get.put(AuthController(), permanent: true);
 
-  if (Firebase.apps.isEmpty) {
+  /*if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
       name: 'Provitask',
       options: DefaultFirebaseOptions.currentPlatform,
     );
-  }
+  }*/
 
   Preferences prefs = Preferences();
   await prefs.init();
 
   Get.put(SocketController(), permanent: true);
-  Get.put(FirebaseController(), permanent: true);
+  //Get.put(FirebaseController(), permanent: true);
   Get.put(NotificationController(), permanent: true);
   Get.put(GpsController(), permanent: true);
   Get.put(LocationController(), permanent: true);
@@ -80,7 +80,7 @@ Future<void> restartApp() async {
   await Get.delete<Preferences>(force: true);
   await Get.delete<AuthController>(force: true);
   await Get.delete<SocketController>(force: true);
-  await Get.delete<FirebaseController>(force: true);
+  //await Get.delete<FirebaseController>(force: true);
   await Get.delete<NotificationController>(force: true);
   await Get.delete<GpsController>(force: true);
   await Get.delete<LocationController>(force: true);
