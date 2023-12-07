@@ -371,7 +371,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.provitaskApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.provitask.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "Provitask distribution 2";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Provitask distribution 2";
@@ -507,7 +507,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.provitaskApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.provitask.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "Provitask distribution 2";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Provitask distribution 2";
@@ -535,7 +535,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.provitaskApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.provitask.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "Provitask distribution 2";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Provitask distribution 2";

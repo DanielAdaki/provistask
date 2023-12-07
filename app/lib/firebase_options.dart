@@ -69,7 +69,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '525225209804',
     projectId: 'provitask-197ff',
     storageBucket: 'provitask-197ff.appspot.com',
-    iosClientId: '525225209804-vjo3hgbdl8dkdqplc8oikhf9rs1akcfg.apps.googleusercontent.com',
-    iosBundleId: 'com.example.provitaskApp',
+    iosClientId:
+        '525225209804-vjo3hgbdl8dkdqplc8oikhf9rs1akcfg.apps.googleusercontent.com',
+    iosBundleId: 'com.provitask.app',
   );
 }
