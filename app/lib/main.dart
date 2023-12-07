@@ -9,6 +9,7 @@ import 'package:provitask_app/controllers/location/gps_controller.dart';
 import 'package:provitask_app/controllers/location/location_controller.dart';
 import 'package:provitask_app/controllers/notification/notification_controller.dart';
 import 'package:provitask_app/middlewares/auth_middleware.dart';
+import 'package:provitask_app/middlewares/gps_permisses_middleware.dart';
 import 'utility/fix_https.dart';
 import 'package:provitask_app/services/preferences.dart';
 import 'package:provitask_app/pages/pages.dart';
@@ -53,24 +54,24 @@ Future<void> initializeAppAndRun() async {
   WidgetsFlutterBinding.ensureInitialized();
   Get.put(AuthController(), permanent: true);
 
-  /*if (Firebase.apps.isEmpty) {
+  if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
       name: 'Provitask',
       options: DefaultFirebaseOptions.currentPlatform,
     );
-  }*/
+  }
 
   Preferences prefs = Preferences();
   await prefs.init();
 
   Get.put(SocketController(), permanent: true);
-  //Get.put(FirebaseController(), permanent: true);
+  Get.put(FirebaseController(), permanent: true);
   Get.put(NotificationController(), permanent: true);
   Get.put(GpsController(), permanent: true);
+
+  await FirebaseController().initNotifications();
   Get.put(LocationController(), permanent: true);
   await LocationController().getUserLocation();
-  //await FirebaseController().initNotifications();
-
   HttpOverrides.global = MyHttpOverrides();
 }
 
@@ -113,21 +114,30 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       getPages: [
         GetPage(name: '/', page: () => const SplashPage()),
-        GetPage(name: '/welcome', page: () => WelcomePage()),
-        GetPage(name: '/gps-access', page: () => const GPSAccessScreen()),
+        GetPage(
+          name: '/welcome',
+          page: () => WelcomePage(),
+          middlewares: [GpsPermisessMiddleware()],
+        ),
+        GetPage(
+          name: '/gps-access',
+          page: () => const GPSAccessScreen(),
+        ),
         GetPage(
             name: '/home',
             page: () => HomePage(),
             transition: Transition.rightToLeftWithFade,
-            middlewares: [AuthMiddleware()]),
+            middlewares: [GpsPermisessMiddleware(), AuthMiddleware()]),
         GetPage(
             name: '/login',
             page: () => LoginPage(),
-            transition: Transition.rightToLeftWithFade),
+            transition: Transition.rightToLeftWithFade,
+            middlewares: [GpsPermisessMiddleware()]),
         GetPage(
             name: '/profile_client',
             page: () => ProfileClientPage(),
             middlewares: [
+              GpsPermisessMiddleware(),
               AuthMiddleware()
             ],
             children: [
@@ -169,10 +179,10 @@ class MyApp extends StatelessWidget {
             page: () => ChangePassword(),
             middlewares: [AuthMiddleware()]),
         GetPage(
-            name: '/register_client',
-            page: () => RegisterClientPage(),
-            transition: Transition.rightToLeftWithFade,
-            middlewares: [AuthMiddleware()]),
+          name: '/register_client',
+          page: () => RegisterClientPage(),
+          transition: Transition.rightToLeftWithFade,
+        ),
         GetPage(
             name: '/register_provider',
             page: () => RegisterProviderPage(),
@@ -276,6 +286,10 @@ class MyApp extends StatelessWidget {
         GetPage(
             name: '/home-proveedor',
             page: () => HomePageProvider(),
+            middlewares: [
+              GpsPermisessMiddleware(),
+              AuthMiddleware()
+            ],
             children: [
               GetPage(
                   name: '/tareas-pendientes',

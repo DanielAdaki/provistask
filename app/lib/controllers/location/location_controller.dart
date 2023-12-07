@@ -81,7 +81,47 @@ class LocationController extends GetxController {
       if (kDebugMode) {
         print('Error obteniendo ubicación: $e');
       }
+
       _isError.value = true;
+
+      // verifico los permisos si fueron concedidos
+
+      if (await Geolocator.isLocationServiceEnabled()) {
+        // permisos concedidos
+        if (await Geolocator.checkPermission() ==
+            LocationPermission.deniedForever) {
+          // permisos denegados para siempre
+          if (kDebugMode) {
+            print('Permisos denegados para siempre, no se puede solicitar');
+          }
+
+          // reenvio a la pantalla de configuración de la aplicación
+
+          await Geolocator.openAppSettings();
+        } else if (await Geolocator.checkPermission() ==
+            LocationPermission.denied) {
+          // permisos denegados
+          if (kDebugMode) {
+            print('Permisos denegados, solicitar permisos');
+          }
+          // espero que esté inicializado el controlador
+          // reenvio a la pagina de  /gps-access
+        } else {
+          // permisos concedidos
+          if (kDebugMode) {
+            print('Permisos concedidos, solicitar ubicación');
+          }
+        }
+      } else {
+        // permisos denegados
+        if (kDebugMode) {
+          print('Permisos denegados, solicitar permisos');
+        }
+
+        // reenvio a la pagina de  /gps-access
+
+        Get.toNamed('/gps-access');
+      }
     }
   }
 

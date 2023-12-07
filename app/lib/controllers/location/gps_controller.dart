@@ -66,6 +66,4 @@ class GpsController extends GetxController {
         break;
     }
   }
-
-  // todo investigar cierre de getcontroller para optimizar memoria
 }
