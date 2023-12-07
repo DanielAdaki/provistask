@@ -54,22 +54,22 @@ Future<void> initializeAppAndRun() async {
   WidgetsFlutterBinding.ensureInitialized();
   Get.put(AuthController(), permanent: true);
 
-  if (Firebase.apps.isEmpty) {
+  /* if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
       name: 'Provitask',
       options: DefaultFirebaseOptions.currentPlatform,
     );
-  }
+  }*/
 
   Preferences prefs = Preferences();
   await prefs.init();
 
   Get.put(SocketController(), permanent: true);
-  Get.put(FirebaseController(), permanent: true);
+  //Get.put(FirebaseController(), permanent: true);
   Get.put(NotificationController(), permanent: true);
   Get.put(GpsController(), permanent: true);
 
-  await FirebaseController().initNotifications();
+  //await FirebaseController().initNotifications();
   Get.put(LocationController(), permanent: true);
   await LocationController().getUserLocation();
   HttpOverrides.global = MyHttpOverrides();
