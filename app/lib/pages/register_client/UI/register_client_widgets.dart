@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:provitask_app/controllers/auth/register_controller.dart';
 
 class RegisterClientWidgets {
-  final _controller = Get.find<RegisterController>();
+  final _controller = Get.put(RegisterController());
 
   Widget registerHeader() {
     return Container(

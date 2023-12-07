@@ -17,32 +17,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
-/*void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  Get.put(AuthController(), permanent: true);
-
-  if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(
-      name: 'Provitask',
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  }
-  Preferences prefs = Preferences();
-
-  await prefs.init();
-  Get.put(SocketController(), permanent: true);
-  Get.put(FirebaseController(), permanent: true);
-  Get.put(NotificationController(), permanent: true);
-  await FirebaseController().initNotifications();
-
-  // inicializo el controlador de autenticación
-
-  HttpOverrides.global = MyHttpOverrides();
-  initializeDateFormatting('en').then((_) {
-    runApp(Phoenix(child: const MyApp()));
-  });
-}*/
-
 void main() async {
   await initializeAppAndRun();
   initializeDateFormatting('en').then((_) {
@@ -54,22 +28,21 @@ Future<void> initializeAppAndRun() async {
   WidgetsFlutterBinding.ensureInitialized();
   Get.put(AuthController(), permanent: true);
 
-  /* if (Firebase.apps.isEmpty) {
+  if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
       name: 'Provitask',
       options: DefaultFirebaseOptions.currentPlatform,
     );
-  }*/
+  }
 
   Preferences prefs = Preferences();
   await prefs.init();
 
   Get.put(SocketController(), permanent: true);
-  //Get.put(FirebaseController(), permanent: true);
+  Get.put(FirebaseController(), permanent: true);
   Get.put(NotificationController(), permanent: true);
   Get.put(GpsController(), permanent: true);
-
-  //await FirebaseController().initNotifications();
+  await FirebaseController().initNotifications();
   Get.put(LocationController(), permanent: true);
   await LocationController().getUserLocation();
   HttpOverrides.global = MyHttpOverrides();
@@ -81,7 +54,7 @@ Future<void> restartApp() async {
   await Get.delete<Preferences>(force: true);
   await Get.delete<AuthController>(force: true);
   await Get.delete<SocketController>(force: true);
-  //await Get.delete<FirebaseController>(force: true);
+  await Get.delete<FirebaseController>(force: true);
   await Get.delete<NotificationController>(force: true);
   await Get.delete<GpsController>(force: true);
   await Get.delete<LocationController>(force: true);
