@@ -131,3 +131,5 @@ app/android/java_pid14932.hprof
 app/android/java_pid16204.hprof
 prueba/test/analysis_options.yaml
 prueba/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
