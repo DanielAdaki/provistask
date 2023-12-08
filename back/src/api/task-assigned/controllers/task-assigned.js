@@ -808,7 +808,7 @@ module.exports = createCoreController(
 					id: tarea.id,
 					datetime: tarea.datetime,
 					description: tarea.description,
-					monto: tarea.totalPrice ? tarea.totalPrice : tarea.brutePrice,
+					monto: tarea.totalPrice ? tarea.totalPrice : tarea.brutePrice ? tarea.brutePrice :  tarea.netoPrice	? tarea.netoPrice : 0,
 					categoria: {
 						id: tarea.skill.id,
 						name: tarea.skill.name,
