@@ -167,13 +167,13 @@
 				<key>CODE_SIGN_ENTITLEMENTS</key>
 				<string>Runner/RunnerProfile.entitlements</string>
 				<key>CODE_SIGN_IDENTITY</key>
-				<string>Apple Development</string>
+				<string>Apple Distribution: Yoan Paredes (UPJHVJQN75)</string>
 				<key>CODE_SIGN_STYLE</key>
 				<string>Manual</string>
 				<key>CURRENT_PROJECT_VERSION</key>
 				<string>$(FLUTTER_BUILD_NUMBER)</string>
 				<key>DEVELOPMENT_TEAM</key>
-				<string></string>
+				<string>UPJHVJQN75</string>
 				<key>ENABLE_BITCODE</key>
 				<string>NO</string>
 				<key>INFOPLIST_FILE</key>
@@ -196,7 +196,7 @@
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
 				<key>PROVISIONING_PROFILE_SPECIFIER</key>
-				<string></string>
+				<string>provitask ios_app_store 1702015949</string>
 				<key>SWIFT_OBJC_BRIDGING_HEADER</key>
 				<string>Runner/Runner-Bridging-Header.h</string>
 				<key>SWIFT_VERSION</key>
@@ -334,7 +334,7 @@
 			<key>showEnvVarsInLog</key>
 			<string>0</string>
 		</dict>
-		<key>658F2E172B22DE0F00E9DD2B</key>
+		<key>5A6A18052B22F5A300C21307</key>
 		<dict>
 			<key>fileEncoding</key>
 			<string>4</string>
@@ -345,14 +345,14 @@
 			<key>name</key>
 			<string>GoogleService-Info.plist</string>
 			<key>path</key>
-			<string>../../../../../../Downloads/GoogleService-Info.plist</string>
+			<string>../../../../Downloads/GoogleService-Info.plist</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
-		<key>658F2E182B22DE0F00E9DD2B</key>
+		<key>5A6A18062B22F5A300C21307</key>
 		<dict>
 			<key>fileRef</key>
-			<string>658F2E172B22DE0F00E9DD2B</string>
+			<string>5A6A18052B22F5A300C21307</string>
 			<key>isa</key>
 			<string>PBXBuildFile</string>
 		</dict>
@@ -552,8 +552,12 @@
 					<dict>
 						<key>CreatedOnToolsVersion</key>
 						<string>7.3.1</string>
+						<key>DevelopmentTeam</key>
+						<string>UPJHVJQN75</string>
 						<key>LastSwiftMigration</key>
 						<string>1100</string>
+						<key>ProvisioningStyle</key>
+						<string>Manual</string>
 					</dict>
 				</dict>
 			</dict>
@@ -635,9 +639,9 @@
 			<array>
 				<string>97C147011CF9000F007C117D</string>
 				<string>3B3967161E833CAA004F5970</string>
-				<string>658F2E182B22DE0F00E9DD2B</string>
 				<string>97C146FE1CF9000F007C117D</string>
 				<string>97C146FC1CF9000F007C117D</string>
+				<string>5A6A18062B22F5A300C21307</string>
 			</array>
 			<key>isa</key>
 			<string>PBXResourcesBuildPhase</string>
@@ -714,7 +718,7 @@
 				<string>1498D2321E8E86230040F4C2</string>
 				<string>1498D2331E8E89220040F4C2</string>
 				<string>74858FAE1ED2DC5600515810</string>
-				<string>658F2E172B22DE0F00E9DD2B</string>
+				<string>5A6A18052B22F5A300C21307</string>
 				<string>74858FAD1ED2DC5600515810</string>
 			</array>
 			<key>isa</key>
@@ -1058,13 +1062,13 @@
 				<key>CODE_SIGN_ENTITLEMENTS</key>
 				<string>Runner/Runner.entitlements</string>
 				<key>CODE_SIGN_IDENTITY</key>
-				<string>Apple Development</string>
+				<string>Apple Distribution: Yoan Paredes (UPJHVJQN75)</string>
 				<key>CODE_SIGN_STYLE</key>
 				<string>Manual</string>
 				<key>CURRENT_PROJECT_VERSION</key>
 				<string>$(FLUTTER_BUILD_NUMBER)</string>
 				<key>DEVELOPMENT_TEAM</key>
-				<string></string>
+				<string>UPJHVJQN75</string>
 				<key>ENABLE_BITCODE</key>
 				<string>NO</string>
 				<key>INFOPLIST_FILE</key>
@@ -1087,7 +1091,7 @@
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
 				<key>PROVISIONING_PROFILE_SPECIFIER</key>
-				<string></string>
+				<string>provitask ios_app_store 1702015949</string>
 				<key>SWIFT_OBJC_BRIDGING_HEADER</key>
 				<string>Runner/Runner-Bridging-Header.h</string>
 				<key>SWIFT_OPTIMIZATION_LEVEL</key>
@@ -1115,13 +1119,13 @@
 				<key>CODE_SIGN_ENTITLEMENTS</key>
 				<string>Runner/Runner.entitlements</string>
 				<key>CODE_SIGN_IDENTITY</key>
-				<string>Apple Development</string>
+				<string>Apple Distribution: Yoan Paredes (UPJHVJQN75)</string>
 				<key>CODE_SIGN_STYLE</key>
 				<string>Manual</string>
 				<key>CURRENT_PROJECT_VERSION</key>
 				<string>$(FLUTTER_BUILD_NUMBER)</string>
 				<key>DEVELOPMENT_TEAM</key>
-				<string></string>
+				<string>UPJHVJQN75</string>
 				<key>ENABLE_BITCODE</key>
 				<string>NO</string>
 				<key>INFOPLIST_FILE</key>
@@ -1144,7 +1148,7 @@
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
 				<key>PROVISIONING_PROFILE_SPECIFIER</key>
-				<string></string>
+				<string>provitask ios_app_store 1702015949</string>
 				<key>SWIFT_OBJC_BRIDGING_HEADER</key>
 				<string>Runner/Runner-Bridging-Header.h</string>
 				<key>SWIFT_VERSION</key>
