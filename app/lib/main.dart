@@ -40,7 +40,7 @@ Future<void> initializeAppAndRun() async {
 
   Get.put(SocketController(), permanent: true);
   //Get.put(FirebaseController(), permanent: true);
-  //Get.put(NotificationController(), permanent: true);
+  Get.put(NotificationController(), permanent: true);
   Get.put(GpsController(), permanent: true);
   //await FirebaseController().initNotifications();
   Get.put(LocationController(), permanent: true);
@@ -55,7 +55,7 @@ Future<void> restartApp() async {
   await Get.delete<AuthController>(force: true);
   await Get.delete<SocketController>(force: true);
   //await Get.delete<FirebaseController>(force: true);
-  //await Get.delete<NotificationController>(force: true);
+  await Get.delete<NotificationController>(force: true);
   await Get.delete<GpsController>(force: true);
   await Get.delete<LocationController>(force: true);
   Phoenix.rebirth(Get.context!);
