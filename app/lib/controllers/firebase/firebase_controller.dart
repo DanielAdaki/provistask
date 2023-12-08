@@ -26,7 +26,7 @@ class FirebaseController extends GetxController {
 
   Future<void> initNotifications() async {
     // Solicitar permisos para notificaciones, especialmente importante en iOS
-    if (Platform.isIOS) {
+    /*  if (Platform.isIOS) {
       await FirebaseMessaging.instance.requestPermission();
     }
 
@@ -52,10 +52,10 @@ class FirebaseController extends GetxController {
         prefs.fcmToken = token;
         print('FCM Token: $token');
       }
-    }
+    }*/
 
     // Inicializar las notificaciones push y locales como antes
-    initPushNotifications();
+    //initPushNotifications();
     initLocalNotifications();
   }
 
