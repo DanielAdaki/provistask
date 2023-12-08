@@ -7,7 +7,7 @@
 	<key>classes</key>
 	<dict/>
 	<key>objectVersion</key>
-	<string>51</string>
+	<string>54</string>
 	<key>objects</key>
 	<dict>
 		<key>0D54BD5157AF5E6569AA8024</key>
@@ -137,7 +137,7 @@
 				<key>GCC_WARN_UNUSED_VARIABLE</key>
 				<string>YES</string>
 				<key>IPHONEOS_DEPLOYMENT_TARGET</key>
-				<string>12.0</string>
+				<string>13.0</string>
 				<key>MTL_ENABLE_DEBUG_INFO</key>
 				<string>NO</string>
 				<key>SDKROOT</key>
@@ -164,23 +164,39 @@
 				<string>AppIcon</string>
 				<key>CLANG_ENABLE_MODULES</key>
 				<string>YES</string>
+				<key>CODE_SIGN_ENTITLEMENTS</key>
+				<string>Runner/RunnerProfile.entitlements</string>
+				<key>CODE_SIGN_IDENTITY</key>
+				<string>Apple Development</string>
+				<key>CODE_SIGN_STYLE</key>
+				<string>Manual</string>
 				<key>CURRENT_PROJECT_VERSION</key>
 				<string>$(FLUTTER_BUILD_NUMBER)</string>
 				<key>DEVELOPMENT_TEAM</key>
-				<string>DV52HXV5QW</string>
+				<string></string>
 				<key>ENABLE_BITCODE</key>
 				<string>NO</string>
 				<key>INFOPLIST_FILE</key>
 				<string>Runner/Info.plist</string>
+				<key>INFOPLIST_KEY_CFBundleDisplayName</key>
+				<string>Provitask</string>
+				<key>INFOPLIST_KEY_LSApplicationCategoryType</key>
+				<string>public.app-category.business</string>
+				<key>IPHONEOS_DEPLOYMENT_TARGET</key>
+				<string>13.0</string>
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<array>
 					<string>$(inherited)</string>
 					<string>@executable_path/Frameworks</string>
 				</array>
+				<key>MARKETING_VERSION</key>
+				<string>1</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
 				<string>com.provitask.app</string>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
+				<key>PROVISIONING_PROFILE_SPECIFIER</key>
+				<string></string>
 				<key>SWIFT_OBJC_BRIDGING_HEADER</key>
 				<string>Runner/Runner-Bridging-Header.h</string>
 				<key>SWIFT_VERSION</key>
@@ -217,12 +233,16 @@
 		</dict>
 		<key>3B06AD1E1E4923F5004D2608</key>
 		<dict>
+			<key>alwaysOutOfDate</key>
+			<string>1</string>
 			<key>buildActionMask</key>
 			<string>2147483647</string>
 			<key>files</key>
 			<array/>
 			<key>inputPaths</key>
-			<array/>
+			<array>
+				<string>${TARGET_BUILD_DIR}/${INFOPLIST_PATH}</string>
+			</array>
 			<key>isa</key>
 			<string>PBXShellScriptBuildPhase</string>
 			<key>name</key>
@@ -258,6 +278,34 @@
 			<key>isa</key>
 			<string>PBXBuildFile</string>
 		</dict>
+		<key>3F2DED941281673AFF7B3289</key>
+		<dict>
+			<key>buildActionMask</key>
+			<string>2147483647</string>
+			<key>files</key>
+			<array/>
+			<key>inputFileListPaths</key>
+			<array>
+				<string>${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist</string>
+			</array>
+			<key>isa</key>
+			<string>PBXShellScriptBuildPhase</string>
+			<key>name</key>
+			<string>[CP] Copy Pods Resources</string>
+			<key>outputFileListPaths</key>
+			<array>
+				<string>${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist</string>
+			</array>
+			<key>runOnlyForDeploymentPostprocessing</key>
+			<string>0</string>
+			<key>shellPath</key>
+			<string>/bin/sh</string>
+			<key>shellScript</key>
+			<string>"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh"
+</string>
+			<key>showEnvVarsInLog</key>
+			<string>0</string>
+		</dict>
 		<key>46EE691665B24CDB2DB92F11</key>
 		<dict>
 			<key>buildActionMask</key>
@@ -286,6 +334,28 @@
 			<key>showEnvVarsInLog</key>
 			<string>0</string>
 		</dict>
+		<key>658F2E172B22DE0F00E9DD2B</key>
+		<dict>
+			<key>fileEncoding</key>
+			<string>4</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>text.plist.xml</string>
+			<key>name</key>
+			<string>GoogleService-Info.plist</string>
+			<key>path</key>
+			<string>../../../../../../Downloads/GoogleService-Info.plist</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>658F2E182B22DE0F00E9DD2B</key>
+		<dict>
+			<key>fileRef</key>
+			<string>658F2E172B22DE0F00E9DD2B</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
 		<key>65A7A3C51DBED39CEBCE6BFE</key>
 		<dict>
 			<key>children</key>
@@ -298,6 +368,28 @@
 			<string>PBXGroup</string>
 			<key>path</key>
 			<string>Pods</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>65F9CABE2B22B76F0089B5F3</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>text.plist.entitlements</string>
+			<key>path</key>
+			<string>RunnerProfile.entitlements</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>65F9CAC12B22C6B50089B5F3</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>text.plist.entitlements</string>
+			<key>path</key>
+			<string>Runner.entitlements</string>
 			<key>sourceTree</key>
 			<string>&lt;group&gt;</string>
 		</dict>
@@ -410,6 +502,8 @@
 		</dict>
 		<key>9740EEB61CF901F6004384FC</key>
 		<dict>
+			<key>alwaysOutOfDate</key>
+			<string>1</string>
 			<key>buildActionMask</key>
 			<string>2147483647</string>
 			<key>files</key>
@@ -449,9 +543,9 @@
 			<key>attributes</key>
 			<dict>
 				<key>LastUpgradeCheck</key>
-				<string>1300</string>
+				<string>1430</string>
 				<key>ORGANIZATIONNAME</key>
-				<string></string>
+				<string>Provitask</string>
 				<key>TargetAttributes</key>
 				<dict>
 					<key>97C146ED1CF9000F007C117D</key>
@@ -541,6 +635,7 @@
 			<array>
 				<string>97C147011CF9000F007C117D</string>
 				<string>3B3967161E833CAA004F5970</string>
+				<string>658F2E182B22DE0F00E9DD2B</string>
 				<string>97C146FE1CF9000F007C117D</string>
 				<string>97C146FC1CF9000F007C117D</string>
 			</array>
@@ -563,6 +658,7 @@
 				<string>9705A1C41CF9048500538489</string>
 				<string>3B06AD1E1E4923F5004D2608</string>
 				<string>46EE691665B24CDB2DB92F11</string>
+				<string>3F2DED941281673AFF7B3289</string>
 			</array>
 			<key>buildRules</key>
 			<array/>
@@ -609,6 +705,8 @@
 		<dict>
 			<key>children</key>
 			<array>
+				<string>65F9CAC12B22C6B50089B5F3</string>
+				<string>65F9CABE2B22B76F0089B5F3</string>
 				<string>97C146FA1CF9000F007C117D</string>
 				<string>97C146FD1CF9000F007C117D</string>
 				<string>97C146FF1CF9000F007C117D</string>
@@ -616,6 +714,7 @@
 				<string>1498D2321E8E86230040F4C2</string>
 				<string>1498D2331E8E89220040F4C2</string>
 				<string>74858FAE1ED2DC5600515810</string>
+				<string>658F2E172B22DE0F00E9DD2B</string>
 				<string>74858FAD1ED2DC5600515810</string>
 			</array>
 			<key>isa</key>
@@ -812,7 +911,7 @@
 				<key>GCC_WARN_UNUSED_VARIABLE</key>
 				<string>YES</string>
 				<key>IPHONEOS_DEPLOYMENT_TARGET</key>
-				<string>12.0</string>
+				<string>13.0</string>
 				<key>MTL_ENABLE_DEBUG_INFO</key>
 				<string>YES</string>
 				<key>ONLY_ACTIVE_ARCH</key>
@@ -910,7 +1009,7 @@
 				<key>GCC_WARN_UNUSED_VARIABLE</key>
 				<string>YES</string>
 				<key>IPHONEOS_DEPLOYMENT_TARGET</key>
-				<string>12.0</string>
+				<string>13.0</string>
 				<key>MTL_ENABLE_DEBUG_INFO</key>
 				<string>NO</string>
 				<key>SDKROOT</key>
@@ -956,23 +1055,39 @@
 				<string>AppIcon</string>
 				<key>CLANG_ENABLE_MODULES</key>
 				<string>YES</string>
+				<key>CODE_SIGN_ENTITLEMENTS</key>
+				<string>Runner/Runner.entitlements</string>
+				<key>CODE_SIGN_IDENTITY</key>
+				<string>Apple Development</string>
+				<key>CODE_SIGN_STYLE</key>
+				<string>Manual</string>
 				<key>CURRENT_PROJECT_VERSION</key>
 				<string>$(FLUTTER_BUILD_NUMBER)</string>
 				<key>DEVELOPMENT_TEAM</key>
-				<string>DV52HXV5QW</string>
+				<string></string>
 				<key>ENABLE_BITCODE</key>
 				<string>NO</string>
 				<key>INFOPLIST_FILE</key>
 				<string>Runner/Info.plist</string>
+				<key>INFOPLIST_KEY_CFBundleDisplayName</key>
+				<string>Provitask</string>
+				<key>INFOPLIST_KEY_LSApplicationCategoryType</key>
+				<string>public.app-category.business</string>
+				<key>IPHONEOS_DEPLOYMENT_TARGET</key>
+				<string>13.0</string>
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<array>
 					<string>$(inherited)</string>
 					<string>@executable_path/Frameworks</string>
 				</array>
+				<key>MARKETING_VERSION</key>
+				<string>1</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
 				<string>com.provitask.app</string>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
+				<key>PROVISIONING_PROFILE_SPECIFIER</key>
+				<string></string>
 				<key>SWIFT_OBJC_BRIDGING_HEADER</key>
 				<string>Runner/Runner-Bridging-Header.h</string>
 				<key>SWIFT_OPTIMIZATION_LEVEL</key>
@@ -997,23 +1112,39 @@
 				<string>AppIcon</string>
 				<key>CLANG_ENABLE_MODULES</key>
 				<string>YES</string>
+				<key>CODE_SIGN_ENTITLEMENTS</key>
+				<string>Runner/Runner.entitlements</string>
+				<key>CODE_SIGN_IDENTITY</key>
+				<string>Apple Development</string>
+				<key>CODE_SIGN_STYLE</key>
+				<string>Manual</string>
 				<key>CURRENT_PROJECT_VERSION</key>
 				<string>$(FLUTTER_BUILD_NUMBER)</string>
 				<key>DEVELOPMENT_TEAM</key>
-				<string>DV52HXV5QW</string>
+				<string></string>
 				<key>ENABLE_BITCODE</key>
 				<string>NO</string>
 				<key>INFOPLIST_FILE</key>
 				<string>Runner/Info.plist</string>
+				<key>INFOPLIST_KEY_CFBundleDisplayName</key>
+				<string>Provitask</string>
+				<key>INFOPLIST_KEY_LSApplicationCategoryType</key>
+				<string>public.app-category.business</string>
+				<key>IPHONEOS_DEPLOYMENT_TARGET</key>
+				<string>13.0</string>
 				<key>LD_RUNPATH_SEARCH_PATHS</key>
 				<array>
 					<string>$(inherited)</string>
 					<string>@executable_path/Frameworks</string>
 				</array>
+				<key>MARKETING_VERSION</key>
+				<string>1</string>
 				<key>PRODUCT_BUNDLE_IDENTIFIER</key>
 				<string>com.provitask.app</string>
 				<key>PRODUCT_NAME</key>
 				<string>$(TARGET_NAME)</string>
+				<key>PROVISIONING_PROFILE_SPECIFIER</key>
+				<string></string>
 				<key>SWIFT_OBJC_BRIDGING_HEADER</key>
 				<string>Runner/Runner-Bridging-Header.h</string>
 				<key>SWIFT_VERSION</key>
