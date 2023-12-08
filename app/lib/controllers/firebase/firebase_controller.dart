@@ -25,16 +25,37 @@ class FirebaseController extends GetxController {
   final notificationCount = 0.obs;
 
   Future<void> initNotifications() async {
-    // pido permiso para recibir notificaciones
-
-    final token = await _firebaseMessaging.getToken();
-    if (token != null) {
-      prefs.fcmToken = token;
-      // imprimo
-      print('FCM Token: $token');
+    // Solicitar permisos para notificaciones, especialmente importante en iOS
+    /*  if (Platform.isIOS) {
+      await FirebaseMessaging.instance.requestPermission();
     }
 
-    initPushNotifications();
+    // Lógica específica para iOS
+    if (Platform.isIOS) {
+      String? apnsToken = await _firebaseMessaging.getAPNSToken();
+      if (apnsToken == null) {
+        // Esperar y volver a intentar obtener el APNS token
+        await Future<void>.delayed(const Duration(seconds: 3));
+        apnsToken = await _firebaseMessaging.getAPNSToken();
+      }
+      if (apnsToken != null) {
+        final token = await _firebaseMessaging.getToken();
+        if (token != null) {
+          prefs.fcmToken = token;
+          print('FCM Token: $token');
+        }
+      }
+    } else {
+      // Lógica para otras plataformas (Android, etc.)
+      final token = await _firebaseMessaging.getToken();
+      if (token != null) {
+        prefs.fcmToken = token;
+        print('FCM Token: $token');
+      }
+    }*/
+
+    // Inicializar las notificaciones push y locales como antes
+    //initPushNotifications();
     initLocalNotifications();
   }
 
