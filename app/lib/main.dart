@@ -16,12 +16,21 @@ import 'package:provitask_app/pages/pages.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() async {
-  await initializeAppAndRun();
-  initializeDateFormatting('en').then((_) {
-    runApp(Phoenix(child: const MyApp()));
-  });
+  await SentryFlutter.init((options) {
+    options.dsn =
+        'https://215b1d8d933cdb799778dc7f7e84e93f@o4506360545411072.ingest.sentry.io/4506360550522880';
+    options.tracesSampleRate = 1.0;
+  },
+      // Init your App.
+      appRunner: (() async {
+    await initializeAppAndRun();
+    initializeDateFormatting('en').then((_) {
+      runApp(Phoenix(child: const MyApp()));
+    });
+  }));
 }
 
 Future<void> initializeAppAndRun() async {

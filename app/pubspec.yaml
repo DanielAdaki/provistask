@@ -99,6 +99,7 @@ dependencies:
   rating_dialog: ^2.0.4
   flutter_phoenix: ^1.1.1
   notification_permissions: ^0.6.1
+  sentry_flutter: ^7.13.2
 
 
 dependency_overrides:
