@@ -17,6 +17,7 @@ export 'package:provitask_app/pages/tasks/tasks_page.dart';
 export 'package:provitask_app/pages/verification_provider/verification_provider_page.dart';
 export 'package:provitask_app/pages/welcome/welcome_page.dart';
 export 'package:provitask_app/pages/tasks/task/task_page.dart';
+export 'package:provitask_app/pages/tasks/task/task_page_provider.dart';
 export 'package:provitask_app/pages/profile_client/edit_perfil_page.dart';
 export 'package:provitask_app/pages/profile_client/notificacion_page.dart';
 export 'package:provitask_app/pages/profile_client/change_password.dart';

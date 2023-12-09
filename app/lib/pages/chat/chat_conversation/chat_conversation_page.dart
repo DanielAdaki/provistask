@@ -6,13 +6,13 @@ import 'package:provitask_app/components/provitask_bottom_bar.dart';
 import 'package:provitask_app/components/main_app_bar.dart';
 import 'package:provitask_app/pages/chat/chat_conversation/UI/chat_conversation_controller.dart';
 import 'package:provitask_app/pages/chat/chat_conversation/UI/chat_conversation_widgets.dart';
-import 'package:provitask_app/pages/chat/chat_conversation/propuestas/chat_propuesta_controller.dart';
+//import 'package:provitask_app/pages/chat/chat_conversation/propuestas/chat_propuesta_controller.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class ChatConversationPage extends GetView<ChatConversationController> {
   final _widgets = ChatConversationWidgets();
 
-  final _controllerP = Get.put(ChatPropuestaController());
+  //final _controllerP = Get.put(ChatPropuestaController());
 
   ChatConversationPage({Key? key}) : super(key: key);
 

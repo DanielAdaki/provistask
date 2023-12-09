@@ -20,12 +20,14 @@ module.exports = createCoreController("api::task.task", ({ strapi }) => ({
 
       const { lat, lng } = ctx.query;
 
-      //		las elimino de la query
+      console.log(ctx.params)
+		console.log(ctx.query)
+      
 
-      delete ctx.query.lat;
-      delete ctx.query.lng;
 
       let entity = await super.findOne(ctx);
+
+      console.log(entity);
 
       if (entity.data.attributes.provider) {
         let idProvider = entity.data.attributes.provider.data.id;

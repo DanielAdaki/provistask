@@ -93,6 +93,7 @@ class TaskServices extends GetxController {
 
       respuesta = {"status": 200, "data": aux};
     } catch (e) {
+      Logger().e(e);
       respuesta = {"status": 500, "error": e};
     }
 
@@ -206,11 +207,12 @@ class TaskServices extends GetxController {
     return respuesta; //
   }
 
-  Future<Map> taskDetail(int id) async {
+  Future<Map> taskDetail(int id, [bool provider = false]) async {
     Map respuesta;
     configDio();
     try {
-      final response = await dio.get('/task-assigneds/$id');
+      final response =
+          await dio.get('/task-assigneds/$id?viewProvider=$provider');
 
       if (response.statusCode != 200) {
         throw response.data;

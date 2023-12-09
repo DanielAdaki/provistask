@@ -221,7 +221,6 @@ class TasksWidgets {
   Widget taskProCard(TaskData item) {
     return GestureDetector(
       onTap: () async {
-        //ProgressDialog pd = ProgressDialog(context: Get.context);
         try {
           _controller.isLoading.value = true;
 

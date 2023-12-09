@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provitask_app/controllers/task/task_controller.dart';
+import 'package:provitask_app/services/preferences.dart';
 
 import 'package:rating_dialog/rating_dialog.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -23,7 +24,7 @@ class TaskDetailDialog extends GetWidget {
 
   final GlobalKey<ScrollableState> _scrollableKey = GlobalKey();
 
-  // key del scaffold
+  final prefs = Preferences();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
@@ -60,6 +61,7 @@ class TaskDetailDialog extends GetWidget {
                     height: 10,
                   ),
                   infoTask(task.skill.name, task.status),
+
                   // fila donde van los botones de acciones, para cancelar la tarea , aceptarla en caso sea una oferta o marcarla como completada
                   const SizedBox(
                     height: 20,
@@ -67,270 +69,301 @@ class TaskDetailDialog extends GetWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      if (task.status == 'acepted') ...[
-                        CircleIconButton(
-                          height: 40,
-                          width: 40,
-                          onPressed: () async {
-                            // muestro un dialogo de confirmación para marcar la tarea como completada
+                      if (task.provider.id != prefs.userMe!.id) ...[
+                        if (task.status == 'acepted') ...[
+                          CircleIconButton(
+                            height: 40,
+                            width: 40,
+                            onPressed: () async {
+                              // muestro un dialogo de confirmación para marcar la tarea como completada
 
-                            final result = await showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Confirm'),
-                                content: const Text(
-                                    'Are you sure you want to mark the task as completed?'),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(false),
-                                    child: const Text('No'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(true),
-                                    child: const Text('Yes'),
-                                  ),
-                                ],
-                              ),
-                            );
-
-                            if (result == true) {
-                              final ProgressDialog progressDialog =
-                                  ProgressDialog(context: Get.context);
-
-                              try {
-                                progressDialog.show(
-                                  max: 100,
-                                  msg: 'Please wait...',
-                                  progressType: ProgressType.valuable,
-                                );
-
-                                final respuesta =
-                                    await TaskController().finishTask(task.id);
-
-                                if (respuesta == null) {
-                                  throw Exception(
-                                      "Error al marcar la tarea como completada");
-                                }
-
-                                progressDialog.close();
-
-                                Get.back();
-
-                                // muestro un mensaje de que se envio la calificación
-
-                                Get.snackbar(
-                                  'Success',
-                                  'The task was marked as completed successfully',
-                                  backgroundColor: Colors.green,
-                                  colorText: Colors.white,
-                                  snackPosition: SnackPosition.BOTTOM,
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  duration: const Duration(seconds: 3),
-                                );
-                              } catch (e) {
-                                progressDialog.close();
-                                Get.back();
-                                Get.snackbar(
-                                  'Error',
-                                  e.toString(),
-                                  backgroundColor: Colors.red,
-                                  colorText: Colors.white,
-                                  snackPosition: SnackPosition.BOTTOM,
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  duration: const Duration(seconds: 3),
-                                );
-                              }
-                            }
-                          },
-                          icon: const Icon(Icons.done),
-                          iconSize: 20,
-                          backgroundColor: Colors.green,
-                          iconColor: Colors.white,
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        CircleIconButton(
-                          height: 40,
-                          width: 40,
-                          onPressed: () async {
-                            // muestro un dialogo de confirmación para marcar la tarea como completada
-
-                            final result = await showDialog(
-                              context: context,
-                              builder: (context) => Obx(
-                                () => AlertDialog(
-                                  title: const Text('Cancel task'),
-                                  content: SizedBox(
-                                    height: Get.height * 0.3,
-                                    child: Column(
-                                      children: [
-                                        const Text(
-                                            'Are you sure you want to cancel the task?'),
-
-                                        // campo de texto para ingresar el motivo de la cancelación
-
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-
-                                        TextField(
-                                          decoration: const InputDecoration(
-                                            hintText: 'Reason for cancellation',
-                                          ),
-                                          controller: reasonCancel.value,
-                                          maxLines: 4,
-                                          onChanged: (value) {
-                                            if (value.length < 15) {
-                                              _errorText.value =
-                                                  'The reason must be at least 15 characters long';
-                                            } else {
-                                              _errorText.value = '';
-                                            }
-                                          },
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-
-                                        Obx(
-                                          () => Text(
-                                            _errorText.value,
-                                            style: const TextStyle(
-                                              color: Colors.red,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
+                              final result = await showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Confirm'),
+                                  content: const Text(
+                                      'Are you sure you want to mark the task as completed?'),
                                   actions: <Widget>[
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.of(context).pop(false),
                                       child: const Text('No'),
                                     ),
-                                    if (_errorText.value.isEmpty) ...[
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.of(context).pop(true),
-                                        child: const Text('Yes'),
-                                      ),
-                                    ] else ...[
-                                      const TextButton(
-                                        onPressed: null,
-                                        child: Text('Yes'),
-                                      ),
-                                    ]
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true),
+                                      child: const Text('Yes'),
+                                    ),
                                   ],
                                 ),
-                              ),
-                            );
+                              );
 
-                            if (result == true) {
-                              final ProgressDialog progressDialog =
-                                  ProgressDialog(context: Get.context);
+                              if (result == true) {
+                                final ProgressDialog progressDialog =
+                                    ProgressDialog(context: Get.context);
 
-                              try {
-                                progressDialog.show(
-                                  max: 100,
-                                  msg: 'Please wait...',
-                                  progressType: ProgressType.valuable,
-                                );
+                                try {
+                                  progressDialog.show(
+                                    max: 100,
+                                    msg: 'Please wait...',
+                                    progressType: ProgressType.valuable,
+                                  );
 
-                                final respuesta = await TaskController()
-                                    .canceledTask(
-                                        task.id, reasonCancel.value.text);
+                                  final respuesta = await TaskController()
+                                      .finishTask(task.id);
 
-                                if (respuesta == null) {
-                                  throw Exception(
-                                      "Error the task could not be canceled");
+                                  if (respuesta == null) {
+                                    throw Exception(
+                                        "Error al marcar la tarea como completada");
+                                  }
+
+                                  progressDialog.close();
+
+                                  Get.back();
+
+                                  // muestro un mensaje de que se envio la calificación
+
+                                  Get.snackbar(
+                                    'Success',
+                                    'The task was marked as completed successfully',
+                                    backgroundColor: Colors.green,
+                                    colorText: Colors.white,
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    margin: const EdgeInsets.only(bottom: 10),
+                                    duration: const Duration(seconds: 3),
+                                  );
+                                } catch (e) {
+                                  progressDialog.close();
+                                  Get.back();
+                                  Get.snackbar(
+                                    'Error',
+                                    e.toString(),
+                                    backgroundColor: Colors.red,
+                                    colorText: Colors.white,
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    margin: const EdgeInsets.only(bottom: 10),
+                                    duration: const Duration(seconds: 3),
+                                  );
                                 }
-
-                                progressDialog.close();
-
-                                Get.back();
-
-                                // muestro un mensaje de que se envio la calificación
-
-                                Get.snackbar(
-                                  'Success',
-                                  'The task was marked as canceled successfully',
-                                  backgroundColor: Colors.green,
-                                  colorText: Colors.white,
-                                  snackPosition: SnackPosition.BOTTOM,
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  duration: const Duration(seconds: 3),
-                                );
-                              } catch (e) {
-                                progressDialog.close();
-                                Get.back();
-                                Get.snackbar(
-                                  'Error',
-                                  e.toString(),
-                                  backgroundColor: Colors.red,
-                                  colorText: Colors.white,
-                                  snackPosition: SnackPosition.BOTTOM,
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  duration: const Duration(seconds: 3),
-                                );
                               }
-                            }
-                          },
-                          icon: const Icon(Icons.cancel),
-                          iconSize: 20,
-                          backgroundColor: Colors.red,
-                          iconColor: Colors.white,
-                        )
-                      ],
-                      if (task.status == 'offer') ...[
-                        CircleIconButton(
-                          height: 40,
-                          width: 40,
-                          onPressed: () {
-                            // Acción para aceptar la oferta
-                          },
-                          icon: const Icon(Icons.check),
-                          iconSize: 20,
-                          backgroundColor: Colors.blue,
-                          iconColor: Colors.white,
-                        ),
-                      ],
-                      if (task.status == 'completed' && task.review == null ||
-                          task.status == 'cancelled' &&
-                              task.review == null) ...[
-                        CircleIconButton(
-                          height: 40,
-                          width: 40,
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              barrierDismissible:
-                                  true, // set to false if you want to force a rating
-                              builder: (context) => ratingWrapperDialog(
-                                  task.provider, task.skill.name, task.id),
-                            );
-                          },
-                          icon: const Icon(Icons.star),
-                          iconSize: 20,
-                          backgroundColor: const Color(0xffd06605),
-                          iconColor: Colors.white,
-                        ),
+                            },
+                            icon: const Icon(Icons.done),
+                            iconSize: 20,
+                            backgroundColor: Colors.green,
+                            iconColor: Colors.white,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          CircleIconButton(
+                            height: 40,
+                            width: 40,
+                            onPressed: () async {
+                              // muestro un dialogo de confirmación para marcar la tarea como completada
+
+                              final result = await showDialog(
+                                context: context,
+                                builder: (context) => Obx(
+                                  () => AlertDialog(
+                                    title: const Text('Cancel task'),
+                                    content: SizedBox(
+                                      height: Get.height * 0.3,
+                                      child: Column(
+                                        children: [
+                                          const Text(
+                                              'Are you sure you want to cancel the task?'),
+
+                                          // campo de texto para ingresar el motivo de la cancelación
+
+                                          const SizedBox(
+                                            width: 10,
+                                          ),
+
+                                          TextField(
+                                            decoration: const InputDecoration(
+                                              hintText:
+                                                  'Reason for cancellation',
+                                            ),
+                                            controller: reasonCancel.value,
+                                            maxLines: 4,
+                                            onChanged: (value) {
+                                              if (value.length < 15) {
+                                                _errorText.value =
+                                                    'The reason must be at least 15 characters long';
+                                              } else {
+                                                _errorText.value = '';
+                                              }
+                                            },
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+
+                                          Obx(
+                                            () => Text(
+                                              _errorText.value,
+                                              style: const TextStyle(
+                                                color: Colors.red,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(false),
+                                        child: const Text('No'),
+                                      ),
+                                      if (_errorText.value.isEmpty) ...[
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(true),
+                                          child: const Text('Yes'),
+                                        ),
+                                      ] else ...[
+                                        const TextButton(
+                                          onPressed: null,
+                                          child: Text('Yes'),
+                                        ),
+                                      ]
+                                    ],
+                                  ),
+                                ),
+                              );
+
+                              if (result == true) {
+                                final ProgressDialog progressDialog =
+                                    ProgressDialog(context: Get.context);
+
+                                try {
+                                  progressDialog.show(
+                                    max: 100,
+                                    msg: 'Please wait...',
+                                    progressType: ProgressType.valuable,
+                                  );
+
+                                  final respuesta = await TaskController()
+                                      .canceledTask(
+                                          task.id, reasonCancel.value.text);
+
+                                  if (respuesta == null) {
+                                    throw Exception(
+                                        "Error the task could not be canceled");
+                                  }
+
+                                  progressDialog.close();
+
+                                  Get.back();
+
+                                  // muestro un mensaje de que se envio la calificación
+
+                                  Get.snackbar(
+                                    'Success',
+                                    'The task was marked as canceled successfully',
+                                    backgroundColor: Colors.green,
+                                    colorText: Colors.white,
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    margin: const EdgeInsets.only(bottom: 10),
+                                    duration: const Duration(seconds: 3),
+                                  );
+                                } catch (e) {
+                                  progressDialog.close();
+                                  Get.back();
+                                  Get.snackbar(
+                                    'Error',
+                                    e.toString(),
+                                    backgroundColor: Colors.red,
+                                    colorText: Colors.white,
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    margin: const EdgeInsets.only(bottom: 10),
+                                    duration: const Duration(seconds: 3),
+                                  );
+                                }
+                              }
+                            },
+                            icon: const Icon(Icons.cancel),
+                            iconSize: 20,
+                            backgroundColor: Colors.red,
+                            iconColor: Colors.white,
+                          )
+                        ],
+                        if (task.status == 'offer') ...[
+                          CircleIconButton(
+                            height: 40,
+                            width: 40,
+                            onPressed: () {
+                              // Acción para aceptar la oferta
+                            },
+                            icon: const Icon(Icons.check),
+                            iconSize: 20,
+                            backgroundColor: Colors.blue,
+                            iconColor: Colors.white,
+                          ),
+                        ],
+                        if (task.status == 'completed' && task.review == null ||
+                            task.status == 'cancelled' &&
+                                task.review == null) ...[
+                          CircleIconButton(
+                            height: 40,
+                            width: 40,
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                barrierDismissible:
+                                    true, // set to false if you want to force a rating
+                                builder: (context) => ratingWrapperDialog(
+                                    task.provider, task.skill.name, task.id),
+                              );
+                            },
+                            icon: const Icon(Icons.star),
+                            iconSize: 20,
+                            backgroundColor: const Color(0xffd06605),
+                            iconColor: Colors.white,
+                          ),
+                        ]
+                      ] else ...[
+                        // boton para ir al chat
+                        if (task.conversation != null) ...[
+                          CircleIconButton(
+                            height: 40,
+                            width: 40,
+                            onPressed: () {
+                              Get.toNamed('/chat/${task.conversation}');
+                            },
+                            icon: const Icon(Icons.chat),
+                            iconSize: 20,
+                            backgroundColor: Colors.blue,
+                            iconColor: Colors.white,
+                          ),
+                        ]
                       ]
                     ],
                   ),
-                  taskData(
-                      '${task.provider.name} ${task.provider.lastname}',
-                      task.provider.avatar,
-                      task.netoPrice!,
-                      task.brutePrice!,
-                      task.totalPrice,
-                      task.location!,
-                      task.datetime,
-                      task.transportation),
+                  if (task.provider.id != prefs.userMe!.id) ...[
+                    taskData(
+                        '${task.provider.name} ${task.provider.lastname}',
+                        task.provider.avatar,
+                        task.netoPrice ?? '0',
+                        task.brutePrice ?? '0',
+                        task.totalPrice,
+                        task.location ?? 'No definida',
+                        task.datetime,
+                        task.transportation),
+                  ] else ...[
+                    taskData(
+                        '${task.client.name} ${task.client.lastname}',
+                        task.client.avatar,
+                        task.netoPrice ?? '0',
+                        task.brutePrice ?? '0',
+                        task.totalPrice,
+                        task.location ?? 'No definida',
+                        task.datetime,
+                        task.transportation),
+                  ],
+
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10),
                     child: Divider(

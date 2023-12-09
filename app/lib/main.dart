@@ -289,6 +289,10 @@ class MyApp extends StatelessWidget {
             page: () => TaskPage(),
             middlewares: [AuthMiddleware()]),
         GetPage(
+            name: '/task-assing-detail-provider/:id',
+            page: () => TaskPageProvider(),
+            middlewares: [AuthMiddleware()]),
+        GetPage(
             name: '/chat/:id',
             page: () => ChatConversationPage(),
             middlewares: [

@@ -3,11 +3,15 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provitask_app/controllers/home/home_provider_controller.dart';
+import 'package:provitask_app/controllers/task/task_controller.dart';
 import 'package:provitask_app/models/pending_request/pending_request.dart';
+import 'package:provitask_app/pages/tasks/UI/tasks_controller.dart';
+import 'package:provitask_app/widget/tasks/task_details_widget.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
 class HomeWidgetsProvider {
   final controller = Get.find<HomeProviderController>();
+  final _controller = Get.put<TasksController>(TasksController());
   Widget franjaInformativa(String texto,
       [int colorText = 0xFFFFFFFF,
       int colorFondo = 0xFFD67B21,
@@ -116,8 +120,28 @@ class HomeWidgetsProvider {
       Color textColor = const Color(0xFF170591),
       double fontSize = 13]) {
     return GestureDetector(
-      onTap: () {
-        Get.toNamed('/task-assing-detail/${request.id}');
+      onTap: () async {
+        try {
+          _controller.isLoading.value = true;
+
+          List<Future> futures = [
+            _controller.getTask(request.id, true),
+          ];
+
+          // Ejecutar las funciones en paralelo
+          await Future.wait(futures);
+
+          Get.dialog(
+            Dialog(
+              insetPadding: const EdgeInsets.all(0),
+              child: TaskDetailDialog(task: _controller.task),
+            ),
+          );
+          _controller.isLoading.value = false;
+        } catch (e) {
+          print(e);
+          _controller.isLoading.value = false;
+        }
       },
       child: Container(
         width: Get.width * 0.4,
@@ -144,6 +168,7 @@ class HomeWidgetsProvider {
               children: [
                 Text(
                   request.nombre,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: textColor,
                     fontSize: fontSize,
@@ -167,6 +192,7 @@ class HomeWidgetsProvider {
                       const SizedBox(height: 5),
                       Text(
                         request.monto,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: textColor,
                           fontSize: fontSize,
@@ -208,6 +234,7 @@ class HomeWidgetsProvider {
                       Text(
                         request.categoria['name'] ?? '',
                         style: TextStyle(
+                          overflow: TextOverflow.ellipsis,
                           color: textColor,
                           fontSize: fontSize,
                           fontWeight: FontWeight.bold,
@@ -231,12 +258,17 @@ class HomeWidgetsProvider {
                           as ImageProvider,
                 ),
                 const SizedBox(width: 5),
-                Text(
-                  request.cliente['name'] ?? '',
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.bold,
+                SizedBox(
+                  width: Get.width * 0.2,
+                  child: Text(
+                    request.cliente['name'] ?? '',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      overflow: TextOverflow.clip,
+                      color: textColor,
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -402,8 +434,27 @@ class HomeWidgetsProvider {
       Color textColor = const Color.fromARGB(255, 255, 255, 255),
       double fontSize = 13]) {
     return GestureDetector(
-      onTap: () {
-        Get.toNamed('/task-assing-detail/${request.id}');
+      onTap: () async {
+        try {
+          _controller.isLoading.value = true;
+
+          List<Future> futures = [
+            _controller.getTask(request.id),
+          ];
+
+          // Ejecutar las funciones en paralelo
+          await Future.wait(futures);
+
+          Get.dialog(
+            Dialog(
+              insetPadding: const EdgeInsets.all(0),
+              child: TaskDetailDialog(task: _controller.task),
+            ),
+          );
+          _controller.isLoading.value = false;
+        } catch (e) {
+          _controller.isLoading.value = false;
+        }
       },
       child: Container(
         width: Get.width * 0.9,
