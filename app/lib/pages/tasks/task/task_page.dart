@@ -11,7 +11,6 @@ import 'package:provitask_app/components/provitask_bottom_bar.dart';
 
 class TaskPage extends GetView<TaskController> {
   final _widget = TaskWidgets();
-  final _controller = Get.put(TaskController());
 
   TaskPage({Key? key}) : super(key: key);
 
@@ -23,77 +22,78 @@ class TaskPage extends GetView<TaskController> {
         drawer: const HomeDrawer(),
         bottomNavigationBar: const ProvitaskBottomBar(),
         body: SafeArea(
-          child: Column(
-            children: [
-              Visibility(
-                visible: _controller.isLoading.value,
-                child: const CircularProgressIndicator(),
-              ),
-              Expanded(
-                child: Visibility(
-                  visible: !_controller.isLoading.value,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        _widget.titleGenerate(_controller.taskDetail.isNotEmpty
-                            ? _controller.taskDetail["attributes"]["name"]
-                            : ""),
-                        _widget.imageTask(_controller.taskDetail.isNotEmpty
-                            ? _controller.taskDetail["attributes"]["image"]
-                                ["data"]["attributes"]["url"]
-                            : ""),
-                        _widget.priceTask(_controller.taskDetail.isNotEmpty
-                            ? _controller.taskDetail["attributes"]["price"]
-                                .toString()
-                            : ""),
-                        _controller.provider["name"] != null
-                            ? _widget.proviData(
-                                _controller.provider["name"] +
-                                        " " +
-                                        _controller.provider["lastname"] ??
-                                    "",
-                                _controller.provider["type_provider"],
-                                _controller.provider["cost_per_houers"] != null
-                                    ? _controller.provider["cost_per_houers"]
-                                        .toString()
-                                    : "",
-                                _controller.provider["distanceGoogle"]
-                                    .toString(),
-                                _controller.provider["scoreAverage"].toString(),
-                                _controller.provider["open_disponibility"]
-                                    .toString(),
-                                _controller.provider["close_disponibility"]
-                                    .toString(),
-                                _controller.provider["skills"],
-                                _controller.provider["car"],
-                                _controller.provider["truck"],
-                                _controller.provider["motorcycle"],
-                                Random().nextInt(100).toString())
-                            : Container(),
-                        _widget.descriptionTask(
-                            _controller.taskDetail.isNotEmpty
-                                ? _controller.taskDetail["attributes"]
-                                    ["description"]
+          child: controller.isLoading.value
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            _widget.titleGenerate(controller
+                                    .taskDetail.isNotEmpty
+                                ? controller.taskDetail["attributes"]["name"]
                                 : ""),
+                            _widget.imageTask(controller.taskDetail.isNotEmpty
+                                ? controller.taskDetail["attributes"]["image"]
+                                    ["data"]["attributes"]["url"]
+                                : ""),
+                            _widget.priceTask(controller.taskDetail.isNotEmpty
+                                ? controller.taskDetail["attributes"]["price"]
+                                    .toString()
+                                : ""),
+                            controller.provider["name"] != null
+                                ? _widget.proviData(
+                                    controller.provider["name"] +
+                                            " " +
+                                            controller.provider["lastname"] ??
+                                        "",
+                                    controller.provider["type_provider"],
+                                    controller.provider["cost_per_houers"] !=
+                                            null
+                                        ? controller.provider["cost_per_houers"]
+                                            .toString()
+                                        : "",
+                                    controller.provider["distanceGoogle"]
+                                        .toString(),
+                                    controller.provider["scoreAverage"]
+                                        .toString(),
+                                    controller.provider["open_disponibility"]
+                                        .toString(),
+                                    controller.provider["close_disponibility"]
+                                        .toString(),
+                                    controller.provider["skills"],
+                                    controller.provider["car"],
+                                    controller.provider["truck"],
+                                    controller.provider["motorcycle"],
+                                    Random().nextInt(100).toString())
+                                : Container(),
+                            _widget.descriptionTask(
+                                controller.taskDetail.isNotEmpty
+                                    ? controller.taskDetail["attributes"]
+                                        ["description"]
+                                    : ""),
 
-                        const SizedBox(
-                          height: 30,
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            // ignore: unnecessary_null_comparison
+                            controller.provider != null
+                                ? _widget
+                                    .buttonContact(controller.provider["id"])
+                                : Container(),
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            // Aquí va el contenido de la página
+                          ],
                         ),
-                        // ignore: unnecessary_null_comparison
-                        _controller.provider != null
-                            ? _widget.buttonContact(_controller.provider["id"])
-                            : Container(),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                        // Aquí va el contenido de la página
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );

@@ -5,6 +5,7 @@
 	*/
 const moment = require('moment');
 const conversation = require('../../conversation/controllers/conversation');
+const { provider } = require('@strapi/provider-email-nodemailer');
 const { createCoreController } = require('@strapi/strapi').factories;
 const { STRIPE_PUBLIC_KEY, STRIPE_SECRET_KEY, STRIPE_URL, STRIPE_ID_CLIENT, STRIPE_WEBHOOK_SECRET, URL } = process.env;
 const stripe = require('stripe')(STRIPE_SECRET_KEY);
@@ -529,9 +530,12 @@ module.exports = createCoreController(
 			const user = ctx.state.user;
 
 			const { id } = ctx.params;
+			const { viewProvider	} = ctx.query
+
+
 
 			if (!id) {
-
+				console.log("No se ha enviado id", { error: 'No se envió id' });
 				return ctx.notFound("No se ha enviado id", { error: 'No se envió id' });
 
 			}
@@ -543,203 +547,428 @@ module.exports = createCoreController(
 
 
 
-			// busco las tareas filtrando por el usuario logueado y el status que recibo por params considerando la paginacion
+if(!viewProvider){
+	let tarea = await strapi.db.query("api::task-assigned.task-assigned").findOne({
 
-			let tarea = await strapi.db.query("api::task-assigned.task-assigned").findOne({
+		where: { id: id, client: user.id },
 
-				where: { id: id, client: user.id },
+		select: ['id', 'status', 'taskLength', 'datetime', 'time', 'createType', 'idCreador', "transportation", "description", "brutePrice", "netoPrice", "totalPrice", "descriptionProvis"],
 
-				select: ['id', 'status', 'taskLength', 'datetime', 'time', 'createType', 'idCreador', "transportation", "description", "brutePrice", "netoPrice", "totalPrice", "descriptionProvis"],
+		populate: ['provider', 'provider.avatar_image', 'conversation', 'skill', 'images', 'skill.image', 'location']
 
-				populate: ['provider', 'provider.avatar_image', 'conversation', 'skill', 'images', 'skill.image', 'location']
+	});
 
-			});
+	// si	no existe la tarea retorno un error
 
-			// si	no existe la tarea retorno un error
+	if (!tarea) {
+		console.log("No existe la tarea", { error: 'No existe la tarea' });
+		return ctx.notFound("No existe la tarea", { error: 'No existe la tarea' });
 
-			if (!tarea) {
+	}
 
-				return ctx.notFound("No existe la tarea", { error: 'No existe la tarea' });
+	tarea.location = tarea.location ? tarea.location.name : null;
 
-			}
 
-			tarea.location = tarea.location ? tarea.location.name : null;
 
 
+	tarea.provider = {
 
+		id: tarea.provider.id,
 
-			tarea.provider = {
+		name: tarea.provider.name,
 
-				id: tarea.provider.id,
+		lastname: tarea.provider.lastname,
 
-				name: tarea.provider.name,
+		avatar: tarea.provider.avatar_image ? process.env.URL + tarea.provider.avatar_image.url : process.env.URL + '/uploads/user_147dd8408e.png'
 
-				lastname: tarea.provider.lastname,
+	}
 
-				avatar: tarea.provider.avatar_image ? process.env.URL + tarea.provider.avatar_image.url : process.env.URL + '/uploads/user_147dd8408e.png'
+	tarea.client = {
 
-			}
+		id: user.id,
 
+		name: user.name,
 
-			// si conversation es null es porque la tarea no tiene conversacion le creo una
-			let messages = [];
-			if (!tarea.conversation) {
+		lastname: user.lastname,
 
+		avatar: user.avatar_image ? process.env.URL + user.avatar_image.url : process.env.URL + '/uploads/user_147dd8408e.png'
 
-				tarea.conversation = null;
+	}
 
-			} else {
 
-				tarea.conversation = tarea.conversation.id;
+	// si conversation es null es porque la tarea no tiene conversacion le creo una
+	let messages = [];
+	if (!tarea.conversation) {
 
-				// busco todos los mensajes de tipo file image o	video de la conversacion
 
-				messages = await strapi.db.query("api::chat-message.chat-message").findMany({
+		tarea.conversation = null;
 
-					where: { conversation: tarea.conversation, type: ["file", "image", "video"] },
+	} else {
 
-					select: ['id', 'type'],
+		tarea.conversation = tarea.conversation.id;
 
-					populate: ['media']
+		// busco todos los mensajes de tipo file image o	video de la conversacion
 
+		messages = await strapi.db.query("api::chat-message.chat-message").findMany({
 
-				});
+			where: { conversation: tarea.conversation, type: ["file", "image", "video"] },
 
+			select: ['id', 'type'],
 
+			populate: ['media']
 
-			}
 
-			// si conversation.media es =! null o messages es =! null es porque tiene archivos adjuntos , los recorro cada uno para solo tener las url
+		});
 
-			if (tarea.images) {
 
 
-				for (let i = 0; i < tarea.images.length; i++) {
+	}
 
-					tarea.images[i] = process.env.URL + tarea.images[i].url;
+	// si conversation.media es =! null o messages es =! null es porque tiene archivos adjuntos , los recorro cada uno para solo tener las url
 
-				}
+	if (tarea.images) {
 
 
+		for (let i = 0; i < tarea.images.length; i++) {
 
-			} else {
+			tarea.images[i] = process.env.URL + tarea.images[i].url;
 
-				tarea.images = [];
-			}
+		}
 
 
 
-			if (messages.length > 0) {
+	} else {
 
-				tarea.mediaConversation = [];
+		tarea.images = [];
+	}
 
-				for (let i = 0; i < messages.length; i++) {
 
-					tarea.mediaConversation[i] = process.env.URL + messages[i].media.url;
 
-				}
+	if (messages.length > 0) {
 
-			} else {
+		tarea.mediaConversation = [];
 
-				tarea.mediaConversation = [];
-			}
+		for (let i = 0; i < messages.length; i++) {
 
+			tarea.mediaConversation[i] = process.env.URL + messages[i].media.url;
 
-			// busco la habilidad del usuario api::provider-skill.provider-skill
+		}
 
-			let skillM = await strapi.db.query("api::provider-skill.provider-skill").findOne({
+	} else {
 
-				where: { provider: tarea.provider.id, categorias_skill: tarea.skill.id },
+		tarea.mediaConversation = [];
+	}
 
-				select: ['type_price', 'cost', 'hourMinimum']
 
-			});
+	// busco la habilidad del usuario api::provider-skill.provider-skill
 
+	let skillM = await strapi.db.query("api::provider-skill.provider-skill").findOne({
 
+		where: { provider: tarea.provider.id, categorias_skill: tarea.skill.id },
 
+		select: ['type_price', 'cost', 'hourMinimum']
 
+	});
 
 
 
 
-			let lengthName = tarea.skill.name.length;
 
-			if (lengthName > 25) {
 
-				tarea.skill.shortName = tarea.skill.name.substring(0, 25) + "...";
 
-			} else {
 
-				tarea.skill.shortName = tarea.skill.name;
+	let lengthName = tarea.skill.name.length;
 
-			}
+	if (lengthName > 25) {
 
-			// saco la imagen de la tarea
+		tarea.skill.shortName = tarea.skill.name.substring(0, 25) + "...";
 
-			let imageS = tarea.skill.image ? process.env.URL + tarea.skill.image.url : process.env.LOGO_APP;
-			tarea.skill = {
-				id: tarea.skill.id,
-				name: tarea.skill.name,
-				shortName: tarea.skill.shortName,
-				image: imageS,
-				type_price: skillM.type_price,
-				cost: skillM.cost,
-				hourMinimum: skillM.hourMinimum
-			}
+	} else {
 
-			tarea.datetime = this.mergeDateTime(tarea.datetime, tarea.time);
+		tarea.skill.shortName = tarea.skill.name;
 
-			//	tarea.datetime = moment(tarea.datetime).format('YYYY-MM-DD HH:mm:ss');
+	}
 
-			delete tarea.time;
+	// saco la imagen de la tarea
 
-			// verifico si tiene calificacion
+	let imageS = tarea.skill.image ? process.env.URL + tarea.skill.image.url : process.env.LOGO_APP;
+	tarea.skill = {
+		id: tarea.skill.id,
+		name: tarea.skill.name,
+		shortName: tarea.skill.shortName,
+		image: imageS,
+		type_price: skillM.type_price,
+		cost: skillM.cost,
+		hourMinimum: skillM.hourMinimum
+	}
 
-			let valoration = await strapi.db.query("api::valoration.valoration").findOne({
+	tarea.datetime = this.mergeDateTime(tarea.datetime, tarea.time);
 
-				where: { task: tarea.id },
+	//	tarea.datetime = moment(tarea.datetime).format('YYYY-MM-DD HH:mm:ss');
 
-				select: ['valoration', 'description', 'createdAt', 'description'],
+	delete tarea.time;
 
-				populate: ['client', 'client.avatar_image']
+	// verifico si tiene calificacion
 
-			});
+	let valoration = await strapi.db.query("api::valoration.valoration").findOne({
 
-			if (valoration) {
+		where: { task: tarea.id },
 
-				tarea.review = {
+		select: ['valoration', 'description', 'createdAt', 'description'],
 
-					rating: valoration.valoration,
+		populate: ['client', 'client.avatar_image']
 
-					review: valoration.description,
+	});
 
-					date: valoration.createdAt,
+	if (valoration) {
 
-					username: valoration.client.name + " " + valoration.client.lastname,
+		tarea.review = {
 
-					avatarUrl: valoration.client.avatar_image ? process.env.URL + valoration.client.avatar_image.url : process.env.URL + '/uploads/user_147dd8408e.png',
+			rating: valoration.valoration,
 
-				}
+			review: valoration.description,
 
-			} else {
+			date: valoration.createdAt,
 
-				tarea.review = null;
+			username: valoration.client.name + " " + valoration.client.lastname,
 
-			}
+			avatarUrl: valoration.client.avatar_image ? process.env.URL + valoration.client.avatar_image.url : process.env.URL + '/uploads/user_147dd8408e.png',
 
-			// si la tarea está en status cancelled  busco el motivo de cancelacion
+		}
 
-			if (tarea.status == "cancelled") {
+	} else {
 
+		tarea.review = null;
 
-				//let cancelation = await strapi.db.query("api::cancelation.cancelation").findOne({
-					
+	}
 
-			}
+	// si la tarea está en status cancelled  busco el motivo de cancelacion
 
+	if (tarea.status == "cancelled") {
 
 
-			return ctx.send({ data: tarea });
+		//let cancelation = await strapi.db.query("api::cancelation.cancelation").findOne({
+			
+
+	}
+
+	return ctx.send({ data: tarea });
+}else{
+
+	let tarea = await strapi.db.query("api::task-assigned.task-assigned").findOne({
+
+		where: { id: id, provider: user.id },
+
+		select: ['id', 'status', 'taskLength', 'datetime', 'time', 'createType', 'idCreador', "transportation", "description", "brutePrice", "netoPrice", "totalPrice", "descriptionProvis"],
+
+		populate: ['client', 'client.avatar_image', 'conversation', 'skill', 'images', 'skill.image', 'location']
+
+	});
+
+	// si	no existe la tarea retorno un error
+
+	if (!tarea) {
+		console.log("No existe la tarea", { error: 'No existe la tarea' });
+		return ctx.notFound("No existe la tarea", { error: 'No existe la tarea' });
+
+	}
+
+	tarea.location = tarea.location ? tarea.location.name : null;
+
+
+
+
+	tarea.provider= {
+
+		id: user.id,
+
+		name: user.name,
+
+		lastname: user.lastname,
+
+		avatar: user.avatar_image ? process.env.URL + user.avatar_image.url : process.env.URL + '/uploads/user_147dd8408e.png'
+
+	}
+
+	tarea.client = {
+
+		id: tarea.client.id,
+
+		name: tarea.client.name,
+
+		lastname: tarea.client.lastname,
+
+		avatar: tarea.client.avatar_image ? process.env.URL + tarea.client.avatar_image.url : process.env.URL + '/uploads/user_147dd8408e.png'
+
+	}
+
+
+	// si conversation es null es porque la tarea no tiene conversacion le creo una
+	let messages = [];
+	if (!tarea.conversation) {
+
+
+		tarea.conversation = null;
+
+	} else {
+
+		tarea.conversation = tarea.conversation.id;
+
+		// busco todos los mensajes de tipo file image o	video de la conversacion
+
+		messages = await strapi.db.query("api::chat-message.chat-message").findMany({
+
+			where: { conversation: tarea.conversation, type: ["file", "image", "video"] },
+
+			select: ['id', 'type'],
+
+			populate: ['media']
+
+
+		});
+
+
+
+	}
+
+	// si conversation.media es =! null o messages es =! null es porque tiene archivos adjuntos , los recorro cada uno para solo tener las url
+
+	if (tarea.images) {
+
+
+		for (let i = 0; i < tarea.images.length; i++) {
+
+			tarea.images[i] = process.env.URL + tarea.images[i].url;
+
+		}
+
+
+
+	} else {
+
+		tarea.images = [];
+	}
+
+
+
+	if (messages.length > 0) {
+
+		tarea.mediaConversation = [];
+
+		for (let i = 0; i < messages.length; i++) {
+
+			tarea.mediaConversation[i] = process.env.URL + messages[i].media.url;
+
+		}
+
+	} else {
+
+		tarea.mediaConversation = [];
+	}
+
+
+	// busco la habilidad del usuario api::provider-skill.provider-skill
+
+	let skillM = await strapi.db.query("api::provider-skill.provider-skill").findOne({
+
+		where: { provider: user.id, categorias_skill: tarea.skill.id },
+
+		select: ['type_price', 'cost', 'hourMinimum']
+
+	});
+
+
+
+
+
+
+
+
+	let lengthName = tarea.skill.name.length;
+
+	if (lengthName > 25) {
+
+		tarea.skill.shortName = tarea.skill.name.substring(0, 25) + "...";
+
+	} else {
+
+		tarea.skill.shortName = tarea.skill.name;
+
+	}
+
+	// saco la imagen de la tarea
+
+	let imageS = tarea.skill.image ? process.env.URL + tarea.skill.image.url : process.env.LOGO_APP;
+	tarea.skill = {
+		id: tarea.skill.id,
+		name: tarea.skill.name,
+		shortName: tarea.skill.shortName,
+		image: imageS,
+		type_price: skillM.type_price,
+		cost: skillM.cost,
+		hourMinimum: skillM.hourMinimum
+	}
+
+	tarea.datetime = this.mergeDateTime(tarea.datetime, tarea.time);
+
+	//	tarea.datetime = moment(tarea.datetime).format('YYYY-MM-DD HH:mm:ss');
+
+	delete tarea.time;
+
+	// verifico si tiene calificacion
+
+	let valoration = await strapi.db.query("api::valoration.valoration").findOne({
+
+		where: { task: tarea.id },
+
+		select: ['valoration', 'description', 'createdAt', 'description'],
+
+		populate: ['client', 'client.avatar_image']
+
+	});
+
+	if (valoration) {
+
+		tarea.review = {
+
+			rating: valoration.valoration,
+
+			review: valoration.description,
+
+			date: valoration.createdAt,
+
+			username: valoration.client.name + " " + valoration.client.lastname,
+
+			avatarUrl: valoration.client.avatar_image ? process.env.URL + valoration.client.avatar_image.url : process.env.URL + '/uploads/user_147dd8408e.png',
+
+		}
+
+	} else {
+
+		tarea.review = null;
+
+	}
+
+	// si la tarea está en status cancelled  busco el motivo de cancelacion
+
+	if (tarea.status == "cancelled") {
+
+
+		//let cancelation = await strapi.db.query("api::cancelation.cancelation").findOne({
+			
+
+	}
+
+	return ctx.send({ data: tarea });
+
+
+
+}
+
+
+
+
+			
 
 		},
 
@@ -803,12 +1032,14 @@ module.exports = createCoreController(
 				} else if (tarea.client.id == user.id) {
 					continue;
 				}
-
+				/*
+				* @revisar error que hay tareas con monto no aceptado
+				*/
 				elementos.push({
 					id: tarea.id,
 					datetime: tarea.datetime,
 					description: tarea.description,
-					monto: tarea.totalPrice ? tarea.totalPrice : tarea.brutePrice,
+					monto: tarea.totalPrice ? tarea.totalPrice : tarea.brutePrice ? tarea.brutePrice :  tarea.netoPrice	? tarea.netoPrice : "1500",
 					categoria: {
 						id: tarea.skill.id,
 						name: tarea.skill.name,
@@ -940,14 +1171,6 @@ module.exports = createCoreController(
 
 			const provider = await strapi.entityService.findOne('plugin::users-permissions.user', tarea.provider.id, {});
 
-
-
-
-
-
-			console.log(paymentIntent.amount);
-
-
 			// desceunto la comision de la plataforma que es de 15$  y el resto se lo transfiero al proveedor
 
 
@@ -959,18 +1182,20 @@ module.exports = createCoreController(
 
 
 
+			if(provider.stripe_connect_id){
+				await stripe.transfers.create({
 
-			await stripe.transfers.create({
+					amount: amount,
+	
+					currency: 'usd',
+	
+					destination: provider.stripe_connect_id,
+	
+					source_transaction: paymentIntent.latest_charge,
+	
+				});
+			}
 
-				amount: amount,
-
-				currency: 'usd',
-
-				destination: provider.stripe_connect_id,
-
-				source_transaction: paymentIntent.latest_charge,
-
-			});
 
 
 

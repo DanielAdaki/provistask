@@ -83,9 +83,9 @@ class TasksController extends GetxController {
     }
   }
 
-  getTask(int id) async {
+  getTask(int id, [provider = false]) async {
     isLoading.value = true;
-    final response = await _task.taskDetail(id);
+    final response = await _task.taskDetail(id, provider);
 
     if (response["status"] != 200) {
       isLoading.value = false;

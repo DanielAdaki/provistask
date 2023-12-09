@@ -119,8 +119,6 @@ class HomeProviderController extends GetxController {
 
     final data = response["data"];
 
-    Logger().i(data);
-
     // vacio la lista de pendingRequest
 
     pendingRequest.clear();

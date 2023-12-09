@@ -17,6 +17,7 @@ class TaskApprovalDetail {
   String? totalPrice;
   String? descriptionProvis;
   ProviderLite provider;
+  ProviderLite client;
   int? conversation;
   SkillLite skill;
   List<String> images;
@@ -38,6 +39,7 @@ class TaskApprovalDetail {
     this.totalPrice,
     this.descriptionProvis,
     required this.provider,
+    required this.client,
     this.conversation,
     required this.skill,
     required this.images,
@@ -61,6 +63,7 @@ class TaskApprovalDetail {
       totalPrice: json['data']['totalPrice'],
       descriptionProvis: json['data']['descriptionProvis'],
       provider: ProviderLite.fromJson(json['data']['provider']),
+      client: ProviderLite.fromJson(json['data']['client']),
       conversation: json['data']['conversation'],
       skill: SkillLite.fromJson(json['data']['skill']),
       images: List<String>.from(json['data']['images']),
